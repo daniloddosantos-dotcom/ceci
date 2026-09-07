@@ -20,6 +20,15 @@
      Cabem 6 fileiras de altura; no tablet fica com cerca de 2 cm. */
   --b: min(96px, calc((100vh - 76px) / 6));
   --raio: 22px;
+
+  /* Margem de segurança: afasta os botões das beiradas da tela.
+     Soma o recorte do aparelho (env) com um mínimo nosso, porque em
+     tela cheia as bordas laterais são a área do gesto de "voltar"
+     do Android e da barrinha de gestos embaixo. */
+  --seguro-esq:   max(22px, env(safe-area-inset-left));
+  --seguro-dir:   max(22px, env(safe-area-inset-right));
+  --seguro-topo:  max(16px, env(safe-area-inset-top));
+  --seguro-baixo: max(18px, env(safe-area-inset-bottom));
 }
 
 *{ box-sizing: border-box; }
@@ -99,7 +108,7 @@ button{
 
 /* engrenagem discreta do papai */
 .engrenagem{
-  position:absolute; right:14px; bottom:14px;
+  position:absolute; right:var(--seguro-dir); bottom:var(--seguro-baixo);
   width:56px; height:56px; border-radius:50%;
   color:var(--tinta-suave); opacity:.35;
   display:flex; align-items:center; justify-content:center;
@@ -138,7 +147,7 @@ button{
 
 .barra{
   flex:0 0 auto;
-  padding:10px;
+  padding:10px 10px 10px calc(10px + var(--seguro-esq));
   display:grid;
   grid-template-columns: var(--b) var(--b);
   grid-auto-rows: var(--b);
@@ -171,7 +180,8 @@ button{
 
 /* área do canvas */
 .area{
-  position:relative; flex:1 1 auto; padding:10px;
+  position:relative; flex:1 1 auto;
+  padding:var(--seguro-topo) var(--seguro-dir) var(--seguro-baixo) 10px;
   background:var(--creme-fundo);      /* cor lisa, sem degradê */
 }
 #quadro{
@@ -184,7 +194,7 @@ button{
 }
 
 .flutuante{
-  position:absolute; left:24px; top:24px;
+  position:absolute; left:calc(10px + var(--seguro-esq)); top:calc(8px + var(--seguro-topo));
   width:var(--b); height:var(--b);
   border-radius:var(--raio);
   background:rgba(255,255,255,.75);
@@ -196,7 +206,7 @@ button{
 
 /* trilha do sol (canto superior direito, vale para todas as telas) */
 #trilha-sol{
-  position:fixed; right:26px; top:20px; z-index:40;
+  position:fixed; right:calc(6px + var(--seguro-dir)); top:var(--seguro-topo); z-index:40;
   width:64px; height:42%;
   pointer-events:none;
 }
@@ -347,7 +357,7 @@ select.seletor{ max-width:min(420px, 60vw); font-size:17px; }
 
 /* botão do papai: pequeno, cinza apagado, no canto de baixo à direita */
 #btn-destravar{
-  position:absolute; right:18px; bottom:16px;
+  position:absolute; right:var(--seguro-dir); bottom:var(--seguro-baixo);
   width:96px; height:52px;
   overflow:hidden;
   border:2px solid #3a3f4c; border-radius:16px;
@@ -390,7 +400,7 @@ select.seletor{ max-width:min(420px, 60vw); font-size:17px; }
 
 /* botão de voltar (casinha) no canto das telas de brincar */
 .voltar-canto{
-  position:absolute; left:20px; top:20px; z-index:5;
+  position:absolute; left:var(--seguro-esq); top:var(--seguro-topo); z-index:5;
   width:var(--b); height:var(--b);
   border-radius:var(--raio);
   background:rgba(255,255,255,.8);
@@ -404,7 +414,12 @@ select.seletor{ max-width:min(420px, 60vw); font-size:17px; }
 #tela-atividade{ background:var(--creme); }
 #palco{
   position:absolute; inset:0;
-  padding:14px 100px 14px 110px;   /* espaço para a casinha e para o sol */
+  /* espaço para a casinha, para o sol e para as beiradas do Android */
+  padding:
+    calc(14px + var(--seguro-topo))
+    calc(90px + var(--seguro-dir))
+    calc(14px + var(--seguro-baixo))
+    calc(96px + var(--seguro-esq));
 }
 .tabuleiro{ position:relative; width:100%; height:100%; }
 
@@ -542,7 +557,7 @@ select.seletor{ max-width:min(420px, 60vw); font-size:17px; }
 
 /* ------------------ Gatinho ajudante ------------------ */
 #gatinho-ajudante{
-  position:absolute; left:18px; bottom:14px;
+  position:absolute; left:var(--seguro-esq); bottom:var(--seguro-baixo);
   width:clamp(70px, 11vh, 110px); height:auto;
   pointer-events:none; opacity:.9;
 }
@@ -564,10 +579,11 @@ select.seletor{ max-width:min(420px, 60vw); font-size:17px; }
 .fim-cena{
   position:relative;
   width:min(860px, 96vw); height:100%;
+  padding-left:var(--seguro-esq); padding-right:var(--seguro-dir);
   display:flex; flex-direction:column;
   align-items:center; justify-content:center;
   gap:clamp(6px, 1.4vh, 16px);
-  padding-bottom:44px;              /* espaço da tira do papai */
+  padding-bottom:calc(44px + var(--seguro-baixo));   /* espaço da tira do papai */
 }
 
 /* balão de fala grande, com o convite para ela */
@@ -601,7 +617,7 @@ select.seletor{ max-width:min(420px, 60vw); font-size:17px; }
 
 /* tira discreta do papai, no rodapé, sem caixa alta e sem voz */
 .tira-pai{
-  position:absolute; left:0; right:0; bottom:0;
+  position:absolute; left:0; right:0; bottom:var(--seguro-baixo);
   display:flex; align-items:center; justify-content:center; gap:8px;
   padding:8px 12px;
   color:#a8a096; font-size:14px; font-weight:400;

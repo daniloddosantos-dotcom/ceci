@@ -576,9 +576,12 @@
   var ultimoPonto = null;
 
   function ajustarCanvas() {
-    var r = area.getBoundingClientRect();
-    var larguraCSS = Math.max(1, Math.round(r.width - 20));   // menos o padding
-    var alturaCSS = Math.max(1, Math.round(r.height - 20));
+    // desconta o padding real da área (que muda com a margem de segurança)
+    var estilo = getComputedStyle(area);
+    var larguraCSS = Math.max(1, Math.round(
+      area.clientWidth - parseFloat(estilo.paddingLeft) - parseFloat(estilo.paddingRight)));
+    var alturaCSS = Math.max(1, Math.round(
+      area.clientHeight - parseFloat(estilo.paddingTop) - parseFloat(estilo.paddingBottom)));
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     // guarda o que já estava desenhado
@@ -920,12 +923,19 @@
      --------------------------------------------------------- */
 
   // 12.1 tela cheia no primeiro toque (e recupera se sair)
+  // O manifest já pede "fullscreen", mas isso vale só quando o app é aberto
+  // pelo ícone. Pelo navegador, quem esconde a barra do Android é esta função.
   function telaCheia() {
     try {
       var el = document.documentElement;
       var pedir = el.requestFullscreen || el.webkitRequestFullscreen;
       if (pedir && !document.fullscreenElement && !document.webkitFullscreenElement) {
-        var p = pedir.call(el);
+        var p;
+        try {
+          p = pedir.call(el, { navigationUI: 'hide' });   // pede para sumir a barra de navegação
+        } catch (erro) {
+          p = pedir.call(el);
+        }
         if (p && p.then) p.then(travarPaisagem).catch(function () {});
         else travarPaisagem();
       }
