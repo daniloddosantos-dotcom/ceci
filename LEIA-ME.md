@@ -34,6 +34,8 @@ do tablet deitado (landscape) e ver como a Cecí vai ver.
 | `icone-mascara.svg` | Mesmo ícone, na versão que o Android recorta em círculo. |
 | `servidor.js` | Servidorzinho local para testar no PC (usa o Node.js que você já tem). |
 | `abrir-ceci.bat` | Atalho de dois cliques que liga o servidor e abre o navegador. |
+| `publicar.bat` | Dois cliques para publicar as mudanças no site (sobe a versão do cache sozinho). |
+| `publicar.js` | O miolo do `publicar.bat`. |
 | `LEIA-ME.md` | Este guia. |
 
 ---
@@ -134,16 +136,33 @@ Ou seja: o app cuida de tudo **dentro** da tela; o Android cuida do que está **
 
 ---
 
-## 7. Instalar no tablet (quando você quiser)
+## 7. O app publicado
 
-Nada foi publicado na internet. Quando quiser levar para o tablet,
-o app precisa ser servido por `http(s)`. Podemos fazer isso depois —
-me chame quando chegar essa hora.
+**Endereço:** https://daniloddosantos-dotcom.github.io/ceci/
 
-## 8. Se você mudar algum arquivo
+Está no GitHub Pages, no repositório público `daniloddosantos-dotcom/ceci`.
+Ser público não é problema: o app não guarda nada seu. O PIN, as configurações
+e os desenhos ficam **só dentro do tablet**, nunca sobem para a internet.
 
-Abra `sw.js` e troque o número da versão (hoje está em `ceci-v4`).
-Isso avisa o navegador/tablet que existe uma versão nova para baixar.
+Não foram publicados: `servidor.js`, `abrir-ceci.bat`, `animais.html`,
+`publicar.js` e `publicar.bat` — são ferramentas do seu computador.
 
-Depois de trocar a versão, recarregue a página **duas vezes** (ou aperte `Ctrl + F5`):
-a primeira baixa a versão nova, a segunda já mostra ela.
+### Instalar no tablet Samsung
+1. Abra o **Chrome** no tablet e vá em `daniloddosantos-dotcom.github.io/ceci/`.
+2. Espere carregar e toque uma vez na tela (isso já guarda o app para uso offline).
+3. Menu **⋮** (três pontinhos) → **Adicionar à tela inicial** → **Instalar**.
+4. Feche o Chrome e abra o **Cecí pelo ícone novo** da tela inicial.
+5. Com o app aberto, ligue o **Fixar app** do Android, como você já faz.
+
+Depois disso ele funciona **sem internet**.
+
+## 8. Publicar uma atualização (um comando só)
+
+Dois cliques em **`publicar.bat`**. Ele sozinho:
+
+1. vê se tem alguma mudança para publicar;
+2. **sobe a versão do cache** no `sw.js` (ceci-v5 → ceci-v6 → ...);
+3. faz o commit e envia para o GitHub.
+
+Em até 2 minutos o site novo está no ar. No tablet, abra o Cecí,
+**feche e abra de novo**: a primeira vez baixa a versão nova, a segunda já mostra ela.
