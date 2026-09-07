@@ -982,8 +982,22 @@
      13) Service worker (faz o app funcionar sem internet)
      --------------------------------------------------------- */
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    // já existia uma versão instalada quando esta página abriu?
+    var jaTinhaVersao = !!navigator.serviceWorker.controller;
+    var jaAtualizou = false;
+
     window.addEventListener('load', function () {
       navigator.serviceWorker.register('sw.js').catch(function () {});
+    });
+
+    // Quando uma versão nova termina de baixar, ela assume o comando.
+    // Aí a página se recarrega sozinha uma única vez, para já usar os
+    // arquivos novos - assim você não precisa abrir e fechar o app.
+    // Só faz isso se a Cecí não estiver no meio de uma sessão.
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      if (jaAtualizou || !jaTinhaVersao) return;
+      jaAtualizou = true;
+      if (!sessao.ativa && !bloqueado) location.reload();
     });
   }
 
