@@ -5,7 +5,7 @@
    Se você mudar algum arquivo, troque o número da versão abaixo.
    ============================================================ */
 
-var VERSAO = 'ceci-v8';
+var VERSAO = 'ceci-v9';
 
 var ARQUIVOS = [
   './',
@@ -21,7 +21,15 @@ var ARQUIVOS = [
 self.addEventListener('install', function (evento) {
   evento.waitUntil(
     caches.open(VERSAO).then(function (cache) {
-      return cache.addAll(ARQUIVOS);
+      // { cache: 'reload' } obriga a baixar tudo do servidor.
+      // Sem isso o navegador entrega cópias antigas que ele ainda tem
+      // guardadas, e a versão nova nasceria misturada com a velha.
+      return Promise.all(ARQUIVOS.map(function (arquivo) {
+        return fetch(new Request(arquivo, { cache: 'reload' })).then(function (resposta) {
+          if (!resposta || !resposta.ok) throw new Error('nao baixou: ' + arquivo);
+          return cache.put(arquivo, resposta);
+        });
+      }));
     }).then(function () { return self.skipWaiting(); })
   );
 });

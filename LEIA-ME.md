@@ -164,5 +164,20 @@ Dois cliques em **`publicar.bat`**. Ele sozinho:
 2. **sobe a versão do cache** no `sw.js` (ceci-v5 → ceci-v6 → ...);
 3. faz o commit e envia para o GitHub.
 
-Em até 2 minutos o site novo está no ar. No tablet, abra o Cecí,
-**feche e abra de novo**: a primeira vez baixa a versão nova, a segunda já mostra ela.
+Em até 2 minutos o site novo está no ar.
+
+No tablet, **abra o Cecí e espere alguns segundos na tela inicial**: ele baixa a
+versão nova sozinho e se recarrega uma única vez (só faz isso fora de uma sessão,
+para nunca interromper a Cecí no meio de um desenho ou de uma brincadeira).
+Se estiver com pressa, feche e abra de novo.
+
+## 9. Tela cheia no tablet
+
+O `manifest.json` pede `"display": "fullscreen"` (com `"standalone"` como reserva),
+então, aberto pelo ícone, o Cecí esconde também a barra de navegação do Android.
+Além disso o app chama a Fullscreen API no primeiro toque, o que resolve o caso
+de abrir pelo navegador e recupera a tela cheia se ela for perdida.
+
+Como em tela cheia as beiradas laterais são a área do **gesto de voltar** do Android,
+todos os botões ficam afastados das bordas (uma margem de segurança que também
+respeita o recorte da tela do aparelho).
