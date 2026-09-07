@@ -429,31 +429,15 @@
   /* ---------------------------------------------------------
      5) Fim de brincadeira: cartão do papai + ponte para fora da tela
      --------------------------------------------------------- */
-  var fimCaixa = document.getElementById('fim-atividade');
-  var gatoFim = document.querySelector('.gato-fim');
-
-  /* O gatinho faz o convite para ela (em letras grandes e em voz alta).
-     A dica do papai fica só escrita, pequenininha, no rodapé. */
+  /* A tela de fim mora no app.js (o musica.js usa a mesma).
+     Aqui só dizemos o que fazer nos botões "De novo" e "Outra brincadeira". */
   function terminar(titulo, convite, dicaDoPapai) {
     daqui(700, function () {
-      document.getElementById('fim-convite').textContent = convite;
-      document.getElementById('fim-dica').textContent = dicaDoPapai;
-      fimCaixa.classList.remove('oculto');
-      balancarGatinho(gatoFim);
-      C.nota(C.NOTAS[3], 0.5, 0.05);
-      daqui(400, function () { C.falarLista([titulo, convite]); });   // a dica NÃO é lida
+      C.mostrarFim(titulo, convite, dicaDoPapai,
+        function () { if (atividadeAtual) abrirAtividade(atividadeAtual); },
+        function () { limparAtividade(); C.irPara('tela-brincar'); });
     });
   }
-
-  document.getElementById('btn-de-novo').addEventListener('click', function () {
-    fimCaixa.classList.add('oculto');
-    if (atividadeAtual) abrirAtividade(atividadeAtual);
-  });
-  document.getElementById('btn-fim-voltar').addEventListener('click', function () {
-    fimCaixa.classList.add('oculto');
-    limparAtividade();
-    C.irPara('tela-brincar');
-  });
 
   /* =========================================================
      BRINCADEIRA 1 - ENCAIXAR (formas e senso espacial)

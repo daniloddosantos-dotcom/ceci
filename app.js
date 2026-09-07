@@ -56,7 +56,9 @@
       if (!ac) {
         var AC = window.AudioContext || window.webkitAudioContext;
         if (!AC) return null;
-        ac = new AC();
+        // "interactive" = a menor demora possível entre o toque e o som
+        try { ac = new AC({ latencyHint: 'interactive' }); }
+        catch (e) { ac = new AC(); }
       }
       if (ac.state === 'suspended') { ac.resume(); }
       return ac;
@@ -234,6 +236,37 @@
   }
 
   /* ---------------------------------------------------------
+     3b) Tela de fim de atividade
+     O gatinho faz o convite (em voz alta) e a dica do papai fica
+     escrita pequenininha no rodapé. Usada pelo brincar.js e pelo musica.js.
+     --------------------------------------------------------- */
+  var fimDeNovo = null;
+  var fimVoltar = null;
+
+  function mostrarFim(titulo, convite, dica, aoDeNovo, aoVoltar) {
+    $('#fim-convite').textContent = convite;
+    $('#fim-dica').textContent = dica;
+    $('#fim-atividade').classList.remove('oculto');
+    var g = $('.gato-fim');
+    g.classList.remove('balancando');
+    void g.offsetWidth;
+    g.classList.add('balancando');
+    nota(NOTAS[3], 0.5, 0.05);
+    fimDeNovo = aoDeNovo || null;
+    fimVoltar = aoVoltar || null;
+    setTimeout(function () { falarLista([titulo, convite]); }, 400);   // a dica NÃO é lida
+  }
+
+  $('#btn-de-novo').addEventListener('click', function () {
+    $('#fim-atividade').classList.add('oculto');
+    if (fimDeNovo) fimDeNovo();
+  });
+  $('#btn-fim-voltar').addEventListener('click', function () {
+    $('#fim-atividade').classList.add('oculto');
+    if (fimVoltar) fimVoltar();
+  });
+
+  /* ---------------------------------------------------------
      4) "Segurar 1 segundo" - evita toques acidentais
      Funciona igual com mouse, dedo e caneta.
      Mostra um anel rosa que vai se preenchendo durante o segundo.
@@ -326,17 +359,16 @@
   // brincar.js coloca aqui a função que desliga a brincadeira aberta
   function encerrarAtividade() {
     if (typeof window.Ceci.limparAtividade === 'function') window.Ceci.limparAtividade();
+    if (typeof window.Ceci.limparSom === 'function') window.Ceci.limparSom();
   }
 
   function algumaSobreposicaoAberta() {
     return !$('#galeria').classList.contains('oculto') ||
            !$('#overlay-pin').classList.contains('oculto') ||
-           !$('#aviso-embreve').classList.contains('oculto') ||
            !$('#fim-atividade').classList.contains('oculto');
   }
   function fecharSobreposicoes() {
     $('#galeria').classList.add('oculto');
-    $('#aviso-embreve').classList.add('oculto');
     $('#fim-atividade').classList.add('oculto');
     fecharPin();
   }
@@ -425,25 +457,12 @@
         nota(NOTAS[4], 0.4, 0.05);
         iniciarSessao();
         irPara('tela-brincar');
-      } else {
-        emBreve();
+      } else if (mod === 'musica') {
+        nota(NOTAS[5], 0.4, 0.05);
+        iniciarSessao();
+        irPara('tela-musica');
       }
     });
-  });
-
-  var emBreveTimer = 0;
-  function emBreve() {
-    nota(NOTAS[1], 0.5, 0.05);
-    $('#aviso-embreve').classList.remove('oculto');
-    falar('Ainda estamos preparando. Em breve!');
-    clearTimeout(emBreveTimer);
-    emBreveTimer = setTimeout(function () {
-      $('#aviso-embreve').classList.add('oculto');
-    }, 4000);
-  }
-  $('#aviso-embreve').addEventListener('click', function () {
-    clearTimeout(emBreveTimer);
-    $('#aviso-embreve').classList.add('oculto');
   });
 
   // engrenagem: segurar 1 segundo + PIN
@@ -519,6 +538,9 @@
     ordem: 'Em ordem',
     pare: 'Pare e siga',
     classificar: 'Separar',
+    tocar: 'Tocar',
+    bater: 'Bater junto',
+    dancar: 'Dançar',
     desenhar: 'Desenhar'
   };
   function mostrarRegistro() {
@@ -970,6 +992,7 @@
     if (algumaSobreposicaoAberta()) { fecharSobreposicoes(); return; }
     // de uma brincadeira, volta para o menu Brincar; do menu, volta para o início
     if (telaAtual === 'tela-atividade') { encerrarAtividade(); irPara('tela-brincar'); return; }
+    if (telaAtual === 'tela-som') { encerrarAtividade(); irPara('tela-musica'); return; }
     irParaInicio();
   });
 
@@ -1011,6 +1034,14 @@
     irPara('tela-brincar');
   });
 
+  $('#btn-musica-casa').addEventListener('click', irParaInicio);
+  $('#btn-som-voltar').addEventListener('click', function () {
+    encerrarAtividade();
+    irPara('tela-musica');
+  });
+
+  window.Ceci.audio = audio;
+  window.Ceci.mostrarFim = mostrarFim;
   window.Ceci.falar = falar;
   window.Ceci.falarLista = falarLista;
   window.Ceci.falarJa = falarJa;

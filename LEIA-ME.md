@@ -1,7 +1,7 @@
-# Cecí — guia do papai (Fases 1 e 2)
+# Cecí — guia do papai (Fases 1, 2 e 3)
 
-Um cantinho calmo para desenhar. Sem anúncios, sem compras, sem pontos,
-sem estrelinhas, sem notificações. Funciona sem internet.
+Um cantinho calmo para desenhar, brincar e fazer música. Sem anúncios, sem compras,
+sem pontos, sem estrelinhas, sem notificações. Funciona sem internet.
 
 ---
 
@@ -27,6 +27,7 @@ do tablet deitado (landscape) e ver como a Cecí vai ver.
 | `style.css` | A aparência: cores suaves, botões grandes, animações lentas. |
 | `app.js` | O cérebro: desenho, sons, voz, timer do sol, galeria, travas, configurações. |
 | `brincar.js` | As 5 brincadeiras da Fase 2 (encaixar, par, ordem, pare e siga, separar). |
+| `musica.js` | As 3 atividades de música da Fase 3 (tocar, bater junto, dançar). |
 | `animais.html` | Folha de conferência dos bichinhos. Só para você olhar; não faz parte do app. |
 | `manifest.json` | A "identidade" do app: nome Cecí, ícone, tela cheia, deitado. |
 | `sw.js` | O *service worker*: guarda uma cópia dos arquivos para funcionar **offline**. |
@@ -43,7 +44,8 @@ do tablet deitado (landscape) e ver como a Cecí vai ver.
 ## 3. Como usar (para a Cecí)
 
 - **Desenhar** — abre o ateliê e começa a sessão (o sol começa a descer).
-- **Brincar** — abre as 5 brincadeiras (veja o item 3b). **Música** ainda diz "Em breve!".
+- **Brincar** — abre as 5 brincadeiras (item 3b).
+- **Música** — abre as 3 atividades de som (item 3c).
 - Na barra da esquerda: 6 cores, 2 espessuras, borracha, limpar, guardar, galeria.
 - A folha é bege bem clarinho (`#FFFDF7`), cor lisa — é a mesma cor no PNG guardado.
 - A **borracha** apaga de verdade (tira a tinta), com traço bem largo. Não pinta de branco por cima.
@@ -90,6 +92,27 @@ Fala um pouco devagar e com o tom levemente mais alto.
 As frases entram numa **fila**: uma espera a outra terminar, nunca corta no meio.
 Só duas coisas cortam a fala: tocar num bicho/peça novo e sair da tela.
 Nas configurações você pode escolher a voz na mão e apertar **Ouvir exemplo**.
+
+## 3c. Música (Fase 3)
+
+O terceiro botão da tela inicial abre 3 atividades. **Todo som é feito na hora
+pelo próprio navegador** — não existe nenhum arquivo de música no app.
+
+| Atividade | O que acontece |
+|---|---|
+| **Tocar** | Xilofone de 5 teclas coloridas (escala pentatônica: qualquer combinação soa bem), tambor e chocalho. A tecla afunda devagar quando ela toca. Livre, sem gravação e sem partitura. |
+| **Bater junto** | O gatinho bate no tambor a 60 batidas por minuto, com um pulso visual grande. Ela bate junto. 3 rodadas de 20 segundos: só pulso, depois "tum-tum-pausa", depois "tum-tum-tum-pausa". Bateu perto do tempo, o tambor brilha de leve — sem pontos e sem som de erro. |
+| **Dançar** | Toca uma música enquanto o gatinho dança devagar. A cada 8 a 12 segundos a música **para**, a voz diz "estátua!" e o gatinho congela por 3 segundos. É o "pare e siga" com o corpo. |
+
+Na Dançar dá para escolher entre três músicas, tocando no ícone:
+- **da Cecí** — melodia original, feita para o app (40 segundos);
+- **estrelinha** — "Brilha, brilha, estrelinha" (a melodia francesa que Mozart usou nas variações; domínio público);
+- **primavera** — o trecho de abertura da *Primavera* de Vivaldi (domínio público).
+
+Detalhes técnicos, para constar: o som usa a Web Audio API com `latencyHint: "interactive"`,
+o motor de áudio só liga no primeiro toque (regra dos navegadores) e os sons dos instrumentos
+são gerados uma vez e guardados prontos na memória, para sair no mesmo instante do toque.
+Volume moderado e timbres macios (nada de agudo estridente).
 
 ## 4. Para o papai
 

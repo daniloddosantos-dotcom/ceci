@@ -208,6 +208,64 @@
   </div>
 </section>
 
+<!-- ================= MENU DA MÚSICA ================= -->
+<section id="tela-musica" class="tela">
+  <div class="menu menu-brincar">
+    <button class="cartao pequeno" data-som="tocar">
+      <svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+        <rect x="10" y="26" width="15" height="50" rx="5" fill="#e04a3f" stroke="#3a3630" stroke-width="4"/>
+        <rect x="29" y="30" width="15" height="46" rx="5" fill="#f2b705" stroke="#3a3630" stroke-width="4"/>
+        <rect x="48" y="34" width="15" height="42" rx="5" fill="#4aa657" stroke="#3a3630" stroke-width="4"/>
+        <rect x="67" y="38" width="15" height="38" rx="5" fill="#3a72c4" stroke="#3a3630" stroke-width="4"/>
+        <path d="M78 18 L92 14" stroke="#3a3630" stroke-width="5" stroke-linecap="round"/>
+        <circle cx="76" cy="19" r="6" fill="#8a8175" stroke="#3a3630" stroke-width="3"/>
+      </svg>
+      <span class="rotulo">Tocar</span>
+    </button>
+
+    <button class="cartao pequeno" data-som="bater">
+      <svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+        <ellipse cx="50" cy="62" rx="34" ry="12" fill="#c98a5a" stroke="#3a3630" stroke-width="4"/>
+        <path d="M16 62 V44 a34 12 0 0 1 68 0 V62" fill="#e0a878" stroke="#3a3630" stroke-width="4"/>
+        <ellipse cx="50" cy="44" rx="34" ry="12" fill="#f6ead8" stroke="#3a3630" stroke-width="4"/>
+        <path d="M30 30 L20 12" stroke="#3a3630" stroke-width="5" stroke-linecap="round"/>
+        <path d="M70 30 L80 12" stroke="#3a3630" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+      <span class="rotulo">Bater junto</span>
+    </button>
+
+    <button class="cartao pequeno" data-som="dancar">
+      <svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+        <circle cx="50" cy="22" r="12" fill="#f7d9a0" stroke="#3a3630" stroke-width="4"/>
+        <path d="M50 34 V60" stroke="#3a3630" stroke-width="6" stroke-linecap="round"/>
+        <path d="M50 40 L28 30 M50 40 L74 34" stroke="#3a3630" stroke-width="6" stroke-linecap="round"/>
+        <path d="M50 60 L34 86 M50 60 L68 84" stroke="#3a3630" stroke-width="6" stroke-linecap="round"/>
+        <path d="M80 60 q8 -10 0 -20" fill="none" stroke="#e08a9b" stroke-width="4" stroke-linecap="round"/>
+      </svg>
+      <span class="rotulo">Dançar</span>
+    </button>
+  </div>
+
+  <button class="voltar-canto" id="btn-musica-casa" aria-label="Voltar para o inicio">
+    <svg viewBox="0 0 100 100" aria-hidden="true">
+      <path d="M18 50 L50 22 L82 50" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M28 46 V78 H72 V46" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+</section>
+
+<!-- ================= UMA ATIVIDADE DE MÚSICA ================= -->
+<section id="tela-som" class="tela">
+  <div id="palco-som"></div>
+
+  <button class="voltar-canto" id="btn-som-voltar" aria-label="Voltar para a musica">
+    <svg viewBox="0 0 100 100" aria-hidden="true">
+      <path d="M18 50 L50 22 L82 50" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M28 46 V78 H72 V46" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+</section>
+
 <!-- ================= SOL DA SESSÃO (fica por cima de tudo) ================= -->
 <div id="trilha-sol" class="oculto" aria-hidden="true">
   <div id="sol">
@@ -270,20 +328,6 @@
     </div>
   </div>
 </section>
-
-<!-- ================= AVISO "EM BREVE" ================= -->
-<div id="aviso-embreve" class="sobreposicao oculto">
-  <div class="balao">
-    <svg class="ico grande" viewBox="0 0 100 100" aria-hidden="true">
-      <path d="M28 42 L24 20 L44 30 Z" fill="#f7d9a0" stroke="#3d3a35" stroke-width="5" stroke-linejoin="round"/>
-      <path d="M72 42 L76 20 L56 30 Z" fill="#f7d9a0" stroke="#3d3a35" stroke-width="5" stroke-linejoin="round"/>
-      <circle cx="50" cy="58" r="26" fill="#f7d9a0" stroke="#3d3a35" stroke-width="5"/>
-      <path d="M38 56 q4 4 8 0 M54 56 q4 4 8 0" stroke="#3d3a35" stroke-width="4" fill="none" stroke-linecap="round"/>
-      <path d="M44 68 q6 5 12 0" stroke="#3d3a35" stroke-width="4" fill="none" stroke-linecap="round"/>
-    </svg>
-    <p class="frase">Em breve!</p>
-  </div>
-</div>
 
 <!-- ================= GALERIA ================= -->
 <div id="galeria" class="sobreposicao oculto">
@@ -379,5 +423,6 @@
 
 <script src="app.js"></script>
 <script src="brincar.js"></script>
+<script src="musica.js"></script>
 </body>
 </html>

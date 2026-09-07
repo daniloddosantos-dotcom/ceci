@@ -5,7 +5,7 @@
    Se você mudar algum arquivo, troque o número da versão abaixo.
    ============================================================ */
 
-var VERSAO = 'ceci-v9';
+var VERSAO = 'ceci-v10';
 
 var ARQUIVOS = [
   './',
@@ -13,6 +13,7 @@ var ARQUIVOS = [
   './style.css',
   './app.js',
   './brincar.js',
+  './musica.js',
   './manifest.json',
   './icone.svg',
   './icone-mascara.svg'
