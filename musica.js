@@ -135,6 +135,22 @@
     f.start(0);
   }
 
+  // percussao levissima da danca: um chiadinho curto
+  function montarTique(oc) {
+    var f = oc.createBufferSource();
+    f.buffer = ruido(oc, 0.12);
+    var bp = oc.createBiquadFilter();
+    bp.type = 'bandpass'; bp.frequency.value = 2200; bp.Q.value = 0.8;
+    var lp = oc.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = 4200;
+    var g = oc.createGain();
+    g.gain.setValueAtTime(0.0001, 0);
+    g.gain.linearRampToValueAtTime(0.35, 0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, 0.10);
+    f.connect(bp); bp.connect(lp); lp.connect(g); g.connect(oc.destination);
+    f.start(0);
+  }
+
   // notas do xilofone: escala pentatônica (dó ré mi sol lá)
   var PENTA = [523.25, 587.33, 659.25, 783.99, 880.00];
   var CORES_TECLAS = ['#e04a3f', '#f2b705', '#4aa657', '#3a72c4', '#e987b8'];
@@ -151,6 +167,7 @@
     });
     tarefas.push(assar(0.7, montarTambor).then(function (b) { buffers.tambor = b; }));
     tarefas.push(assar(0.35, montarChocalho).then(function (b) { buffers.chocalho = b; }));
+    tarefas.push(assar(0.16, montarTique).then(function (b) { buffers.tique = b; }));
     Promise.all(tarefas).then(function () {
       prontos = true;
       preparando = false;
@@ -206,12 +223,14 @@
         '<path d="M142 158 L166 108" fill="none" stroke="#f7d9a0" stroke-width="11" stroke-linecap="round"/>' +
         '<circle cx="168" cy="102" r="14" fill="#f7d9a0" stroke="' + CT + '" stroke-width="4"/>' +
       '</g>' +
+      '<g class="cabeca">' +
       '<path d="M66 66 L60 26 L94 46 Z" fill="#f7d9a0" stroke="' + CT + '" stroke-width="4" stroke-linejoin="round"/>' +
       '<path d="M134 66 L140 26 L106 46 Z" fill="#f7d9a0" stroke="' + CT + '" stroke-width="4" stroke-linejoin="round"/>' +
       '<ellipse cx="100" cy="86" rx="44" ry="40" fill="#f7d9a0" stroke="' + CT + '" stroke-width="4"/>' +
       '<circle cx="86" cy="82" r="4.5" fill="' + CT + '"/><circle cx="114" cy="82" r="4.5" fill="' + CT + '"/>' +
       '<path d="M100 98 q-6 8 -12 3 M100 98 q6 8 12 3" fill="none" stroke="' + CT + '" stroke-width="4" stroke-linecap="round"/>' +
       '<path d="M46 86 H66 M46 96 H66 M134 86 H154 M134 96 H154" stroke="' + CT + '" stroke-width="3" stroke-linecap="round"/>' +
+      '</g>' +
       '</svg>';
   }
 
@@ -230,6 +249,15 @@
     '<circle cx="30" cy="30" r="4" fill="#e0a878"/><circle cx="48" cy="26" r="4" fill="#e0a878"/>' +
     '<circle cx="44" cy="44" r="4" fill="#e0a878"/><circle cx="28" cy="46" r="4" fill="#e0a878"/>' +
     '</svg>';
+
+  // o gatinho balanca a cabeca (elogio silencioso, sem pontuacao)
+  function balancarCabeca(el) {
+    if (!el) return;
+    el.classList.remove('balancando');
+    void el.offsetWidth;
+    el.classList.add('balancando');
+    daqui(1800, function () { el.classList.remove('balancando'); });
+  }
 
   /* ---------------------------------------------------------
      4) TOCAR - xilofone, tambor e chocalho
@@ -288,103 +316,90 @@
   }
 
   /* ---------------------------------------------------------
-     5) BATER JUNTO - ritmo bem devagar (60 batidas por minuto)
+     5) ECO - o gatinho toca, depois é a vez dela
+     Sem exigência de acertar as notas nem de tempo: ela toca o que quiser.
      --------------------------------------------------------- */
-  var CONVITE_BATER = 'Vamos bater palma junto com o papai?';
-  var DICA_BATER = 'Bata palmas bem devagar com ela e deixe ela puxar o ritmo.';
+  var CONVITE_ECO = 'Vamos cantar uma música junto com o papai?';
+  var DICA_ECO = 'Cante uma musiquinha e deixe ela responder do jeito dela.';
 
-  function atividadeBater() {
-    var c = ctx();
+  function atividadeEco() {
     var cena = document.createElement('div');
-    cena.className = 'cena-ritmo';
-    cena.innerHTML =
-      gatoSVG('gato-musica') +
-      '<div class="tambor-grande"><div class="pulso"></div></div>';
+    cena.className = 'cena-eco';
+    cena.innerHTML = gatoSVG('gato-musica') + '<div class="xilofone"></div>';
     palco.appendChild(cena);
 
     var gato = cena.querySelector('.gato-musica');
-    var tambor = cena.querySelector('.tambor-grande');
-    var pulso = cena.querySelector('.pulso');
+    var xilo = cena.querySelector('.xilofone');
+    var teclas = [];
 
-    var RODADAS = [
-      { padrao: [1], fala: 'Bate junto comigo.' },
-      { padrao: [1, 1, 0], fala: 'Agora: tum, tum, pausa.' },
-      { padrao: [1, 1, 1, 0], fala: 'De novo, bem devagar.' }
-    ];
+    PENTA.forEach(function (freq, i) {
+      var t = document.createElement('button');
+      t.className = 'tecla-xilo';
+      t.style.background = CORES_TECLAS[i];
+      t.style.height = (40 - i * 3.5) + 'vh';
+      t.setAttribute('aria-label', 'Tecla ' + (i + 1));
+      t.addEventListener('pointerdown', function (e) {
+        e.preventDefault();
+        if (C.estaBloqueado()) return;
+        tocarBuffer('tecla' + i, 0.8);
+        acender(t);
+        if (vezDela) contarToque();
+      });
+      xilo.appendChild(t);
+      teclas.push(t);
+    });
 
-    var INTERVALO = 1.0;          // 60 batidas por minuto
-    var rodada = 0, passo = 0;
-    var proximo = 0, fimDaRodada = 0;
-    var batidas = [];             // horários das batidas, para conferir o toque dela
-    var agendador = 0;
+    function acender(tecla) {
+      tecla.classList.add('acesa');
+      daqui(280, function () { tecla.classList.remove('acesa'); });
+    }
 
-    function visualDaBatida(quando) {
-      var espera = Math.max(0, (quando - ctx().currentTime) * 1000);
-      daqui(espera, function () {
-        pulso.classList.add('batendo');
-        gato.classList.add('batendo');
-        daqui(300, function () {
-          pulso.classList.remove('batendo');
-          gato.classList.remove('batendo');
+    var QUANTAS = (Number(C.config.nivel) >= 2) ? 3 : 2;   // nível 2 e 3: 3 notas
+    var TOTAL_RODADAS = 5;
+    var rodada = 0;
+    var vezDela = false;
+    var toques = 0;
+
+    // o gatinho toca algumas notas, devagar, acendendo as teclas
+    function vezDoGato() {
+      vezDela = false;
+      toques = 0;
+      var escolhidas = [];
+      for (var i = 0; i < QUANTAS; i++) escolhidas.push(Math.floor(Math.random() * PENTA.length));
+
+      escolhidas.forEach(function (indice, ordem) {
+        daqui(700 + ordem * 850, function () {
+          tocarBuffer('tecla' + indice, 0.8);
+          acender(teclas[indice]);
+          gato.classList.add('batendo');
+          daqui(300, function () { gato.classList.remove('batendo'); });
         });
+      });
+
+      daqui(700 + escolhidas.length * 850 + 300, function () {
+        vezDela = true;                      // agora é ela, sem pressa nenhuma
+        xilo.classList.add('vez-dela');
       });
     }
 
-    function agendar() {
-      var agora = ctx().currentTime;
-      while (proximo < agora + 0.25) {
-        if (proximo > fimDaRodada) { fecharRodada(); return; }
-        var padrao = RODADAS[rodada].padrao;
-        if (padrao[passo % padrao.length] === 1) {
-          tocarBuffer('tambor', 0.55, proximo);
-          batidas.push(proximo);
-          visualDaBatida(proximo);
-        }
-        passo++;
-        proximo += INTERVALO;
-      }
-      // limpa batidas velhas
-      while (batidas.length && batidas[0] < agora - 3) batidas.shift();
-    }
-
-    function abrirRodada() {
-      var r = RODADAS[rodada];
-      C.falar(r.fala);
-      passo = 0;
-      proximo = ctx().currentTime + 2.2;
-      fimDaRodada = proximo + 20;          // 20 segundos por rodada
-      clearInterval(agendador);
-      agendador = cada(25, agendar);
-    }
-
-    function fecharRodada() {
-      clearInterval(agendador);
+    function contarToque() {
+      toques++;
+      if (toques < QUANTAS) return;
+      vezDela = false;
+      xilo.classList.remove('vez-dela');
+      balancarCabeca(gato);                  // o gatinho balança a cabeça
+      C.nota(C.NOTAS[3], 0.4, 0.05);
       rodada++;
-      if (rodada < RODADAS.length) daqui(2200, abrirRodada);
-      else daqui(1200, function () {
-        C.mostrarFim('Que ritmo bonito!', CONVITE_BATER, DICA_BATER,
-          function () { abrirSom('bater'); },
+      if (rodada < TOTAL_RODADAS) daqui(1600, vezDoGato);
+      else daqui(1400, function () {
+        C.mostrarFim('Que música bonita!', CONVITE_ECO, DICA_ECO,
+          function () { abrirSom('eco'); },
           function () { pararTudo(); C.irPara('tela-musica'); });
       });
     }
 
-    tambor.addEventListener('pointerdown', function (e) {
-      e.preventDefault();
-      if (C.estaBloqueado()) return;
-      tocarBuffer('tambor', 0.8);
-      tambor.classList.add('batido');
-      daqui(220, function () { tambor.classList.remove('batido'); });
-
-      // bateu perto do tempo? o tambor brilha de leve. Sem pontos, sem erro.
-      var agora = ctx().currentTime;
-      var perto = batidas.some(function (b) { return Math.abs(b - agora) <= 0.35; });
-      if (perto) {
-        tambor.classList.add('brilhando');
-        daqui(600, function () { tambor.classList.remove('brilhando'); });
-      }
-    });
-
-    abrirRodada();
+    C.falar('Ouça o gatinho e depois é a sua vez.');
+    daqui(2600, vezDoGato);
   }
 
   /* ---------------------------------------------------------
@@ -393,36 +408,72 @@
   var CONVITE_DANCAR = 'Vamos dançar de novo com o papai, sem o tablet?';
   var DICA_DANCAR = 'Dancem juntos e parem quando você disser estátua.';
 
+  /* As músicas têm quatro camadas, todas sintetizadas:
+     melodia + acordes macios + baixo + uma percussão bem leve.
+     "dinamica" deixa alguns trechos mais suaves, para a música respirar. */
+  var ACORDES = {
+    'C':  ['C4', 'E4', 'G4'],
+    'Am': ['A3', 'C4', 'E4'],
+    'F':  ['F3', 'A3', 'C4'],
+    'G':  ['G3', 'B3', 'D4'],
+    'E':  ['E3', 'G#3', 'B3'],
+    'B':  ['B2', 'D#3', 'F#3']
+  };
+  var BAIXOS = { 'C': 'C3', 'Am': 'A2', 'F': 'F2', 'G': 'G2', 'E': 'E2', 'B': 'B2' };
+
   var MUSICAS = {
     ceci: {
-      nome: 'da Cecí', bpm: 96, repetir: 1,
-      notas:
-        'C5:1 D5:1 E5:1 G5:1  E5:2 D5:2  F5:1 E5:1 D5:1 C5:1  D5:4 ' +
-        'C5:1 D5:1 E5:1 G5:1  A5:2 G5:2  E5:1 G5:1 E5:1 D5:1  C5:4 ' +
-        'G5:1 A5:1 G5:1 E5:1  D5:2 E5:2  F5:1 E5:1 D5:1 C5:1  G4:4 ' +
-        'C5:1 D5:1 E5:1 G5:1  A5:2 G5:2  E5:1 D5:1 C5:2       C5:4',
+      nome: 'da Cecí', bpm: 104, repetir: 1,
+      // refrão (A) - verso (B) - refrão (A) - ponte (C) - final
+      melodia:
+        'G4:1 C5:1 E5:1 G5:1  E5:2 C5:2  D5:1 F5:1 A5:1 F5:1  G5:4 ' +
+        'A5:1 G5:1 E5:1 C5:1  D5:2 E5:2  F5:1 E5:1 D5:1 C5:1  G4:4 ' +
+        'G4:1 C5:1 E5:1 G5:1  E5:2 C5:2  D5:1 F5:1 A5:1 F5:1  G5:4 ' +
+        'E5:1 F5:1 G5:1 A5:1  G5:2 E5:2 ' +
+        'G5:1 E5:1 D5:1 C5:1  C5:4',
+      acordes:
+        'C:4 Am:4 F:4 G:4 ' +
+        'Am:4 F:4 G:4 C:4 ' +
+        'C:4 Am:4 F:4 G:4 ' +
+        'F:4 G:4 ' +
+        'C:4 C:4',
+      dinamica: [[16, 1], [32, 0.72], [48, 1], [56, 0.66], [64, 0.9]],
       icone: '<svg viewBox="0 0 100 100"><circle cx="50" cy="52" r="30" fill="#f7d9a0" stroke="' + CT + '" stroke-width="5"/>' +
              '<path d="M28 30 L24 8 L48 22 Z M72 30 L76 8 L52 22 Z" fill="#f7d9a0" stroke="' + CT + '" stroke-width="5" stroke-linejoin="round"/>' +
              '<circle cx="40" cy="48" r="4" fill="' + CT + '"/><circle cx="60" cy="48" r="4" fill="' + CT + '"/></svg>'
     },
+
     brilha: {
       nome: 'estrelinha', bpm: 100, repetir: 1,
-      notas:
+      melodia:
         'C5:1 C5:1 G5:1 G5:1 A5:1 A5:1 G5:2 ' +
         'F5:1 F5:1 E5:1 E5:1 D5:1 D5:1 C5:2 ' +
         'G5:1 G5:1 F5:1 F5:1 E5:1 E5:1 D5:2 ' +
         'G5:1 G5:1 F5:1 F5:1 E5:1 E5:1 D5:2 ' +
         'C5:1 C5:1 G5:1 G5:1 A5:1 A5:1 G5:2 ' +
-        'F5:1 F5:1 E5:1 E5:1 D5:1 D5:1 C5:2',
+        'F5:1 F5:1 E5:1 E5:1 D5:1 D5:1 C5:4',
+      acordes:
+        'C:4 F:2 C:2 ' +
+        'F:2 C:2 G:2 C:2 ' +
+        'C:2 F:2 C:2 G:2 ' +
+        'C:2 F:2 C:2 G:2 ' +
+        'C:4 F:2 C:2 ' +
+        'F:2 C:2 G:2 C:4',
+      dinamica: [[16, 1], [32, 0.74], [50, 1]],
       icone: '<svg viewBox="0 0 100 100"><path d="M50 10 L61 38 L92 40 L68 60 L76 90 L50 73 L24 90 L32 60 L8 40 L39 38 Z" fill="#f2b705" stroke="' + CT + '" stroke-width="5" stroke-linejoin="round"/></svg>'
     },
+
     vivaldi: {
       nome: 'primavera', bpm: 104, repetir: 3,
-      notas:
+      melodia:
         'E5:.5 E5:.5 E5:1 E5:.5 E5:.5 E5:1 ' +
         'E5:.5 G#5:.5 B5:1 B5:.5 A5:.5 G#5:1 ' +
         'E5:.5 E5:.5 E5:1 E5:.5 E5:.5 E5:1 ' +
         'E5:.5 G#5:.5 B5:1 B5:.5 A5:.5 E5:1',
+      acordes: 'E:4 E:2 B:2 E:4 E:2 B:2',
+      final: 'B5:1 A5:1 G#5:1 E5:5',
+      acordesFinal: 'B:4 E:4',
+      dinamica: [[16, 1], [32, 0.75], [48, 1], [56, 0.9]],
       icone: '<svg viewBox="0 0 100 100"><path d="M50 88 V50" stroke="#4aa657" stroke-width="6" stroke-linecap="round"/>' +
              '<path d="M50 56 q-22 -6 -26 -26 q22 2 26 26 Z" fill="#b7d9a8" stroke="' + CT + '" stroke-width="4" stroke-linejoin="round"/>' +
              '<circle cx="58" cy="34" r="18" fill="#e987b8" stroke="' + CT + '" stroke-width="4"/>' +
@@ -432,44 +483,175 @@
 
   var danca = { eventos: [], i: 0, base: 0, total: 0, relogio: 0, vozes: [], pausadoEm: 0, tocando: false };
 
-  function tocarNotaMusical(quando, freq, dur) {
+  function guardarVoz(g, nos) {
+    danca.vozes.push({ g: g, nos: nos });
+    if (danca.vozes.length > 80) danca.vozes.splice(0, 40);
+  }
+
+  // melodia: som doce, na frente
+  function tocarNotaMusical(quando, freq, dur, vol) {
     var c = ctx(), m = saida();
     if (!c || !m) return;
     var lp = c.createBiquadFilter();
     lp.type = 'lowpass'; lp.frequency.value = 2400;
     var g = c.createGain();
     g.gain.setValueAtTime(0.0001, quando);
-    g.gain.exponentialRampToValueAtTime(0.16, quando + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.16 * vol, quando + 0.03);
     g.gain.setTargetAtTime(0.0001, quando + dur * 0.7, 0.12);
     g.connect(lp); lp.connect(m);
 
     var o1 = c.createOscillator();
     o1.type = 'triangle'; o1.frequency.value = freq;
     o1.connect(g);
-    var o2 = c.createOscillator();        // uma oitava abaixo, bem baixinho
+    var o2 = c.createOscillator();
     o2.type = 'sine'; o2.frequency.value = freq / 2;
     var g2 = c.createGain(); g2.gain.value = 0.35;
     o2.connect(g2); g2.connect(g);
 
     o1.start(quando); o1.stop(quando + dur + 0.5);
     o2.start(quando); o2.stop(quando + dur + 0.5);
-    danca.vozes.push({ o1: o1, o2: o2, g: g });
-    if (danca.vozes.length > 40) danca.vozes.splice(0, 20);
+    guardarVoz(g, [o1, o2]);
+  }
+
+  // acorde: um "colchão" macio atrás, que entra e sai devagar
+  function tocarAcorde(quando, notas, dur, vol) {
+    var c = ctx(), m = saida();
+    if (!c || !m) return;
+    var lp = c.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = 1400;
+    var g = c.createGain();
+    g.gain.setValueAtTime(0.0001, quando);
+    g.gain.linearRampToValueAtTime(0.05 * vol, quando + 0.35);
+    g.gain.setTargetAtTime(0.0001, quando + dur * 0.75, 0.25);
+    g.connect(lp); lp.connect(m);
+
+    var osciladores = [];
+    notas.forEach(function (nome) {
+      var o = c.createOscillator();
+      o.type = 'sine';
+      o.frequency.value = frequencia(nome);
+      o.connect(g);
+      o.start(quando); o.stop(quando + dur + 0.8);
+      osciladores.push(o);
+    });
+    guardarVoz(g, osciladores);
+  }
+
+  // baixo: bem grave e curto, marcando o passo
+  function tocarBaixo(quando, nome, dur, vol) {
+    var c = ctx(), m = saida();
+    if (!c || !m) return;
+    var lp = c.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = 320;
+    var g = c.createGain();
+    g.gain.setValueAtTime(0.0001, quando);
+    g.gain.exponentialRampToValueAtTime(0.10 * vol, quando + 0.04);
+    g.gain.setTargetAtTime(0.0001, quando + dur * 0.6, 0.1);
+    g.connect(lp); lp.connect(m);
+    var o = c.createOscillator();
+    o.type = 'sine';
+    o.frequency.value = frequencia(nome);
+    o.connect(g);
+    o.start(quando); o.stop(quando + dur + 0.4);
+    guardarVoz(g, [o]);
+  }
+
+  // percussão levíssima (um chiadinho curto de chocalho)
+  function tocarTique(quando, vol) {
+    var c = ctx(), m = saida();
+    if (!c || !m || !buffers.tique) return;
+    var s = c.createBufferSource();
+    s.buffer = buffers.tique;
+    var g = c.createGain();
+    g.gain.value = vol;
+    s.connect(g); g.connect(m);
+    s.start(quando);
+    guardarVoz(g, [s]);
+  }
+
+  function fatorDaDinamica(musica, batida) {
+    var lista = musica.dinamica || [];
+    for (var i = 0; i < lista.length; i++) {
+      if (batida < lista[i][0]) return lista[i][1];
+    }
+    return lista.length ? lista[lista.length - 1][1] : 1;
   }
 
   function montarEventos(musica) {
     var eventos = [];
-    var t = 0;
-    var lista = lerMelodia(musica.notas);
-    for (var r = 0; r < (musica.repetir || 1); r++) {
-      lista.forEach(function (ev) {
-        var dur = ev.batidas * 60 / musica.bpm;
-        if (ev.nota !== '-') eventos.push({ t: t, freq: frequencia(ev.nota), dur: dur * 0.92 });
+    var porBatida = 60 / musica.bpm;
+    var repeticoes = musica.repetir || 1;
+    var comecoDaVolta = 0;
+    var v, r;
+
+    function juntar(melodia, acordes, deslocamento) {
+      var fimMelodia = 0, fimAcordes = 0;
+
+      // melodia
+      var t = deslocamento;
+      lerMelodia(melodia).forEach(function (ev) {
+        var dur = ev.batidas * porBatida;
+        if (ev.nota !== '-') {
+          eventos.push({
+            tipo: 'nota', t: t, freq: frequencia(ev.nota), dur: dur * 0.92,
+            batida: (t - 0) / porBatida
+          });
+        }
         t += dur;
       });
-      t += 60 / musica.bpm;             // um respiro entre as repetições
+      fimMelodia = t;
+
+      // acordes + baixo + percussão
+      var ta = deslocamento;
+      lerMelodia(acordes).forEach(function (ac) {
+        var dur = ac.batidas * porBatida;
+        var notas = ACORDES[ac.nota];
+        if (notas) {
+          eventos.push({ tipo: 'acorde', t: ta, notas: notas, dur: dur, batida: ta / porBatida });
+          eventos.push({ tipo: 'baixo', t: ta, nome: BAIXOS[ac.nota], dur: porBatida * 0.8, batida: ta / porBatida });
+          if (ac.batidas >= 4) {
+            eventos.push({ tipo: 'baixo', t: ta + porBatida * 2, nome: BAIXOS[ac.nota], dur: porBatida * 0.8, batida: ta / porBatida + 2 });
+          }
+        }
+        // um tique por batida dentro deste acorde
+        for (var b = 0; b < ac.batidas; b++) {
+          eventos.push({
+            tipo: 'tique', t: ta + b * porBatida,
+            forte: ((ta / porBatida + b) % 4) === 0,
+            batida: ta / porBatida + b
+          });
+        }
+        ta += dur;
+      });
+      fimAcordes = ta;
+
+      return Math.max(fimMelodia, fimAcordes);
     }
-    return { eventos: eventos, total: t };
+
+    var fim = 0;
+    for (r = 0; r < repeticoes; r++) {
+      fim = juntar(musica.melodia, musica.acordes, comecoDaVolta);
+      comecoDaVolta = fim + porBatida;      // um respiro entre as voltas
+    }
+    if (musica.final) {
+      fim = juntar(musica.final, musica.acordesFinal || musica.acordes, comecoDaVolta);
+    }
+
+    var totalBatidas = fim / porBatida;
+
+    // volume de cada evento (dinâmica + fim sem percussão, para acabar limpo)
+    eventos.forEach(function (e) {
+      var f = fatorDaDinamica(musica, e.batida);
+      if (e.tipo === 'tique') {
+        e.vol = (e.forte ? 0.15 : 0.09) * f;
+        if (e.batida > totalBatidas - 4.5) e.vol = 0;    // último compasso sem percussão
+      } else {
+        e.vol = f;
+      }
+    });
+
+    eventos.sort(function (a, b) { return a.t - b.t; });
+    return { eventos: eventos, total: fim + porBatida * 2 };
   }
 
   function passoDaMelodia(aoFim) {
@@ -478,7 +660,11 @@
     var limite = c.currentTime + 0.2 - danca.base;
     while (danca.i < danca.eventos.length && danca.eventos[danca.i].t <= limite) {
       var e = danca.eventos[danca.i];
-      tocarNotaMusical(danca.base + e.t, e.freq, e.dur);
+      var quando = danca.base + e.t;
+      if (e.tipo === 'nota') tocarNotaMusical(quando, e.freq, e.dur, e.vol);
+      else if (e.tipo === 'acorde') tocarAcorde(quando, e.notas, e.dur, e.vol);
+      else if (e.tipo === 'baixo') tocarBaixo(quando, e.nome, e.dur, e.vol);
+      else if (e.tipo === 'tique' && e.vol > 0) tocarTique(quando, e.vol);
       danca.i++;
     }
     if (danca.i >= danca.eventos.length && c.currentTime > danca.base + danca.total) {
@@ -488,22 +674,25 @@
     }
   }
 
+  function silenciarVozes(c, demora) {
+    danca.vozes.forEach(function (v) {
+      try {
+        v.g.gain.cancelScheduledValues(c.currentTime);
+        v.g.gain.setTargetAtTime(0.0001, c.currentTime, demora);
+        (v.nos || []).forEach(function (no) { try { no.stop(c.currentTime + 0.3); } catch (e) {} });
+      } catch (e) {}
+    });
+    danca.vozes = [];
+  }
+
   function pausarMelodia() {
     var c = ctx();
     if (!c) return;
     clearInterval(danca.relogio);
     danca.tocando = false;
     danca.pausadoEm = c.currentTime;
-    // silencia o que está soando e devolve para a fila o que já estava agendado
-    danca.vozes.forEach(function (v) {
-      try {
-        v.g.gain.cancelScheduledValues(c.currentTime);
-        v.g.gain.setTargetAtTime(0.0001, c.currentTime, 0.05);
-        v.o1.stop(c.currentTime + 0.3);
-        v.o2.stop(c.currentTime + 0.3);
-      } catch (e) {}
-    });
-    danca.vozes = [];
+    silenciarVozes(c, 0.05);
+    // devolve para a fila o que já estava agendado mas ainda não soou
     while (danca.i > 0 && danca.eventos[danca.i - 1] &&
            danca.base + danca.eventos[danca.i - 1].t > c.currentTime) danca.i--;
   }
@@ -626,16 +815,7 @@
     danca.eventos = [];
     danca.i = 0;
     var c = ctx();
-    if (c) {
-      danca.vozes.forEach(function (v) {
-        try {
-          v.g.gain.cancelScheduledValues(c.currentTime);
-          v.g.gain.setTargetAtTime(0.0001, c.currentTime, 0.04);
-          v.o1.stop(c.currentTime + 0.2);
-          v.o2.stop(c.currentTime + 0.2);
-        } catch (e) {}
-      });
-    }
+    if (c) silenciarVozes(c, 0.04);
     danca.vozes = [];
     palco.innerHTML = '';
   }
@@ -649,7 +829,7 @@
     prepararSons();
     daqui(80, function () {
       if (nome === 'tocar') atividadeTocar();
-      else if (nome === 'bater') atividadeBater();
+      else if (nome === 'eco') atividadeEco();
       else if (nome === 'dancar') atividadeDancar();
     });
   }

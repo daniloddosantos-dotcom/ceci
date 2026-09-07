@@ -85,6 +85,15 @@
       </svg>
     </button>
 
+    <button class="ferramenta" id="btn-carimbo" aria-label="Carimbo">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <rect x="16" y="70" width="68" height="14" rx="7" fill="#c98a5a" stroke="currentColor" stroke-width="5"/>
+        <path d="M28 70 V52 h44 v18 Z" fill="#e0a878" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/>
+        <rect x="42" y="24" width="16" height="30" rx="8" fill="#e0a878" stroke="currentColor" stroke-width="5"/>
+        <path d="M50 8 L56 22 L71 23 L59 32 L63 46 L50 38 L37 46 L41 32 L29 23 L44 22 Z" fill="#f2b705" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
     <button class="ferramenta segurar" id="btn-limpar" aria-label="Limpar tudo (segure)">
       <svg viewBox="0 0 100 100" aria-hidden="true">
         <rect x="26" y="18" width="48" height="60" rx="7" fill="#ffffff" stroke="currentColor" stroke-width="6"/>
@@ -101,13 +110,6 @@
       </svg>
     </button>
 
-    <button class="ferramenta" id="btn-galeria" aria-label="Galeria da Ceci">
-      <svg viewBox="0 0 100 100" aria-hidden="true">
-        <rect x="14" y="26" width="54" height="46" rx="8" fill="#ffffff" stroke="currentColor" stroke-width="6"/>
-        <rect x="34" y="36" width="52" height="44" rx="8" fill="#fdf3df" stroke="currentColor" stroke-width="6"/>
-        <path d="M40 72 L54 56 L64 66 L72 60 L80 72 Z" fill="#b7d9a8" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>
-      </svg>
-    </button>
   </aside>
 
   <div class="area" id="area-desenho">
@@ -117,6 +119,14 @@
       <svg viewBox="0 0 100 100" aria-hidden="true">
         <path d="M18 50 L50 22 L82 50" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
         <path d="M28 46 V78 H72 V46" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <button id="btn-galeria" class="flutuante abaixo" aria-label="Galeria da Ceci">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <rect x="14" y="26" width="54" height="46" rx="8" fill="#ffffff" stroke="currentColor" stroke-width="6"/>
+        <rect x="34" y="36" width="52" height="44" rx="8" fill="#fdf3df" stroke="currentColor" stroke-width="6"/>
+        <path d="M40 72 L54 56 L64 66 L72 60 L80 72 Z" fill="#b7d9a8" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>
       </svg>
     </button>
 
@@ -223,15 +233,16 @@
       <span class="rotulo">Tocar</span>
     </button>
 
-    <button class="cartao pequeno" data-som="bater">
+    <button class="cartao pequeno" data-som="eco">
       <svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
-        <ellipse cx="50" cy="62" rx="34" ry="12" fill="#c98a5a" stroke="#3a3630" stroke-width="4"/>
-        <path d="M16 62 V44 a34 12 0 0 1 68 0 V62" fill="#e0a878" stroke="#3a3630" stroke-width="4"/>
-        <ellipse cx="50" cy="44" rx="34" ry="12" fill="#f6ead8" stroke="#3a3630" stroke-width="4"/>
-        <path d="M30 30 L20 12" stroke="#3a3630" stroke-width="5" stroke-linecap="round"/>
-        <path d="M70 30 L80 12" stroke="#3a3630" stroke-width="5" stroke-linecap="round"/>
+        <circle cx="30" cy="52" r="16" fill="#f7d9a0" stroke="#3a3630" stroke-width="4"/>
+        <path d="M20 40 L17 24 L31 33 Z M40 40 L43 24 L29 33 Z" fill="#f7d9a0" stroke="#3a3630" stroke-width="4" stroke-linejoin="round"/>
+        <circle cx="26" cy="50" r="3" fill="#3a3630"/><circle cx="35" cy="50" r="3" fill="#3a3630"/>
+        <path d="M56 34 q12 18 0 36" fill="none" stroke="#e08a9b" stroke-width="6" stroke-linecap="round"/>
+        <path d="M70 26 q17 26 0 50" fill="none" stroke="#e08a9b" stroke-width="6" stroke-linecap="round" opacity=".65"/>
+        <path d="M84 20 q22 32 0 62" fill="none" stroke="#e08a9b" stroke-width="6" stroke-linecap="round" opacity=".35"/>
       </svg>
-      <span class="rotulo">Bater junto</span>
+      <span class="rotulo">Eco</span>
     </button>
 
     <button class="cartao pequeno" data-som="dancar">
@@ -299,6 +310,12 @@
       <button class="opcao" data-nivel="3">Nível 3</button>
     </div>
 
+    <h3>Sessão de agora</h3>
+    <div class="linha">
+      <span class="pin-atual">Tempo restante: <b id="tempo-restante">—</b></span>
+      <button class="opcao segurar" id="btn-encerrar-agora">Encerrar agora</button>
+    </div>
+
     <h3>Voz</h3>
     <div class="linha">
       <select id="seletor-voz" class="opcao seletor"></select>
@@ -328,6 +345,31 @@
     </div>
   </div>
 </section>
+
+<!-- ================= FIGURAS DO CARIMBO ================= -->
+<div id="escolher-carimbo" class="sobreposicao oculto">
+  <div class="balao">
+    <div class="figuras">
+      <button class="figura" data-figura="circulo" aria-label="Circulo">
+        <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="38" fill="#e04a3f" stroke="#3a3630" stroke-width="5"/></svg>
+      </button>
+      <button class="figura" data-figura="estrela" aria-label="Estrela">
+        <svg viewBox="0 0 100 100"><path d="M50 10 L61 38 L92 40 L68 60 L76 90 L50 73 L24 90 L32 60 L8 40 L39 38 Z" fill="#f2b705" stroke="#3a3630" stroke-width="5" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="figura" data-figura="coracao" aria-label="Coracao">
+        <svg viewBox="0 0 100 100"><path d="M50 86 C10 58 12 26 32 22 C42 20 50 30 50 38 C50 30 58 20 68 22 C88 26 90 58 50 86 Z" fill="#e987b8" stroke="#3a3630" stroke-width="5" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="figura" data-figura="gato" aria-label="Gatinho">
+        <svg viewBox="0 0 100 100">
+          <path d="M26 44 L22 14 L48 30 Z M74 44 L78 14 L52 30 Z" fill="#f0a55c" stroke="#3a3630" stroke-width="5" stroke-linejoin="round"/>
+          <circle cx="50" cy="58" r="30" fill="#f0a55c" stroke="#3a3630" stroke-width="5"/>
+          <circle cx="39" cy="53" r="4.5" fill="#3a3630"/><circle cx="61" cy="53" r="4.5" fill="#3a3630"/>
+          <path d="M50 66 q-7 7 -13 2 M50 66 q7 7 13 2" fill="none" stroke="#3a3630" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- ================= GALERIA ================= -->
 <div id="galeria" class="sobreposicao oculto">

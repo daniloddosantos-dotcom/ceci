@@ -203,6 +203,18 @@ button{
   display:flex; align-items:center; justify-content:center;
 }
 .flutuante svg{ width:58%; height:58%; }
+/* a galeria fica logo abaixo da casinha */
+.flutuante.abaixo{ top:calc(8px + var(--seguro-topo) + var(--b) + 10px); }
+
+/* painel das figuras do carimbo */
+.figuras{ display:flex; gap:clamp(12px, 2.5vw, 28px); }
+.figura{
+  width:clamp(96px, 15vh, 150px); height:clamp(96px, 15vh, 150px);
+  background:var(--papel); border:3px solid var(--borda);
+  border-radius:24px; padding:10px; touch-action:none;
+}
+.figura svg{ width:100%; height:100%; }
+.figura:active{ transform:scale(.97); }
 
 /* trilha do sol (canto superior direito, vale para todas as telas) */
 #trilha-sol{
@@ -567,6 +579,7 @@ select.seletor{ max-width:min(420px, 60vw); font-size:17px; }
 #gatinho-ajudante svg{ width:100%; height:auto; }
 .cabeca{ transform-box:fill-box; transform-origin:50% 92%; }
 #gatinho-ajudante.balancando .cabeca,
+.gato-musica.balancando .cabeca,
 .gato-fim.balancando .cabeca{ animation: balancar-cabeca 1.6s ease-in-out 1; }
 @keyframes balancar-cabeca{
   0%   { transform:rotate(0deg); }
@@ -688,7 +701,25 @@ select.seletor{ max-width:min(420px, 60vw); font-size:17px; }
   70%    { transform:rotate(10deg); }
 }
 
-/* ------------------ Bater junto ------------------ */
+/* ------------------ Eco ------------------ */
+.cena-eco{
+  position:relative; width:100%; height:100%;
+  display:flex; align-items:center; justify-content:center;
+  gap:clamp(16px, 4vw, 54px);
+}
+.cena-eco .xilofone{ align-items:flex-start; }
+/* a tecla acende quando o gatinho toca (e quando ela toca) */
+.tecla-xilo.acesa{
+  filter:brightness(1.35);
+  box-shadow:0 0 0 8px rgba(255,255,255,.55), 0 6px 0 rgba(0,0,0,.10);
+}
+.xilofone.vez-dela{ animation: convidar 1.6s ease-in-out infinite; }
+@keyframes convidar{
+  0%,100%{ transform:translateY(0); }
+  50%    { transform:translateY(-6px); }
+}
+
+/* ------------------ (antigo) Bater junto ------------------ */
 .cena-ritmo{
   position:relative; width:100%; height:100%;
   display:flex; align-items:center; justify-content:center;

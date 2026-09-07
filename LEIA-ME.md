@@ -51,7 +51,11 @@ do tablet deitado (landscape) e ver como a Cecí vai ver.
 - A **borracha** apaga de verdade (tira a tinta), com traço bem largo. Não pinta de branco por cima.
 - **Limpar** só funciona se **segurar 1 segundo**: um **anel rosa** vai se preenchendo
   em volta do botão. Se o dedo escorregar para fora, cancela na hora.
+- O **carimbo** (do lado da borracha) abre 4 figuras grandes: círculo, estrela, coração e o gatinho.
+  Ela escolhe uma e vai batendo na folha — cada toque coloca a figura na cor escolhida.
+  Para voltar a desenhar, é só tocar num dos pincéis.
 - **Guardar** (coração) salva o desenho na Galeria da Cecí, dentro do próprio tablet.
+- A **galeria** virou um botão flutuante logo abaixo da casinha (a barra ficou cheia).
 - Na galeria, tocar na miniatura **reabre** o desenho. O "×" também só apaga
   com o mesmo gesto de segurar 1 segundo (com anel).
 
@@ -106,11 +110,14 @@ pelo próprio navegador** — não existe nenhum arquivo de música no app.
 | Atividade | O que acontece |
 |---|---|
 | **Tocar** | Xilofone de 5 teclas coloridas (escala pentatônica: qualquer combinação soa bem), tambor e chocalho. A tecla afunda devagar quando ela toca. Livre, sem gravação e sem partitura. |
-| **Bater junto** | O gatinho bate no tambor a 60 batidas por minuto, com um pulso visual grande. Ela bate junto. 3 rodadas de 20 segundos: só pulso, depois "tum-tum-pausa", depois "tum-tum-tum-pausa". Bateu perto do tempo, o tambor brilha de leve — sem pontos e sem som de erro. |
+| **Eco** | O gatinho toca 2 notas no xilofone, devagar, acendendo as teclas. Depois é a vez dela: toca o que quiser e, ao tocar 2 teclas quaisquer, o gatinho balança a cabeça e toca outra dupla. Sem acerto nem tempo. 5 rodadas (no nível 2 e 3 são 3 notas). |
 | **Dançar** | Toca uma música enquanto o gatinho dança devagar. A cada 8 a 12 segundos a música **para**, a voz diz "estátua!" e o gatinho congela por 3 segundos. É o "pare e siga" com o corpo. |
 
+Cada música tem quatro camadas sintetizadas: melodia, acordes macios de fundo,
+uma linha de baixo e uma percussão bem levinha, com trechos mais suaves para respirar.
+
 Na Dançar dá para escolher entre três músicas, tocando no ícone:
-- **da Cecí** — melodia original, feita para o app (40 segundos);
+- **da Cecí** — melodia original com refrão que volta e final claro (cerca de 37 segundos);
 - **estrelinha** — "Brilha, brilha, estrelinha" (a melodia francesa que Mozart usou nas variações; domínio público);
 - **primavera** — o trecho de abertura da *Primavera* de Vivaldi (domínio público).
 
@@ -133,6 +140,13 @@ Volume moderado e timbres macios (nada de agudo estridente).
 - Também está lá o **Cartão do papai** com 4 sugestões de conversa para o desenho.
 
 ## 5. O ritual do fim
+
+**Como a sessão conta o tempo:** ela começa no **primeiro toque** depois de abrir o app
+(não importa em qual tela), usa o **relógio do tablet** (não um contador que pode congelar)
+e continua correndo em qualquer tela. O instante de início fica guardado: se você fechar
+e reabrir o app **dentro de 30 minutos**, ela continua de onde parou, sem zerar.
+No Modo do papai aparece o **tempo restante** e há um botão **Encerrar agora**
+(segure 1 segundo), que faz o tchau na hora.
 
 1. O sol pequeno no canto de cima desce devagar durante a sessão.
 2. Faltando 2 minutos, uma voz calma diz: *"Cecí, o sol está quase se deitando"*.

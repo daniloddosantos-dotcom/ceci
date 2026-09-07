@@ -390,11 +390,13 @@
 
   function algumaSobreposicaoAberta() {
     return !$('#galeria').classList.contains('oculto') ||
+           !$('#escolher-carimbo').classList.contains('oculto') ||
            !$('#overlay-pin').classList.contains('oculto') ||
            !$('#fim-atividade').classList.contains('oculto');
   }
   function fecharSobreposicoes() {
     $('#galeria').classList.add('oculto');
+    $('#escolher-carimbo').classList.add('oculto');
     $('#fim-atividade').classList.add('oculto');
     fecharPin();
   }
@@ -477,15 +479,12 @@
       var mod = b.getAttribute('data-modulo');
       if (mod === 'desenhar') {
         nota(NOTAS[3], 0.4, 0.05);
-        iniciarSessao();
         irPara('tela-desenho');
       } else if (mod === 'brincar') {
         nota(NOTAS[4], 0.4, 0.05);
-        iniciarSessao();
         irPara('tela-brincar');
       } else if (mod === 'musica') {
         nota(NOTAS[5], 0.4, 0.05);
-        iniciarSessao();
         irPara('tela-musica');
       }
     });
@@ -503,6 +502,7 @@
     marcarDuracao();
     marcarNivel();
     montarSeletorDeVozes();
+    mostrarTempoRestante();
     mostrarRegistro();
     $('#pin-atual').textContent = config.pin;
     var g = lerGaleria();
@@ -519,6 +519,25 @@
       b.classList.toggle('escolhida', Number(b.getAttribute('data-nivel')) === config.nivel);
     });
   }
+  // ---- sessão: tempo restante e "Encerrar agora" ----
+  function mostrarTempoRestante() {
+    var el = $('#tempo-restante');
+    if (!el) return;
+    if (!sessao.ativa) { el.textContent = 'sessão não começou'; return; }
+    var falta = Math.max(0, faltaDaSessao());
+    var min = Math.floor(falta / 60000);
+    var seg = Math.floor((falta % 60000) / 1000);
+    el.textContent = min + ' min ' + (seg < 10 ? '0' : '') + seg + ' s';
+  }
+
+  // segurar 1 segundo para não encerrar sem querer
+  segurarPara($('#btn-encerrar-agora'), function () {
+    if (!sessao.ativa) { aviso('Nenhuma sessão em andamento'); return; }
+    pararSessao();
+    apagarSessaoGuardada();
+    ritualDeTchau();                      // faz o tchau normal, que ela já conhece
+  });
+
   // ---- seletor de voz do papai ----
   function montarSeletorDeVozes() {
     var sel = $('#seletor-voz');
@@ -566,6 +585,7 @@
     classificar: 'Separar',
     tocar: 'Tocar',
     bater: 'Bater junto',
+    eco: 'Eco',
     dancar: 'Dançar',
     desenhar: 'Desenhar'
   };
@@ -720,9 +740,16 @@
 
     if (e.pointerType === 'pen') { pontosDeCaneta[e.pointerId] = 1; qtdCaneta++; ultimoUsoCaneta = agora; }
 
+    retangulo = canvas.getBoundingClientRect();
+
+    if (carimboLigado) {          // carimbo: um toque, uma figura
+      carimbar(posicao(e));
+      e.preventDefault();
+      return;
+    }
+
     ponteiroDesenhando = e.pointerId;
     try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
-    retangulo = canvas.getBoundingClientRect();
     ultimoPonto = posicao(e);
     pingo(ultimoPonto, larguraDoTraco(e));
     e.preventDefault();
@@ -763,7 +790,7 @@
   $$('.ferramenta.cor').forEach(function (b) {
     b.addEventListener('click', function () {
       corAtual = b.getAttribute('data-cor');
-      borrachaLigada = false;
+      borrachaLigada = false;   // a cor vale tambem para o carimbo
       marcarFerramentas();
       nota(NOTAS[Number(b.getAttribute('data-nota')) % NOTAS.length], 0.34, 0.06);
     });
@@ -774,6 +801,7 @@
     b.addEventListener('click', function () {
       tamanhoAtual = b.getAttribute('data-tamanho');
       borrachaLigada = false;
+      carimboLigado = false;
       marcarFerramentas();
       nota(NOTAS[2], 0.26, 0.045);
     });
@@ -782,9 +810,84 @@
   // --- borracha ---
   $('#btn-borracha').addEventListener('click', function () {
     borrachaLigada = true;
+    carimboLigado = false;
     marcarFerramentas();
     nota(NOTAS[0], 0.3, 0.04);
   });
+
+  /* --- carimbo: ela escolhe uma figura e vai batendo na folha ---
+     Mesma lógica de causa e efeito do resto: toca, aparece. */
+  var carimboLigado = false;
+  var figuraAtual = 'circulo';
+
+  $('#btn-carimbo').addEventListener('click', function () {
+    $('#escolher-carimbo').classList.remove('oculto');
+    nota(NOTAS[2], 0.3, 0.05);
+  });
+
+  $$('#escolher-carimbo .figura').forEach(function (b) {
+    b.addEventListener('click', function () {
+      figuraAtual = b.getAttribute('data-figura');
+      carimboLigado = true;
+      borrachaLigada = false;
+      $('#escolher-carimbo').classList.add('oculto');
+      marcarFerramentas();
+      nota(NOTAS[4], 0.34, 0.05);
+    });
+  });
+
+  function caminhoEstrela(r) {
+    ctx.beginPath();
+    for (var i = 0; i < 10; i++) {
+      var raio = (i % 2 === 0) ? r : r * 0.45;
+      var a = -Math.PI / 2 + i * Math.PI / 5;
+      var x = Math.cos(a) * raio, y = Math.sin(a) * raio;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+  }
+
+  function caminhoCoracao(r) {
+    ctx.beginPath();
+    ctx.moveTo(0, r * 0.85);
+    ctx.bezierCurveTo(-r * 1.4, -r * 0.25, -r * 0.55, -r * 1.1, 0, -r * 0.35);
+    ctx.bezierCurveTo(r * 0.55, -r * 1.1, r * 1.4, -r * 0.25, 0, r * 0.85);
+    ctx.closePath();
+  }
+
+  function desenharGatinho(r) {
+    ctx.beginPath();                                  // orelhas
+    ctx.moveTo(-r * 0.72, -r * 0.42); ctx.lineTo(-r * 0.84, -r * 1.05); ctx.lineTo(-r * 0.14, -r * 0.72);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(r * 0.72, -r * 0.42); ctx.lineTo(r * 0.84, -r * 1.05); ctx.lineTo(r * 0.14, -r * 0.72);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0, 0, r * 0.8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#3a3630';
+    ctx.beginPath(); ctx.arc(-r * 0.3, -r * 0.12, r * 0.1, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(r * 0.3, -r * 0.12, r * 0.1, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-r * 0.2, r * 0.24); ctx.quadraticCurveTo(0, r * 0.44, r * 0.2, r * 0.24);
+    ctx.stroke();
+  }
+
+  function carimbar(p) {
+    var lado = Math.max(90, LARGURAS.grosso * 5);     // figura bem grande
+    var r = lado / 2;
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.translate(p.x, p.y);
+    ctx.lineWidth = Math.max(3, lado * 0.045);
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#3a3630';
+    ctx.fillStyle = corAtual;
+    if (figuraAtual === 'circulo') { ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
+    else if (figuraAtual === 'estrela') { caminhoEstrela(r); ctx.fill(); ctx.stroke(); }
+    else if (figuraAtual === 'coracao') { caminhoCoracao(r * 0.95); ctx.fill(); ctx.stroke(); }
+    else { desenharGatinho(r); }
+    ctx.restore();
+    nota(NOTAS[Math.floor(Math.random() * NOTAS.length)], 0.3, 0.05);
+  }
 
   function marcarFerramentas() {
     $$('.ferramenta.cor').forEach(function (b) {
@@ -794,6 +897,7 @@
       b.classList.toggle('escolhida', b.getAttribute('data-tamanho') === tamanhoAtual);
     });
     $('#btn-borracha').classList.toggle('escolhida', borrachaLigada);
+    $('#btn-carimbo').classList.toggle('escolhida', carimboLigado);
   }
   marcarFerramentas();
 
@@ -902,16 +1006,36 @@
   /* ---------------------------------------------------------
      11) Sessão, sol descendo e ritual de tchau
      --------------------------------------------------------- */
-  var sessao = { ativa: false, fim: 0, total: 0, avisou: false, timer: 0 };
+  /* A sessão é medida pelo RELÓGIO REAL (Date.now), nunca por contagem
+     de segundos. Assim ela continua certa mesmo que o Android congele o
+     app em segundo plano, e continua em qualquer tela.
+     O instante de início fica guardado no tablet: fechar e reabrir o app
+     dentro de 30 minutos continua de onde parou (não zera o tempo). */
+  var CHAVE_SESSAO = 'ceci.sessao.v1';
+  var JANELA_RETOMADA = 30 * 60000;
+
+  var sessao = { ativa: false, inicio: 0, total: 0, avisou: false, timer: 0 };
   var sol = $('#sol');
 
   function iniciarSessao() {
-    sessao.total = config.minutos * 60000;
-    sessao.fim = Date.now() + sessao.total;
+    if (sessao.ativa) return;                       // já começou: NUNCA reinicia
+    var agora = Date.now();
+    var guardada = lerJSON(CHAVE_SESSAO);
+
+    if (guardada && guardada.inicio && (agora - guardada.inicio) < JANELA_RETOMADA) {
+      sessao.inicio = guardada.inicio;              // continua a sessão de antes
+      sessao.total = (guardada.minutos || config.minutos) * 60000;
+      sessao.avisou = !!guardada.avisou;
+    } else {
+      sessao.inicio = agora;                        // sessão nova
+      sessao.total = config.minutos * 60000;
+      sessao.avisou = false;
+      gravarJSON(CHAVE_SESSAO, { inicio: sessao.inicio, minutos: config.minutos, avisou: false });
+    }
+
     sessao.ativa = true;
-    sessao.avisou = false;
     sol.classList.remove('poente');
-    $('#trilha-sol').classList.remove('oculto');   // o sol aparece em todas as telas
+    $('#trilha-sol').classList.remove('oculto');    // o sol aparece em todas as telas
     clearInterval(sessao.timer);
     sessao.timer = setInterval(passoDaSessao, 1000);
     passoDaSessao();
@@ -922,14 +1046,30 @@
     clearInterval(sessao.timer);
   }
 
+  // esquece a sessão guardada (depois do PIN do papai ou do "Encerrar agora")
+  function apagarSessaoGuardada() {
+    try { localStorage.removeItem(CHAVE_SESSAO); } catch (e) {}
+  }
+
+  function faltaDaSessao() {
+    if (!sessao.ativa) return 0;
+    return (sessao.inicio + sessao.total) - Date.now();
+  }
+
   function passoDaSessao() {
-    var falta = sessao.fim - Date.now();
+    if (!sessao.ativa) return;
+    var falta = faltaDaSessao();
     var andado = 1 - Math.max(0, falta) / sessao.total;
     sol.style.top = (Math.min(1, Math.max(0, andado)) * 100) + '%';
     sol.classList.toggle('poente', andado > 0.7);
 
+    if (telaAtual === 'tela-config') mostrarTempoRestante();
+
     if (!sessao.avisou && falta <= 120000 && falta > 0) {
       sessao.avisou = true;
+      var g = lerJSON(CHAVE_SESSAO) || {};
+      g.avisou = true;
+      gravarJSON(CHAVE_SESSAO, g);
       nota(NOTAS[1], 0.6, 0.04);
       setTimeout(function () { falar('Cecí, o sol está quase se deitando'); }, 700);
     }
@@ -938,6 +1078,11 @@
       ritualDeTchau();
     }
   }
+
+  // volta do segundo plano: acerta o sol na hora, sem esperar o próximo segundo
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden && sessao.ativa) passoDaSessao();
+  });
 
   function ritualDeTchau() {
     bloqueado = true;
@@ -959,6 +1104,7 @@
       setTimeout(function () { r.classList.add('oculto'); }, 800);
       $('#btn-destravar').classList.remove('visivel');
       bloqueado = false;
+      apagarSessaoGuardada();
       sol.style.top = '0%';
       sol.classList.remove('poente');
       $('#trilha-sol').classList.add('oculto');
@@ -999,6 +1145,7 @@
   document.addEventListener('pointerdown', function () {
     audio();          // libera o som (navegadores exigem um toque antes)
     telaCheia();
+    if (!bloqueado) iniciarSessao();   // a sessao comeca no primeiro toque
   }, true);
 
   // 12.2 nada de menu de toque longo, seleção ou duplo toque com zoom
