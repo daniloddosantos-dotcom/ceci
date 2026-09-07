@@ -66,7 +66,7 @@ Todas seguem a mesma regra: **acerto** = som suave + o gatinho balança a cabeç
 | **Encaixar** | formas e senso espacial | 3 formas na silhueta igual | quebra-cabeça do gatinho (4 peças) | pinheiro de tangram (gira com toque duplo) |
 | **Achar o par** | memória e padrões | 2 pares | 3 pares | 4 pares |
 | **Em ordem** | lógica e tempo | rotina do dia | + do menor ao maior | + um, dois, três |
-| **Pare e siga** | esperar a vez | 1 minuto, verde/vermelho devagar | igual | igual |
+| **Pare e siga** | esperar a vez | 1 minuto, verde/vermelho, no mínimo 4 s em cada cor | igual | igual |
 | **Separar** | classificar | água/terra e depois grande/pequeno | igual | igual |
 
 Detalhes:
@@ -78,6 +78,11 @@ Detalhes:
   registrada de cada um exagerada (tromba, crina, bico, orelhas, chifres, cauda).
 - Errar nunca faz barulho, nunca trava e nunca conta nada.
 - **Tocar em qualquer peça, forma, carta ou bichinho faz o app dizer o nome.**
+- No **Pare e siga** o sinal usa **sons**, não voz: um *ding* agudo no verde e um *tum*
+  grave no vermelho, tocados no mesmo instante em que a cor muda (medido: menos de 1 milésimo
+  de segundo de diferença). A voz só explica a regra **antes** de começar; durante o jogo
+  nada é falado. Meio segundo antes de trocar, a bolinha **respira** (cresce um pouquinho),
+  para ela antecipar a mudança.
 
 ### A tela do fim
 O gatinho aparece grande no meio, com um balão de fala em letras grandes

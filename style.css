@@ -533,11 +533,14 @@ select.seletor{ max-width:min(420px, 60vw); font-size:17px; }
   border-radius:50%;
   border:6px solid rgba(0,0,0,.10);
   background:#c9c9c9;
-  transition:background-color 1.4s ease, transform .8s ease;
+  /* a cor troca rapido, para ficar colada no som; o resto e lento e calmo */
+  transition:background-color .25s ease, transform .5s ease, box-shadow .5s ease;
   touch-action:none;
 }
 .bolota.verde{ background:#5fb96b; }
 .bolota.vermelha{ background:#e0685c; }
+/* meio segundo respirando antes de mudar de cor, para ela antecipar */
+.bolota.respirando{ transform:scale(1.07); box-shadow:0 0 0 16px rgba(0,0,0,.05); }
 .bolota.tocada{ transform:scale(1.05); }
 
 /* ------------------ Separar (água / terra) ------------------ */

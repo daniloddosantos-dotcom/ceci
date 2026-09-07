@@ -798,6 +798,52 @@
   var CONVITE_PARE = 'Vamos dançar e parar quando o papai disser PARE?';
   var DICA_PARE = 'Elogie a espera, não o acerto: você conseguiu esperar!';
 
+  /* Quer que o app também FALE "verde" e "vermelho"?
+     Deixe true. A palavra sai fora da fila e a cor só muda quando a voz
+     realmente começa - nunca antes. Em false (o normal), só os sons curtos,
+     que são sempre certeiros. */
+  var FALAR_AS_CORES = false;
+
+  // "ding" suave e agudo = verde
+  function somDoVerde() {
+    var c = C.audio();
+    if (!c) return;
+    var t = c.currentTime;
+    var g = c.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.09, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
+    g.connect(c.destination);
+    var o1 = c.createOscillator();
+    o1.type = 'sine'; o1.frequency.value = 1046.5;
+    o1.connect(g);
+    var o2 = c.createOscillator();
+    o2.type = 'sine'; o2.frequency.value = 1568;
+    var g2 = c.createGain(); g2.gain.value = 0.3;
+    o2.connect(g2); g2.connect(g);
+    o1.start(t); o1.stop(t + 0.6);
+    o2.start(t); o2.stop(t + 0.6);
+  }
+
+  // "tum" grave e macio = vermelho
+  function somDoVermelho() {
+    var c = C.audio();
+    if (!c) return;
+    var t = c.currentTime;
+    var lp = c.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = 600;
+    var g = c.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.10, t + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
+    var o = c.createOscillator();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(150, t);
+    o.frequency.exponentialRampToValueAtTime(78, t + 0.16);
+    o.connect(g); g.connect(lp); lp.connect(c.destination);
+    o.start(t); o.stop(t + 0.5);
+  }
+
   function atividadePare() {
     var t = tabuleiro('', 'clamp(76px, 15vh, 120px)');
     var bolota = document.createElement('div');
@@ -805,8 +851,9 @@
     t.appendChild(bolota);
 
     var verde = false;
-    var jaFalouVerde = false, jaFalouVermelho = false;
-    var fim = Date.now() + 60000;               // um minutinho
+    var jogando = false;
+    var comecou = false;
+    var fim = 0;
 
     bolota.addEventListener('pointerdown', function (e) {
       e.preventDefault();
@@ -817,24 +864,65 @@
       daqui(500, function () { bolota.classList.remove('tocada'); });
     });
 
-    function trocar() {
-      if (Date.now() >= fim) {
-        bolota.classList.remove('verde', 'vermelha');
-        balancarGatinho();
-        terminar('Você esperou muito bem!', CONVITE_PARE, DICA_PARE);
-        return;
-      }
-      verde = !verde;
-      bolota.classList.toggle('verde', verde);
-      bolota.classList.toggle('vermelha', !verde);
-      if (verde && !jaFalouVerde) { jaFalouVerde = true; C.falar('Verde! Pode tocar.'); }
-      else if (!verde && !jaFalouVermelho) { jaFalouVermelho = true; C.falar('Vermelho. Agora espera.'); }
-      else C.nota(verde ? C.NOTAS[4] : C.NOTAS[0], 0.35, 0.035);
-      daqui(3000 + Math.random() * 2000, trocar);
+    // a cor e o som saem juntos, na mesma linha, sem esperar nada
+    function acenderSinal(paraVerde) {
+      verde = paraVerde;
+      bolota.classList.toggle('verde', paraVerde);
+      bolota.classList.toggle('vermelha', !paraVerde);
+      if (paraVerde) somDoVerde(); else somDoVermelho();
     }
 
-    C.falar('Quando ficar verde, pode tocar. Quando ficar vermelho, espera.');
-    daqui(2200, trocar);
+    function trocarSinal(paraVerde) {
+      if (!FALAR_AS_CORES) { acenderSinal(paraVerde); return; }
+      // com palavra: corta a fila e só acende quando a voz COMEÇA de verdade
+      var jaAcendeu = false;
+      function acender() {
+        if (jaAcendeu) return;
+        jaAcendeu = true;
+        acenderSinal(paraVerde);
+      }
+      C.falarSinal(paraVerde ? 'verde' : 'vermelho', acender);
+      daqui(300, acender);      // se a voz não começar em 300 ms, acende assim mesmo
+    }
+
+    // meio segundo "respirando" antes de mudar, para ela antecipar
+    function respirarEtrocar(paraVerde) {
+      if (!jogando) return;
+      bolota.classList.add('respirando');
+      daqui(500, function () {
+        bolota.classList.remove('respirando');
+        if (!jogando) return;
+        trocarSinal(paraVerde);
+        agendarProxima();
+      });
+    }
+
+    function agendarProxima() {
+      daqui(4000 + Math.random() * 2000, function () {     // no mínimo 4 segundos em cada cor
+        if (!jogando) return;
+        if (Date.now() >= fim) { fecharJogo(); return; }
+        respirarEtrocar(!verde);
+      });
+    }
+
+    function fecharJogo() {
+      jogando = false;
+      bolota.classList.remove('verde', 'vermelha', 'respirando');
+      balancarGatinho();
+      terminar('Você esperou muito bem!', CONVITE_PARE, DICA_PARE);
+    }
+
+    // a explicação é falada ANTES de começar; durante o jogo nada mais é falado
+    function comecarJogo() {
+      if (comecou) return;
+      comecou = true;
+      jogando = true;
+      fim = Date.now() + 60000;                 // um minutinho
+      respirarEtrocar(true);
+    }
+
+    C.falar('Quando ficar verde, pode tocar. Quando ficar vermelho, espera.', comecarJogo);
+    daqui(9000, comecarJogo);                   // rede de segurança, se a voz falhar
   }
 
   /* =========================================================

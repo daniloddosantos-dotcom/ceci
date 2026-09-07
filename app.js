@@ -151,9 +151,10 @@
   var falando = false;
   var relogioDaFala = 0;
 
-  function falar(texto) {
+  // "aoTerminar" (opcional) avisa quando esta frase acabou de ser falada
+  function falar(texto, aoTerminar) {
     if (!texto) return;
-    filaDeFala.push(String(texto));
+    filaDeFala.push({ texto: String(texto), aoTerminar: aoTerminar || null });
     if (!falando) proximaFrase();
   }
 
@@ -165,6 +166,29 @@
   function falarJa(texto) {
     limparFala();
     falar(texto);
+  }
+
+  /* Fala uma palavra FORA da fila e avisa no instante em que a voz
+     realmente começa (onstart). Serve para sinais que precisam estar
+     colados na imagem, como o verde/vermelho do "Pare e siga". */
+  function falarSinal(texto, aoComecar) {
+    limparFala();
+    var jaAvisou = false;
+    function avisar() { if (jaAvisou) return; jaAvisou = true; if (aoComecar) aoComecar(); }
+    try {
+      if (!('speechSynthesis' in window)) { avisar(); return; }
+      var u = new SpeechSynthesisUtterance(String(texto));
+      u.lang = 'pt-BR';
+      u.rate = VELOCIDADE_FALA;
+      u.pitch = TOM_FALA;
+      u.volume = 0.9;
+      if (!vozes.length) carregarVozes();
+      if (!vozEscolhida) escolherVoz();
+      if (vozEscolhida) u.voice = vozEscolhida;
+      u.onstart = avisar;
+      u.onerror = avisar;
+      window.speechSynthesis.speak(u);
+    } catch (e) { avisar(); }
   }
 
   function limparFala() {
@@ -179,7 +203,8 @@
     if (!('speechSynthesis' in window)) { filaDeFala = []; falando = false; return; }
 
     falando = true;
-    var texto = filaDeFala.shift();
+    var item = filaDeFala.shift();
+    var texto = item.texto;
 
     try {
       var u = new SpeechSynthesisUtterance(texto);
@@ -196,6 +221,7 @@
         if (jaSeguiu) return;
         jaSeguiu = true;
         clearTimeout(relogioDaFala);
+        if (item.aoTerminar) { try { item.aoTerminar(); } catch (e) {} }
         setTimeout(proximaFrase, 260);        // respirinho entre as frases
       }
       u.onend = seguir;
@@ -1045,6 +1071,7 @@
   window.Ceci.falar = falar;
   window.Ceci.falarLista = falarLista;
   window.Ceci.falarJa = falarJa;
+  window.Ceci.falarSinal = falarSinal;
   window.Ceci.limparFala = limparFala;
   window.Ceci.nota = nota;
   window.Ceci.NOTAS = NOTAS;
