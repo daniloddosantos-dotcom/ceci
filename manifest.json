@@ -1,0 +1,28 @@
+{
+  "name": "Cecí",
+  "short_name": "Cecí",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "description": "Um cantinho calmo para desenhar, com a Cecí.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#fdf8f0",
+  "theme_color": "#fdf8f0",
+  "categories": ["education", "kids"],
+  "icons": [
+    {
+      "src": "icone.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icone-mascara.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

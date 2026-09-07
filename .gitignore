@@ -1,0 +1,10 @@
+# Arquivos que ficam só no computador do papai, fora do site publicado
+servidor.js
+abrir-ceci.bat
+animais.html
+.claude/
+
+# lixo do Windows / OneDrive
+Thumbs.db
+desktop.ini
+*.tmp

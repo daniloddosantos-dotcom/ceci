@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#fdf8f0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<title>Cecí</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="icone.svg">
+<link rel="apple-touch-icon" href="icone.svg">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ================= TELA INICIAL ================= -->
+<section id="tela-inicio" class="tela ativa">
+  <h1 class="titulo">Cecí</h1>
+
+  <div class="menu">
+    <button class="cartao" data-modulo="desenhar">
+      <svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M24 76 L30 56 L62 24 L76 38 L44 70 Z" fill="#f6d06a" stroke="#3d3a35" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M62 24 L76 38" stroke="#3d3a35" stroke-width="5" stroke-linecap="round"/>
+        <path d="M24 76 L36 72" stroke="#3d3a35" stroke-width="5" stroke-linecap="round"/>
+        <path d="M18 84 C34 80 46 82 60 86" stroke="#e08a9b" stroke-width="6" stroke-linecap="round" fill="none"/>
+      </svg>
+      <span class="rotulo">Desenhar</span>
+    </button>
+
+    <button class="cartao" data-modulo="brincar">
+      <svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+        <circle cx="32" cy="34" r="18" fill="#e04a3f" stroke="#3d3a35" stroke-width="5"/>
+        <rect x="52" y="18" width="32" height="32" rx="5" fill="#3a72c4" stroke="#3d3a35" stroke-width="5"/>
+        <path d="M50 88 L30 58 H70 Z" fill="#f2b705" stroke="#3d3a35" stroke-width="5" stroke-linejoin="round"/>
+      </svg>
+      <span class="rotulo">Brincar</span>
+    </button>
+
+    <button class="cartao" data-modulo="musica">
+      <svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M42 72 V30 L74 22 V64" fill="none" stroke="#3d3a35" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+        <ellipse cx="34" cy="72" rx="12" ry="9" fill="#9ec5e8" stroke="#3d3a35" stroke-width="5"/>
+        <ellipse cx="66" cy="64" rx="12" ry="9" fill="#9ec5e8" stroke="#3d3a35" stroke-width="5"/>
+      </svg>
+      <span class="rotulo">Música</span>
+    </button>
+  </div>
+
+  <button id="btn-engrenagem" class="engrenagem" aria-label="Configuracoes do papai">
+    <svg viewBox="0 0 100 100" aria-hidden="true">
+      <circle cx="50" cy="50" r="15" fill="none" stroke="currentColor" stroke-width="8"/>
+      <g stroke="currentColor" stroke-width="9" stroke-linecap="round">
+        <path d="M50 12 V26"/><path d="M50 74 V88"/><path d="M12 50 H26"/><path d="M74 50 H88"/>
+        <path d="M23 23 L33 33"/><path d="M67 67 L77 77"/><path d="M77 23 L67 33"/><path d="M33 67 L23 77"/>
+      </g>
+    </svg>
+
+  </button>
+</section>
+
+<!-- ================= TELA DE DESENHO ================= -->
+<section id="tela-desenho" class="tela">
+  <aside class="barra">
+    <button class="ferramenta cor" data-cor="#e04a3f" style="--cor:#e04a3f" data-nota="0" aria-label="Vermelho"></button>
+    <button class="ferramenta cor" data-cor="#3a72c4" style="--cor:#3a72c4" data-nota="1" aria-label="Azul"></button>
+    <button class="ferramenta cor" data-cor="#f2b705" style="--cor:#f2b705" data-nota="2" aria-label="Amarelo"></button>
+    <button class="ferramenta cor" data-cor="#4aa657" style="--cor:#4aa657" data-nota="3" aria-label="Verde"></button>
+    <button class="ferramenta cor" data-cor="#e987b8" style="--cor:#e987b8" data-nota="4" aria-label="Rosa"></button>
+    <button class="ferramenta cor" data-cor="#2b2b33" style="--cor:#2b2b33" data-nota="5" aria-label="Preto"></button>
+
+    <button class="ferramenta tamanho" data-tamanho="fino" aria-label="Pincel fino">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="12" fill="currentColor"/></svg>
+    </button>
+    <button class="ferramenta tamanho" data-tamanho="grosso" aria-label="Pincel grosso">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="28" fill="currentColor"/></svg>
+    </button>
+
+    <button class="ferramenta" id="btn-borracha" aria-label="Borracha">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <rect x="18" y="44" width="52" height="30" rx="8" transform="rotate(-30 44 59)" fill="#ffffff" stroke="currentColor" stroke-width="6"/>
+        <path d="M20 84 H80" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+      </svg>
+    </button>
+
+    <button class="ferramenta segurar" id="btn-limpar" aria-label="Limpar tudo (segure)">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <rect x="26" y="18" width="48" height="60" rx="7" fill="#ffffff" stroke="currentColor" stroke-width="6"/>
+        <path d="M38 40 H62 M38 54 H62" stroke="#cfc6b6" stroke-width="6" stroke-linecap="round"/>
+        <path d="M14 82 C34 66 62 70 86 52" stroke="#e08a9b" stroke-width="7" stroke-linecap="round" fill="none"/>
+      </svg>
+
+    </button>
+
+    <button class="ferramenta" id="btn-guardar" aria-label="Guardar desenho">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <rect x="18" y="18" width="64" height="64" rx="12" fill="#ffffff" stroke="currentColor" stroke-width="6"/>
+        <path d="M50 68 C30 54 30 38 40 36 C46 35 50 40 50 44 C50 40 54 35 60 36 C70 38 70 54 50 68 Z" fill="#e08a9b"/>
+      </svg>
+    </button>
+
+    <button class="ferramenta" id="btn-galeria" aria-label="Galeria da Ceci">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <rect x="14" y="26" width="54" height="46" rx="8" fill="#ffffff" stroke="currentColor" stroke-width="6"/>
+        <rect x="34" y="36" width="52" height="44" rx="8" fill="#fdf3df" stroke="currentColor" stroke-width="6"/>
+        <path d="M40 72 L54 56 L64 66 L72 60 L80 72 Z" fill="#b7d9a8" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </aside>
+
+  <div class="area" id="area-desenho">
+    <canvas id="quadro"></canvas>
+
+    <button id="btn-casa" class="flutuante" aria-label="Voltar para o inicio">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M18 50 L50 22 L82 50" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M28 46 V78 H72 V46" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+  </div>
+</section>
+
+<!-- ================= MENU DAS BRINCADEIRAS ================= -->
+<section id="tela-brincar" class="tela">
+  <div class="menu menu-brincar">
+    <button class="cartao pequeno" data-atividade="encaixar">
+      <svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+        <rect x="12" y="16" width="38" height="38" rx="6" fill="none" stroke="#b3a894" stroke-width="5" stroke-dasharray="8 7"/>
+        <circle cx="68" cy="66" r="20" fill="#e04a3f" stroke="#3d3a35" stroke-width="5"/>
+        <path d="M40 66 H30" stroke="#3d3a35" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+      <span class="rotulo">Encaixar</span>
+    </button>
+
+    <button class="cartao pequeno" data-atividade="par">
+      <svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+        <rect x="10" y="24" width="34" height="50" rx="7" fill="#9ec5e8" stroke="#3d3a35" stroke-width="5"/>
+        <rect x="56" y="24" width="34" height="50" rx="7" fill="#9ec5e8" stroke="#3d3a35" stroke-width="5"/>
+        <circle cx="27" cy="49" r="9" fill="#fdf8f0"/>
+        <circle cx="73" cy="49" r="9" fill="#fdf8f0"/>
+      </svg>
+      <span class="rotulo">Achar o par</span>
+    </button>
+
+    <button class="cartao pequeno" data-atividade="ordem">
+      <svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+        <rect x="14" y="58" width="20" height="24" rx="4" fill="#b7d9a8" stroke="#3d3a35" stroke-width="5"/>
+        <rect x="40" y="42" width="20" height="40" rx="4" fill="#b7d9a8" stroke="#3d3a35" stroke-width="5"/>
+        <rect x="66" y="26" width="20" height="56" rx="4" fill="#b7d9a8" stroke="#3d3a35" stroke-width="5"/>
+      </svg>
+      <span class="rotulo">Em ordem</span>
+    </button>
+
+    <button class="cartao pequeno" data-atividade="pare">
+      <svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+        <circle cx="34" cy="50" r="22" fill="#4aa657" stroke="#3d3a35" stroke-width="5"/>
+        <circle cx="74" cy="50" r="16" fill="#e04a3f" stroke="#3d3a35" stroke-width="5"/>
+      </svg>
+      <span class="rotulo">Pare e siga</span>
+    </button>
+
+    <button class="cartao pequeno" data-atividade="classificar">
+      <svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M10 62 q10 -8 20 0 q10 8 20 0" fill="none" stroke="#3a72c4" stroke-width="6" stroke-linecap="round"/>
+        <path d="M10 76 q10 -8 20 0 q10 8 20 0" fill="none" stroke="#3a72c4" stroke-width="6" stroke-linecap="round"/>
+        <path d="M56 78 q14 -22 34 0 Z" fill="#b7d9a8" stroke="#3d3a35" stroke-width="5" stroke-linejoin="round"/>
+        <circle cx="30" cy="30" r="14" fill="#f2b705" stroke="#3d3a35" stroke-width="5"/>
+        <circle cx="73" cy="34" r="14" fill="#e987b8" stroke="#3d3a35" stroke-width="5"/>
+      </svg>
+      <span class="rotulo">Separar</span>
+    </button>
+  </div>
+
+  <button class="voltar-canto" id="btn-brincar-casa" aria-label="Voltar para o inicio">
+    <svg viewBox="0 0 100 100" aria-hidden="true">
+      <path d="M18 50 L50 22 L82 50" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M28 46 V78 H72 V46" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+</section>
+
+<!-- ================= TELA DE UMA BRINCADEIRA ================= -->
+<section id="tela-atividade" class="tela">
+  <div id="palco"></div>
+
+  <button class="voltar-canto" id="btn-atividade-voltar" aria-label="Voltar para as brincadeiras">
+    <svg viewBox="0 0 100 100" aria-hidden="true">
+      <path d="M18 50 L50 22 L82 50" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M28 46 V78 H72 V46" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
+  <div id="gatinho-ajudante" aria-hidden="true">
+    <svg viewBox="0 0 120 120">
+      <g class="cabeca">
+        <path d="M34 48 L30 16 L58 32 Z" fill="#f7d9a0" stroke="#3d3a35" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M86 48 L90 16 L62 32 Z" fill="#f7d9a0" stroke="#3d3a35" stroke-width="4" stroke-linejoin="round"/>
+        <ellipse cx="60" cy="70" rx="36" ry="32" fill="#f7d9a0" stroke="#3d3a35" stroke-width="4"/>
+        <circle cx="47" cy="66" r="4" fill="#3d3a35"/>
+        <circle cx="73" cy="66" r="4" fill="#3d3a35"/>
+        <path d="M60 80 q-6 7 -12 2 M60 80 q6 7 12 2" fill="none" stroke="#3d3a35" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M14 68 H32 M14 78 H32 M88 68 H106 M88 78 H106" stroke="#3d3a35" stroke-width="3" stroke-linecap="round"/>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<!-- ================= SOL DA SESSÃO (fica por cima de tudo) ================= -->
+<div id="trilha-sol" class="oculto" aria-hidden="true">
+  <div id="sol">
+    <svg viewBox="0 0 100 100">
+      <g stroke="currentColor" stroke-width="8" stroke-linecap="round">
+        <path d="M50 6 V18"/><path d="M50 82 V94"/><path d="M6 50 H18"/><path d="M82 50 H94"/>
+        <path d="M19 19 L28 28"/><path d="M72 72 L81 81"/><path d="M81 19 L72 28"/><path d="M28 72 L19 81"/>
+      </g>
+      <circle cx="50" cy="50" r="24" fill="currentColor"/>
+    </svg>
+  </div>
+</div>
+
+<!-- ================= TELA DE CONFIGURACOES (PAPAI) ================= -->
+<section id="tela-config" class="tela">
+  <div class="painel">
+    <h2>Modo do papai</h2>
+
+    <h3>Duração da sessão</h3>
+    <div class="linha" id="duracoes">
+      <button class="opcao" data-min="5">5 min</button>
+      <button class="opcao" data-min="10">10 min</button>
+      <button class="opcao" data-min="15">15 min</button>
+      <button class="opcao" data-min="20">20 min</button>
+    </div>
+
+    <h3>Nível das brincadeiras</h3>
+    <div class="linha" id="niveis">
+      <button class="opcao" data-nivel="1">Nível 1</button>
+      <button class="opcao" data-nivel="2">Nível 2</button>
+      <button class="opcao" data-nivel="3">Nível 3</button>
+    </div>
+
+    <h3>Voz</h3>
+    <div class="linha">
+      <select id="seletor-voz" class="opcao seletor"></select>
+      <button class="opcao" id="btn-ouvir-voz">Ouvir exemplo</button>
+    </div>
+
+    <h3>PIN para sair</h3>
+    <div class="linha">
+      <span class="pin-atual">PIN atual: <b id="pin-atual">1234</b></span>
+      <button class="opcao" id="btn-trocar-pin">Trocar PIN</button>
+    </div>
+
+    <h3>Cartão do papai</h3>
+    <ul class="cartao-papai">
+      <li>Pergunte: <b>&ldquo;que cor é essa?&rdquo;</b></li>
+      <li>Peça: <b>&ldquo;desenha um bichinho pra mim?&rdquo;</b></li>
+      <li>Pergunte: <b>&ldquo;o que o seu desenho está fazendo?&rdquo;</b></li>
+      <li>Convide: <b>&ldquo;agora vamos desenhar no papel também!&rdquo;</b></li>
+    </ul>
+
+    <h3>Registro (só você vê)</h3>
+    <ul class="registro" id="registro"></ul>
+
+    <div class="linha rodape">
+      <span class="dica" id="info-galeria">Galeria: 0 desenhos</span>
+      <button class="opcao principal" id="btn-fechar-config">Voltar para a Cecí</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= AVISO "EM BREVE" ================= -->
+<div id="aviso-embreve" class="sobreposicao oculto">
+  <div class="balao">
+    <svg class="ico grande" viewBox="0 0 100 100" aria-hidden="true">
+      <path d="M28 42 L24 20 L44 30 Z" fill="#f7d9a0" stroke="#3d3a35" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M72 42 L76 20 L56 30 Z" fill="#f7d9a0" stroke="#3d3a35" stroke-width="5" stroke-linejoin="round"/>
+      <circle cx="50" cy="58" r="26" fill="#f7d9a0" stroke="#3d3a35" stroke-width="5"/>
+      <path d="M38 56 q4 4 8 0 M54 56 q4 4 8 0" stroke="#3d3a35" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M44 68 q6 5 12 0" stroke="#3d3a35" stroke-width="4" fill="none" stroke-linecap="round"/>
+    </svg>
+    <p class="frase">Em breve!</p>
+  </div>
+</div>
+
+<!-- ================= GALERIA ================= -->
+<div id="galeria" class="sobreposicao oculto">
+  <div class="galeria-caixa">
+    <h2>Galeria da Cecí</h2>
+    <div id="galeria-lista" class="galeria-lista"></div>
+    <p class="dica" id="galeria-vazia">Ainda não há desenhos guardados.</p>
+    <button class="opcao principal" id="btn-fechar-galeria">Voltar a desenhar</button>
+  </div>
+</div>
+
+<!-- ================= RITUAL DE TCHAU ================= -->
+<div id="ritual" class="oculto">
+  <!-- céu: uma lua e três estrelinhas paradas, sem piscar -->
+  <svg class="ceu" viewBox="0 0 400 200" aria-hidden="true">
+    <path d="M330 30 a26 26 0 1 0 16 45 a30 30 0 0 1 -16 -45 Z" fill="#e8dcbe" opacity=".55"/>
+    <path d="M70 40 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3 Z" fill="#e8dcbe" opacity=".45"/>
+    <path d="M150 22 l2.5 6 6 2.5 -6 2.5 -2.5 6 -2.5 -6 -6 -2.5 6 -2.5 Z" fill="#e8dcbe" opacity=".35"/>
+    <path d="M250 62 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 Z" fill="#e8dcbe" opacity=".3"/>
+  </svg>
+
+  <div class="ritual-conteudo">
+    <svg class="gatinho" viewBox="0 0 200 210" aria-hidden="true">
+      <!-- rabinho -->
+      <path d="M46 176 q-26 4 -22 -22" fill="none" stroke="#3d3a35" stroke-width="12" stroke-linecap="round"/>
+      <path d="M46 176 q-26 4 -22 -22" fill="none" stroke="#f7d9a0" stroke-width="6" stroke-linecap="round"/>
+      <!-- corpo -->
+      <ellipse cx="100" cy="156" rx="50" ry="42" fill="#f7d9a0" stroke="#3d3a35" stroke-width="4"/>
+      <!-- bracinho que acena -->
+      <g class="patinha">
+        <path d="M142 158 L166 108" fill="none" stroke="#3d3a35" stroke-width="18" stroke-linecap="round"/>
+        <path d="M142 158 L166 108" fill="none" stroke="#f7d9a0" stroke-width="11" stroke-linecap="round"/>
+        <circle cx="168" cy="102" r="14" fill="#f7d9a0" stroke="#3d3a35" stroke-width="4"/>
+      </g>
+      <!-- orelhas -->
+      <path d="M66 66 L60 26 L94 46 Z" fill="#f7d9a0" stroke="#3d3a35" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M134 66 L140 26 L106 46 Z" fill="#f7d9a0" stroke="#3d3a35" stroke-width="4" stroke-linejoin="round"/>
+      <!-- cabeça -->
+      <ellipse cx="100" cy="86" rx="44" ry="40" fill="#f7d9a0" stroke="#3d3a35" stroke-width="4"/>
+      <!-- olhinhos fechados e boca -->
+      <path d="M78 82 q7 8 14 0 M108 82 q7 8 14 0" fill="none" stroke="#3d3a35" stroke-width="4" stroke-linecap="round"/>
+      <path d="M100 98 q-6 8 -12 3 M100 98 q6 8 12 3" fill="none" stroke="#3d3a35" stroke-width="4" stroke-linecap="round"/>
+      <!-- bigodes -->
+      <path d="M46 86 H66 M46 96 H66 M134 86 H154 M134 96 H154" stroke="#3d3a35" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+    <p class="frase">Tchau, Cecí!</p>
+  </div>
+  <button id="btn-destravar" aria-label="Papai (segure)">Papai</button>
+</div>
+
+<!-- ================= TECLADO DO PIN ================= -->
+<div id="overlay-pin" class="sobreposicao oculto">
+  <div class="pin-caixa">
+    <p class="pin-titulo" id="pin-titulo">Digite o PIN do papai</p>
+    <div class="pin-pontos" id="pin-pontos"><i></i><i></i><i></i><i></i></div>
+    <div class="teclado" id="teclado"></div>
+    <button class="opcao" id="btn-cancelar-pin">Voltar</button>
+  </div>
+</div>
+
+<!-- ================= FIM DE UMA BRINCADEIRA ================= -->
+<div id="fim-atividade" class="sobreposicao oculto">
+  <div class="fim-cena">
+    <p class="balao-fala" id="fim-convite"></p>
+
+    <svg class="gato-fim" viewBox="0 0 120 120" aria-hidden="true">
+      <g class="cabeca">
+        <path d="M34 48 L30 16 L58 32 Z" fill="#f7d9a0" stroke="#3d3a35" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M86 48 L90 16 L62 32 Z" fill="#f7d9a0" stroke="#3d3a35" stroke-width="4" stroke-linejoin="round"/>
+        <ellipse cx="60" cy="70" rx="36" ry="32" fill="#f7d9a0" stroke="#3d3a35" stroke-width="4"/>
+        <path d="M41 66 q6 7 12 0 M67 66 q6 7 12 0" fill="none" stroke="#3d3a35" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M60 80 q-6 7 -12 2 M60 80 q6 7 12 2" fill="none" stroke="#3d3a35" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M14 68 H32 M14 78 H32 M88 68 H106 M88 78 H106" stroke="#3d3a35" stroke-width="3" stroke-linecap="round"/>
+      </g>
+    </svg>
+
+    <div class="linha botoes-fim">
+      <button class="opcao" id="btn-de-novo">De novo</button>
+      <button class="opcao principal" id="btn-fim-voltar">Outra brincadeira</button>
+    </div>
+
+    <div class="tira-pai">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="7" r="3.4" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M5 20 q0 -6 7 -6 q7 0 7 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <span id="fim-dica"></span>
+    </div>
+  </div>
+</div>
+
+<div id="aviso" class="aviso oculto"></div>
+
+<script src="app.js"></script>
+<script src="brincar.js"></script>
+</body>
+</html>

@@ -1,0 +1,618 @@
+/* ============================================================
+   Cecí - estilo geral
+   Cores suaves, alvos grandes, nada piscando.
+   ============================================================ */
+
+:root{
+  --creme:      #fdf8f0;
+  --creme-fundo:#f6efe2;
+  --papel:      #ffffff;
+  --fundo-desenho: #FFFDF7;   /* bege bem clarinho da folha de desenho */
+  --tinta:      #3d3a35;
+  --tinta-suave:#8a8175;
+  --borda:      #e6ddcd;
+  --rosa:       #e08a9b;
+  --verde:      #b7d9a8;
+  --sol:        #ffcf5c;
+  --sol-poente: #f09a54;
+
+  /* Tamanho dos botões da barra lateral.
+     Cabem 6 fileiras de altura; no tablet fica com cerca de 2 cm. */
+  --b: min(96px, calc((100vh - 76px) / 6));
+  --raio: 22px;
+}
+
+*{ box-sizing: border-box; }
+
+html, body{
+  margin:0; padding:0;
+  width:100%; height:100%;
+  overflow:hidden;
+  overscroll-behavior:none;            /* mata o "puxar para atualizar" */
+  user-select:none; -webkit-user-select:none;
+  -webkit-touch-callout:none;          /* mata o menu de toque longo */
+  -webkit-tap-highlight-color:transparent;
+  background:var(--creme-fundo);
+  color:var(--tinta);
+  font-family: "Segoe UI", "Nunito", system-ui, -apple-system, sans-serif;
+  font-size:18px;
+}
+
+button{
+  font-family:inherit; color:inherit;
+  border:none; background:none; padding:0; margin:0;
+  cursor:pointer; touch-action:none;
+}
+
+.oculto{ display:none !important; }
+
+/* ------------------ Telas ------------------ */
+/* touch-action:none mata zoom de dois dedos e duplo toque.
+   Fica nas telas (e não no body) para o painel do papai poder rolar. */
+.tela, .sobreposicao, #ritual, #trilha-sol, .aviso{ touch-action:none; }
+#tela-config, #tela-config .painel{ touch-action:pan-y; }
+
+.tela{
+  position:absolute; inset:0;
+  display:none;
+}
+.tela.ativa{ display:flex; }
+
+/* ------------------ Tela inicial ------------------ */
+#tela-inicio{
+  flex-direction:column; align-items:center; justify-content:center;
+  gap:2vh;
+  background:
+    radial-gradient(120% 90% at 50% 0%, #fffdf8 0%, var(--creme) 45%, var(--creme-fundo) 100%);
+}
+
+.titulo{
+  margin:0;
+  font-size:clamp(30px, 5vh, 54px);
+  font-weight:700;
+  letter-spacing:2px;
+  color:var(--tinta);
+  opacity:.85;
+}
+
+.menu{
+  display:flex; gap:clamp(16px, 3vw, 40px);
+  align-items:stretch; justify-content:center;
+  flex-wrap:nowrap;
+}
+
+.cartao{
+  width:clamp(150px, 24vw, 280px);
+  height:clamp(160px, 46vh, 320px);
+  background:var(--papel);
+  border:3px solid var(--borda);
+  border-radius:34px;
+  box-shadow:0 6px 0 rgba(0,0,0,.05);
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:2vh;
+  transition: transform .25s ease, box-shadow .25s ease, opacity .25s ease;
+}
+.cartao:active{ transform:translateY(3px); box-shadow:0 3px 0 rgba(0,0,0,.05); }
+
+.cartao .ico{ width:clamp(70px,11vw,140px); height:clamp(70px,11vw,140px); }
+.rotulo{ font-size:clamp(18px, 2.6vh, 30px); font-weight:700; }
+
+/* engrenagem discreta do papai */
+.engrenagem{
+  position:absolute; right:14px; bottom:14px;
+  width:56px; height:56px; border-radius:50%;
+  color:var(--tinta-suave); opacity:.35;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+.engrenagem svg{ width:30px; height:30px; }
+.engrenagem:active{ opacity:.7; }
+
+/* anel de "segurar 1 segundo" (criado pelo app.js dentro do botão) */
+.anel-segurar{
+  position:absolute; inset:5px;
+  width:auto; height:auto;
+  pointer-events:none; overflow:visible;
+}
+.anel-segurar circle{
+  fill:none;
+  stroke-linecap:round;
+  transform:rotate(-90deg);          /* começa a encher pelo topo */
+  transform-origin:50% 50%;
+}
+.anel-segurar .trilho{ stroke:rgba(0,0,0,.09); stroke-width:10; }
+.anel-segurar .preenche{
+  stroke:var(--rosa); stroke-width:10;
+  stroke-dasharray:276.5;
+  stroke-dashoffset:276.5;           /* vazio */
+}
+.segurando .anel-segurar .preenche{
+  stroke-dashoffset:0;               /* cheio depois de 1 segundo */
+  transition:stroke-dashoffset 1s linear;
+}
+.segurando{ opacity:1 !important; }              /* a engrenagem aparece enquanto segura */
+.ferramenta.segurando, .apagar.segurando{ background:#fff3f6; }  /* fundo rosado de "segurando" */
+
+/* ------------------ Tela de desenho ------------------ */
+#tela-desenho{ flex-direction:row; background:var(--creme-fundo); }
+
+.barra{
+  flex:0 0 auto;
+  padding:10px;
+  display:grid;
+  grid-template-columns: var(--b) var(--b);
+  grid-auto-rows: var(--b);
+  gap:8px;
+  align-content:center;
+  background:var(--creme);
+  border-right:3px solid var(--borda);
+}
+
+.ferramenta{
+  position:relative; overflow:hidden;
+  width:var(--b); height:var(--b);
+  border-radius:var(--raio);
+  background:var(--papel);
+  border:3px solid var(--borda);
+  color:var(--tinta);
+  display:flex; align-items:center; justify-content:center;
+  transition: transform .2s ease, border-color .2s ease;
+}
+.ferramenta svg{ width:64%; height:64%; }
+.ferramenta:active{ transform:scale(.96); }
+
+.ferramenta.cor{ background:var(--cor); border-color:rgba(0,0,0,.10); border-radius:50%; }
+
+.ferramenta.escolhida{
+  border-color:var(--tinta);
+  border-width:5px;
+  transform:scale(1.04);
+}
+
+/* área do canvas */
+.area{
+  position:relative; flex:1 1 auto; padding:10px;
+  background:var(--creme-fundo);      /* cor lisa, sem degradê */
+}
+#quadro{
+  display:block; width:100%; height:100%;
+  background-color:var(--fundo-desenho);  /* cor lisa, sem degradê */
+  background-image:none;
+  border:3px solid var(--borda);
+  border-radius:18px;
+  touch-action:none;
+}
+
+.flutuante{
+  position:absolute; left:24px; top:24px;
+  width:var(--b); height:var(--b);
+  border-radius:var(--raio);
+  background:rgba(255,255,255,.75);
+  border:3px solid var(--borda);
+  color:var(--tinta-suave);
+  display:flex; align-items:center; justify-content:center;
+}
+.flutuante svg{ width:58%; height:58%; }
+
+/* trilha do sol (canto superior direito, vale para todas as telas) */
+#trilha-sol{
+  position:fixed; right:26px; top:20px; z-index:40;
+  width:64px; height:42%;
+  pointer-events:none;
+}
+#sol{
+  position:absolute; left:0; top:0;
+  width:56px; height:56px;
+  color:var(--sol);
+  transition: top 1.2s linear, color 8s linear, opacity 1s linear;
+}
+#sol.poente{ color:var(--sol-poente); }
+#sol svg{ width:100%; height:100%; }
+
+/* ------------------ Configurações do papai ------------------ */
+#tela-config{
+  background:var(--creme-fundo);
+  align-items:center; justify-content:center;
+  padding:16px;
+}
+.painel{
+  width:min(860px, 96vw); max-height:96vh; overflow:auto;
+  background:var(--papel);
+  border:3px solid var(--borda); border-radius:26px;
+  padding:20px 26px;
+}
+.painel h2{ margin:.2em 0 .6em; font-size:26px; }
+.painel h3{ margin:1em 0 .4em; font-size:19px; color:var(--tinta-suave); font-weight:700; }
+
+.linha{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+.linha.rodape{ margin-top:22px; justify-content:space-between; }
+
+.opcao{
+  min-height:64px; min-width:120px;
+  padding:0 22px;
+  background:var(--creme);
+  border:3px solid var(--borda); border-radius:18px;
+  font-size:19px; font-weight:600;
+}
+.opcao.escolhida{ background:var(--verde); border-color:#8ec27c; }
+select.seletor{ max-width:min(420px, 60vw); font-size:17px; }
+.opcao.principal{ background:var(--rosa); border-color:#cf7186; color:#fff; }
+.opcao:active{ transform:scale(.97); }
+
+.pin-atual{ font-size:19px; }
+.pin-atual b{ letter-spacing:4px; font-size:23px; }
+
+.cartao-papai{ margin:0; padding-left:22px; line-height:1.9; font-size:19px; }
+.dica{ color:var(--tinta-suave); font-size:16px; }
+
+/* ------------------ Sobreposições ------------------ */
+.sobreposicao{
+  position:fixed; inset:0; z-index:50;
+  background:rgba(40,36,32,.45);
+  display:flex; align-items:center; justify-content:center;
+  padding:16px;
+}
+
+.balao{
+  background:var(--papel); border:3px solid var(--borda);
+  border-radius:32px; padding:26px 40px;
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+}
+.ico.grande{ width:min(160px, 22vh); height:min(160px, 22vh); }
+.frase{ margin:0; font-size:clamp(22px,3.4vh,34px); font-weight:700; }
+
+/* galeria */
+.galeria-caixa{
+  width:min(1000px,96vw); max-height:94vh; overflow:auto;
+  background:var(--papel); border:3px solid var(--borda);
+  border-radius:26px; padding:18px 22px;
+  display:flex; flex-direction:column; gap:14px;
+}
+.galeria-caixa h2{ margin:0; font-size:24px; }
+.galeria-lista{
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(210px, 1fr));
+  gap:16px;
+}
+.mini{
+  position:relative; overflow:hidden; cursor:pointer;
+  border:3px solid var(--borda); border-radius:18px;
+  background:var(--papel); padding:6px;
+  aspect-ratio: 4 / 3;
+}
+.mini img{ width:100%; height:100%; object-fit:contain; pointer-events:none; }
+.mini:active{ transform:scale(.98); }
+.apagar{
+  position:absolute; right:6px; top:6px;
+  width:54px; height:54px; border-radius:50%;
+  background:rgba(255,255,255,.9); border:3px solid var(--borda);
+  color:var(--tinta-suave); font-size:22px; overflow:hidden;
+}
+
+/* teclado do PIN - precisa ficar acima do ritual de tchau */
+#overlay-pin{ z-index:90; }
+.pin-caixa{
+  background:var(--papel); border:3px solid var(--borda);
+  border-radius:26px; padding:20px 26px;
+  display:flex; flex-direction:column; align-items:center; gap:12px;
+}
+.pin-titulo{ margin:0; font-size:20px; font-weight:700; }
+.pin-pontos{ display:flex; gap:14px; height:26px; align-items:center; }
+.pin-pontos i{
+  width:18px; height:18px; border-radius:50%;
+  background:var(--creme-fundo); border:2px solid var(--borda);
+}
+.pin-pontos i.cheio{ background:var(--tinta); border-color:var(--tinta); }
+.pin-caixa.errado{ animation: balancar .5s ease; }
+@keyframes balancar{
+  0%,100%{ transform:translateX(0); }
+  25%{ transform:translateX(-8px); }
+  75%{ transform:translateX(8px); }
+}
+.teclado{ display:grid; grid-template-columns:repeat(3, 92px); gap:10px; }
+.tecla{
+  height:66px; border-radius:16px;
+  background:var(--creme); border:3px solid var(--borda);
+  font-size:24px; font-weight:700;
+}
+.tecla:active{ transform:scale(.96); }
+
+/* ------------------ Ritual de tchau ------------------ */
+#ritual{
+  position:fixed; inset:0; z-index:80;
+  background:#20242e;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; transition:opacity 6s ease;
+}
+#ritual.visivel{ opacity:1; }
+.ritual-conteudo{
+  display:flex; flex-direction:column; align-items:center; gap:18px;
+  color:#f4ead8;
+}
+.gatinho{ width:min(340px, 42vh); height:auto; }
+.patinha{
+  transform-box: fill-box;
+  transform-origin: 18% 100%;
+  animation: acenar 2.8s ease-in-out infinite;
+}
+@keyframes acenar{
+  0%,100%{ transform:rotate(-10deg); }
+  50%    { transform:rotate(14deg); }
+}
+/* céu com lua e estrelinhas, paradas, bem discretas */
+#ritual .ceu{
+  position:absolute; left:0; top:0;
+  width:100%; height:52%;
+  pointer-events:none;
+}
+
+/* botão do papai: pequeno, cinza apagado, no canto de baixo à direita */
+#btn-destravar{
+  position:absolute; right:18px; bottom:16px;
+  width:96px; height:52px;
+  overflow:hidden;
+  border:2px solid #3a3f4c; border-radius:16px;
+  background:transparent; color:#6f6a62;
+  font-size:15px; font-weight:600;
+  opacity:0; pointer-events:none;
+  transition:opacity 2s ease;
+}
+#btn-destravar.visivel{ opacity:.55; pointer-events:auto; }
+#btn-destravar.segurando{ opacity:1; background:rgba(255,255,255,.06); }
+
+/* ------------------ Aviso curtinho ------------------ */
+.aviso{
+  position:fixed; left:50%; bottom:32px; transform:translateX(-50%);
+  z-index:70;
+  background:rgba(61,58,53,.92); color:#fff;
+  padding:14px 26px; border-radius:999px;
+  font-size:19px; font-weight:600;
+  opacity:0; transition:opacity .6s ease;
+}
+.aviso.visivel{ opacity:1; }
+
+/* ============================================================
+   FASE 2 - Brincadeiras
+   ============================================================ */
+
+/* ------------------ Menu das brincadeiras ------------------ */
+#tela-brincar{
+  align-items:center; justify-content:center;
+  background: radial-gradient(120% 90% at 50% 0%, #fffdf8 0%, var(--creme) 45%, var(--creme-fundo) 100%);
+}
+.menu-brincar{ flex-wrap:nowrap; gap:clamp(10px, 2vw, 26px); padding:0 24px; }
+.cartao.pequeno{
+  width:clamp(112px, 16vw, 190px);
+  height:clamp(130px, 40vh, 240px);
+  border-radius:28px; gap:1.4vh;
+}
+.cartao.pequeno .ico{ width:clamp(56px, 8vw, 100px); height:clamp(56px, 8vw, 100px); }
+.cartao.pequeno .rotulo{ font-size:clamp(14px, 2.1vh, 22px); }
+
+/* botão de voltar (casinha) no canto das telas de brincar */
+.voltar-canto{
+  position:absolute; left:20px; top:20px; z-index:5;
+  width:var(--b); height:var(--b);
+  border-radius:var(--raio);
+  background:rgba(255,255,255,.8);
+  border:3px solid var(--borda);
+  color:var(--tinta-suave);
+  display:flex; align-items:center; justify-content:center;
+}
+.voltar-canto svg{ width:56%; height:56%; }
+
+/* ------------------ Tela de uma brincadeira ------------------ */
+#tela-atividade{ background:var(--creme); }
+#palco{
+  position:absolute; inset:0;
+  padding:14px 100px 14px 110px;   /* espaço para a casinha e para o sol */
+}
+.tabuleiro{ position:relative; width:100%; height:100%; }
+
+/* frase curta no topo da brincadeira (poucas palavras) */
+.enunciado{
+  position:absolute; left:0; right:0; top:4px;
+  text-align:center; font-size:clamp(16px, 2.4vh, 24px);
+  font-weight:700; color:var(--tinta-suave);
+  pointer-events:none;
+}
+
+/* ------------------ Peças que se arrastam ------------------ */
+.peca{
+  position:absolute;
+  width:var(--p); height:var(--p);
+  margin-left:calc(var(--p) / -2); margin-top:calc(var(--p) / -2);
+  touch-action:none; cursor:grab;
+  transform-origin:50% 50%;
+  will-change:transform;
+}
+.peca svg{ width:100%; height:100%; display:block; pointer-events:none; }
+.peca.pegando{ z-index:20; filter:drop-shadow(0 8px 10px rgba(0,0,0,.18)); }
+.peca.carta-ordem{        /* os cartões de "Em ordem" parecem cartinhas */
+  box-sizing:border-box;
+  background:var(--papel);
+  border:3px solid var(--borda);
+  border-radius:20px;
+  padding:8px;
+}
+.peca.fixa{ cursor:default; }
+
+/* buraco / silhueta onde a peça encaixa */
+.alvo{
+  position:absolute;
+  width:var(--p); height:var(--p);
+  margin-left:calc(var(--p) / -2); margin-top:calc(var(--p) / -2);
+  pointer-events:none;
+  opacity:.55;
+}
+.alvo svg{ width:100%; height:100%; display:block; }
+.alvo.sombra{ opacity:1; filter:grayscale(1) brightness(1.2) opacity(.42); }
+.alvo.cheio{ opacity:0; transition:opacity .6s ease; }
+
+/* ------------------ Achar o par ------------------ */
+.grade-cartas{
+  position:absolute; inset:0;
+  display:grid; place-content:center;
+  gap:clamp(10px, 1.8vw, 22px);
+  padding-top:26px;
+}
+.carta{
+  width:var(--c); height:calc(var(--c) * 1.08);
+  border:none; background:none; padding:0;
+  perspective:900px; touch-action:none;
+}
+.carta .lados{
+  position:relative; width:100%; height:100%;
+  transition:transform .7s ease;
+  transform-style:preserve-3d;
+}
+.carta.virada .lados{ transform:rotateY(180deg); }
+.carta .frente, .carta .verso{
+  position:absolute; inset:0;
+  backface-visibility:hidden; -webkit-backface-visibility:hidden;
+  border-radius:20px; border:3px solid var(--borda);
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+.carta .verso{ background:var(--papel); }
+.carta .frente{
+  transform:rotateY(180deg);
+  background:var(--papel);
+}
+.carta .frente svg{ width:92%; height:92%; }
+.carta .verso svg{ width:56%; height:56%; opacity:.5; }
+.carta.achada{ opacity:.75; }
+
+/* ------------------ Sequência (qual vem depois?) ------------------ */
+.fila-padrao{
+  position:absolute; left:0; right:0; top:22%;
+  display:flex; align-items:center; justify-content:center;
+  gap:clamp(10px, 2vw, 26px);
+}
+.casa-padrao{
+  width:var(--p); height:var(--p);
+  display:flex; align-items:center; justify-content:center;
+}
+.casa-padrao svg{ width:100%; height:100%; }
+.casa-padrao.vazia{
+  border:5px dashed #cfc6b6; border-radius:20px;
+  font-size:44px; color:#cfc6b6; font-weight:700;
+}
+.fila-opcoes{
+  position:absolute; left:0; right:0; bottom:8%;
+  display:flex; align-items:center; justify-content:center;
+  gap:clamp(16px, 4vw, 48px);
+}
+.opcao-padrao{
+  width:var(--p); height:var(--p);
+  background:var(--papel); border:3px solid var(--borda);
+  border-radius:22px; padding:8px; touch-action:none;
+}
+.opcao-padrao svg{ width:100%; height:100%; }
+.opcao-padrao:active{ transform:scale(.97); }
+
+/* ------------------ Pare e siga ------------------ */
+.bolota{
+  position:absolute; left:50%; top:52%;
+  width:min(46vh, 320px); height:min(46vh, 320px);
+  margin-left:min(-23vh, -160px); margin-top:min(-23vh, -160px);
+  border-radius:50%;
+  border:6px solid rgba(0,0,0,.10);
+  background:#c9c9c9;
+  transition:background-color 1.4s ease, transform .8s ease;
+  touch-action:none;
+}
+.bolota.verde{ background:#5fb96b; }
+.bolota.vermelha{ background:#e0685c; }
+.bolota.tocada{ transform:scale(1.05); }
+
+/* ------------------ Separar (água / terra) ------------------ */
+.cesto{
+  position:absolute;
+  border-radius:28px;
+  border:5px dashed rgba(0,0,0,.14);
+  display:flex; align-items:flex-start; justify-content:center;
+  padding-top:8px;
+  font-size:clamp(15px, 2.2vh, 22px); font-weight:700;
+  color:rgba(61,58,53,.55);
+}
+.cesto.agua{ background:#dcecf8; }
+.cesto.terra{ background:#e4f0dc; }
+.cesto.grande-cesto{ background:#f6e8d6; }
+.cesto.pequeno-cesto{ background:#f3e3ec; }
+
+/* ------------------ Gatinho ajudante ------------------ */
+#gatinho-ajudante{
+  position:absolute; left:18px; bottom:14px;
+  width:clamp(70px, 11vh, 110px); height:auto;
+  pointer-events:none; opacity:.9;
+}
+#gatinho-ajudante svg{ width:100%; height:auto; }
+.cabeca{ transform-box:fill-box; transform-origin:50% 92%; }
+#gatinho-ajudante.balancando .cabeca,
+.gato-fim.balancando .cabeca{ animation: balancar-cabeca 1.6s ease-in-out 1; }
+@keyframes balancar-cabeca{
+  0%   { transform:rotate(0deg); }
+  25%  { transform:rotate(-8deg); }
+  55%  { transform:rotate(7deg); }
+  80%  { transform:rotate(-4deg); }
+  100% { transform:rotate(0deg); }
+}
+
+/* ------------------ Fim de brincadeira ------------------ */
+#fim-atividade{ background:rgba(253,248,240,.96); }
+
+.fim-cena{
+  position:relative;
+  width:min(860px, 96vw); height:100%;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:clamp(6px, 1.4vh, 16px);
+  padding-bottom:44px;              /* espaço da tira do papai */
+}
+
+/* balão de fala grande, com o convite para ela */
+.balao-fala{
+  position:relative;
+  margin:0;
+  max-width:min(700px, 92vw);
+  background:var(--papel);
+  border:4px solid var(--borda);
+  border-radius:30px;
+  padding:16px 30px;
+  text-align:center;
+  font-size:clamp(21px, 3.6vh, 34px);
+  font-weight:700; line-height:1.25;
+}
+.balao-fala::after{               /* rabinho do balão apontando para o gatinho */
+  content:''; position:absolute;
+  left:50%; bottom:-20px; margin-left:-16px;
+  border:16px solid transparent;
+  border-top-color:var(--borda);
+}
+.balao-fala::before{
+  content:''; position:absolute; z-index:1;
+  left:50%; bottom:-13px; margin-left:-16px;
+  border:16px solid transparent;
+  border-top-color:var(--papel);
+}
+
+.gato-fim{ width:min(270px, 40vh); height:auto; }
+.botoes-fim{ justify-content:center; }
+
+/* tira discreta do papai, no rodapé, sem caixa alta e sem voz */
+.tira-pai{
+  position:absolute; left:0; right:0; bottom:0;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  padding:8px 12px;
+  color:#a8a096; font-size:14px; font-weight:400;
+  text-align:center;
+}
+.tira-pai svg{ width:17px; height:17px; flex:0 0 auto; }
+
+/* ------------------ Registro no painel do papai ------------------ */
+.registro{ margin:0; padding-left:22px; line-height:1.8; font-size:18px; }
+.registro li span{ color:var(--tinta-suave); }
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:.001ms !important; transition-duration:.001ms !important; }
+}
