@@ -8,7 +8,7 @@
 // a lista de frases (e dos áudios) vem do mesmo arquivo que o app usa
 importScripts('frases.js');
 
-var VERSAO = 'ceci-v18';
+var VERSAO = 'ceci-v19';
 
 var ARQUIVOS = [
   './',

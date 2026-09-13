@@ -554,7 +554,20 @@
   /* ---------------------------------------------------------
      8) Configurações do papai
      --------------------------------------------------------- */
+  // mostra a versão instalada (o nome do cache do service worker, ex.: ceci-v19)
+  function mostrarVersao() {
+    var el = $('#info-versao');
+    if (!el) return;
+    if (!('caches' in window)) { el.textContent = 'versão local'; return; }
+    caches.keys().then(function (nomes) {
+      var v = nomes.filter(function (n) { return /^ceci-v[0-9]+$/.test(n); })
+        .sort(function (x, y) { return Number(y.slice(6)) - Number(x.slice(6)); })[0];
+      el.textContent = v ? v.replace('ceci-', 'versão ') : 'versão local';
+    }).catch(function () { el.textContent = 'versão —'; });
+  }
+
   function abrirConfig() {
+    mostrarVersao();
     marcarDuracao();
     marcarNivel();
     montarSeletorDeVozes();
@@ -811,8 +824,8 @@
     ponteiroDesenhando = e.pointerId;
     try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
     ultimoPonto = posicao(e);
-    pingo(ultimoPonto, larguraDoTraco(e));
-    if (modoLinha) alimentarLinha(ultimoPonto);
+    if (!modoLinha || pertoDaLinha(ultimoPonto)) pingo(ultimoPonto, larguraDoTraco(e));
+    if (modoLinha) { linha.ultimoDedo = null; alimentarLinha(ultimoPonto); }
     e.preventDefault();
   });
 
@@ -826,7 +839,11 @@
     for (var i = 0; i < eventos.length; i++) {
       var ev = eventos[i];
       var p = posicao(ev);
-      traco(ultimoPonto, p, larguraDoTraco(ev));
+      if (!modoLinha) {
+        traco(ultimoPonto, p, larguraDoTraco(ev));
+      } else if (pertoDaLinha(p) && pertoDaLinha(ultimoPonto)) {
+        traco(ultimoPonto, p, larguraDoTraco(ev));   // so pinta perto da linha
+      }
       ultimoPonto = p;
       if (modoLinha) alimentarLinha(p);
     }
@@ -996,7 +1013,7 @@
   area.appendChild(guia);
   var gctx = guia.getContext('2d');
   var modoLinha = false;
-  var linha = { tipo: '', pontos: [], visitados: [], completa: false };
+  var linha = { tipo: '', pontos: [], visitados: [], completa: false, proximo: 0 };
   var TOLERANCIA_LINHA = 64;
   var TIPOS_LINHA = ['reta', 'curva', 'zigue', 'circulo', 'letraC'];
   var NOME_LINHA = { reta: 'uma linha reta', curva: 'uma curva', zigue: 'um zigue-zague', circulo: 'um círculo', letraC: 'a letra C' };
@@ -1035,6 +1052,12 @@
     linha.pontos = brutos;
     linha.visitados = brutos.map(function () { return false; });
     linha.completa = false;
+    linha.proximo = 0;
+    linha.ultimoDedo = null;
+    var soma = 0;
+    for (var j = 1; j < brutos.length; j++) soma += Math.hypot(brutos[j][0] - brutos[j - 1][0], brutos[j][1] - brutos[j - 1][1]);
+    var passoMedio = soma / Math.max(1, brutos.length - 1);
+    linha.alcance = Math.max(1, Math.round(50 / passoMedio));
     desenharGuia();
   }
 
@@ -1084,17 +1107,45 @@
   }
 
   // cada ponto por onde o dedo passa marca os pontos da linha que estão perto
+  // o dedo esta a ate 1,5 cm de algum ponto da linha?
+  function pertoDaLinha(p) {
+    var pts = linha.pontos, t2 = TOLERANCIA_LINHA * TOLERANCIA_LINHA;
+    for (var i = 0; i < pts.length; i++) {
+      var dx = pts[i][0] - p.x, dy = pts[i][1] - p.y;
+      if (dx * dx + dy * dy <= t2) return true;
+    }
+    return false;
+  }
+
+  // os pontos vao colorindo NA ORDEM, a partir da bolinha verde.
+  // Um rabisco por cima da linha nao serve: so o proximo trecho conta.
   function alimentarLinha(p) {
     if (!modoLinha || linha.completa) return;
-    var pts = linha.pontos, mudou = false, i;
-    for (i = 0; i < pts.length; i++) {
-      if (linha.visitados[i]) continue;
-      var dx = pts[i][0] - p.x, dy = pts[i][1] - p.y;
-      if (dx * dx + dy * dy <= TOLERANCIA_LINHA * TOLERANCIA_LINHA) { linha.visitados[i] = true; mudou = true; }
+    var pts = linha.pontos, t2 = TOLERANCIA_LINHA * TOLERANCIA_LINHA;
+    // A linha só avança até o ponto MAIS PERTO do dedo, e esse ponto tem de
+    // estar logo à frente do último colorido (uns 5 cm no máximo) e a até
+    // 1,5 cm do dedo. Assim ela precisa passar por cima da linha, na ordem:
+    // cruzar a linha de vez em quando não colore o que ficou no meio.
+    var limite = Math.min(pts.length - 1, linha.proximo + linha.alcance);
+    var melhor = -1, menor = Infinity;
+    for (var i = linha.proximo; i <= limite; i++) {
+      var dx = pts[i][0] - p.x, dy = pts[i][1] - p.y, d = dx * dx + dy * dy;
+      if (d < menor) { menor = d; melhor = i; }
     }
-    if (!mudou) return;
+    if (melhor < 0 || menor > t2) return;
+    // e o dedo tem de estar indo NA DIREÇÃO da linha (cruzar a linha de lado não vale)
+    if (linha.ultimoDedo) {
+      var mx = p.x - linha.ultimoDedo.x, my = p.y - linha.ultimoDedo.y;
+      var a0 = pts[Math.max(0, melhor - 1)], a1 = pts[Math.min(pts.length - 1, melhor + 1)];
+      var lx = a1[0] - a0[0], ly = a1[1] - a0[1];
+      var mm = Math.hypot(mx, my), ll = Math.hypot(lx, ly);
+      if (mm > 3 && ll > 0 && (mx * lx + my * ly) / (mm * ll) < 0.35) { linha.ultimoDedo = { x: p.x, y: p.y }; return; }
+    }
+    linha.ultimoDedo = { x: p.x, y: p.y };
+    for (var k = linha.proximo; k <= melhor; k++) linha.visitados[k] = true;
+    linha.proximo = melhor + 1;
     desenharGuia();
-    var feitos = linha.visitados.filter(Boolean).length;
+    var feitos = linha.proximo;
     if (feitos >= pts.length * 0.9) {
       linha.completa = true;
       desenharGuia();

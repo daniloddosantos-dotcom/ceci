@@ -55,6 +55,35 @@
       '</svg>';
   }
 
+  /* o gatinho deitado na caminha, de frente, olhos fechados, coberta até o peito.
+     Desenhado nas mesmas coordenadas da caminha (300 x 160), para encaixar nela. */
+  function svgGatinhoDeitado() {
+    return '' +
+      '<svg class="gato-deitado-svg" viewBox="0 0 300 160" aria-hidden="true">' +
+        '<path d="M282 104 q16 -18 -2 -34" fill="none" stroke="' + CT + '" stroke-width="12" stroke-linecap="round"/>' +
+        '<path d="M282 104 q16 -18 -2 -34" fill="none" stroke="' + PELO + '" stroke-width="6" stroke-linecap="round"/>' +
+        '<g class="corpo-deitado">' +
+          '<ellipse cx="170" cy="102" rx="90" ry="32" fill="' + PELO + '" stroke="' + CT + '" stroke-width="4"/>' +
+          '<ellipse cx="112" cy="118" rx="16" ry="9" fill="' + PELO + '" stroke="' + CT + '" stroke-width="4"/>' +
+        '</g>' +
+        '<g class="cabeca-deitada">' +
+          '<path d="M44 52 L40 20 L66 38 Z" fill="' + PELO + '" stroke="' + CT + '" stroke-width="4" stroke-linejoin="round"/>' +
+          '<path d="M100 52 L104 20 L78 38 Z" fill="' + PELO + '" stroke="' + CT + '" stroke-width="4" stroke-linejoin="round"/>' +
+          '<ellipse cx="72" cy="72" rx="36" ry="33" fill="' + PELO + '" stroke="' + CT + '" stroke-width="4"/>' +
+          '<path d="M52 70 q8 9 16 0 M76 70 q8 9 16 0" fill="none" stroke="' + CT + '" stroke-width="4.5" stroke-linecap="round"/>' +
+          '<path d="M72 84 q-5 6 -10 2 M72 84 q5 6 10 2" fill="none" stroke="' + CT + '" stroke-width="3.5" stroke-linecap="round"/>' +
+          '<path d="M26 74 H44 M26 82 H44 M100 74 H118 M100 82 H118" stroke="' + CT + '" stroke-width="3" stroke-linecap="round"/>' +
+        '</g>' +
+        '<path d="M126 88 q0 -14 14 -14 h146 q10 0 10 10 v40 q0 8 -8 8 h-154 q-8 0 -8 -8 Z" fill="#7f9fd1" stroke="' + CT + '" stroke-width="4"/>' +
+        '<path d="M136 100 h150" stroke="#a9c1e6" stroke-width="7" stroke-linecap="round"/>' +
+        '<g class="zzz" fill="#e8dcbe" font-family="Segoe UI, sans-serif" font-weight="700">' +
+          '<text class="z1" x="112" y="44" font-size="20">z</text>' +
+          '<text class="z2" x="128" y="28" font-size="26">z</text>' +
+          '<text class="z3" x="146" y="12" font-size="32">z</text>' +
+        '</g>' +
+      '</svg>';
+  }
+
   /* ---------------------------------------------------------
      2) Sons do gatinho (Web Audio, tudo suave)
      --------------------------------------------------------- */
@@ -194,6 +223,8 @@
   var quarto = document.querySelector('#ritual .quarto');
   var gatoRitual = quarto ? quarto.querySelector('.gato-ritual') : null;
   if (gatoRitual) gatoRitual.innerHTML = svgGatinho();
+  var gatoDeitado = quarto ? quarto.querySelector('.gato-deitado') : null;
+  if (gatoDeitado) gatoDeitado.innerHTML = svgGatinhoDeitado();
   var relogioRonco = 0;
 
   function dormir() {
@@ -202,9 +233,14 @@
     gatoRitual.style.left = '';
     setTimeout(function () { reagir('bocejando', 1800, gatoRitual); }, 1400);
     setTimeout(function () { gatoRitual.classList.add('andando'); }, 3600);
-    setTimeout(function () { gatoRitual.classList.remove('andando'); gatoRitual.classList.add('deitado'); }, 7400);
+    // chegou na caminha: o gatinho sentado some e aparece o deitado, de frente
     setTimeout(function () {
-      gatoRitual.classList.add('dormindo');
+      gatoRitual.classList.remove('andando');
+      gatoRitual.classList.add('sumindo');
+      if (gatoDeitado) gatoDeitado.classList.add('visivel');
+    }, 7400);
+    setTimeout(function () {
+      if (gatoDeitado) gatoDeitado.classList.add('dormindo');
       clearInterval(relogioRonco);
       relogioRonco = setInterval(roncar, 3200);
       roncar();
@@ -214,15 +250,16 @@
   function acordar() {
     clearInterval(relogioRonco);
     if (gatoRitual) { gatoRitual.className = 'gato-ritual'; gatoRitual.style.left = ''; }
+    if (gatoDeitado) gatoDeitado.className = 'gato-deitado';
   }
 
-  if (gatoRitual) {
-    gatoRitual.addEventListener('pointerdown', function (e) {
+  if (gatoDeitado) {
+    gatoDeitado.addEventListener('pointerdown', function (e) {
       e.preventDefault();
-      if (!gatoRitual.classList.contains('dormindo')) return;
+      if (!gatoDeitado.classList.contains('dormindo')) return;
       shhh();                                    // tocar nele dormindo: só um "shhh"
-      gatoRitual.classList.add('shhh');
-      setTimeout(function () { gatoRitual.classList.remove('shhh'); }, 900);
+      gatoDeitado.classList.add('shhh');
+      setTimeout(function () { gatoDeitado.classList.remove('shhh'); }, 900);
     });
   }
 

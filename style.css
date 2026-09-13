@@ -345,7 +345,7 @@ select.seletor{ max-width:min(420px, 60vw); font-size:17px; }
 /* ------------------ Ritual de dormir ------------------ */
 #ritual{
   position:fixed; inset:0; z-index:80;
-  background:#20242e;
+  background:#121a3a;            /* azul-marinho de noite */
   display:flex; align-items:center; justify-content:center;
   opacity:0; transition:opacity 6s ease;
 }
@@ -360,13 +360,28 @@ select.seletor{ max-width:min(420px, 60vw); font-size:17px; }
   position:relative;
   width:min(760px, 92vw); height:min(360px, 60vh);
 }
-.cama-fundo, .cama-frente{
-  position:absolute; right:4%; bottom:8%;
-  width:min(360px, 52vh); height:auto;
-  pointer-events:none;
+.cama-fundo{
+  position:absolute; right:3%; bottom:6%;
+  width:min(520px, 78vh); height:auto;
+  pointer-events:none; z-index:1;
 }
-.cama-fundo{ z-index:1; }
-.cama-frente{ z-index:3; }
+/* o gatinho deitado ocupa exatamente o quadro da caminha */
+.gato-deitado{
+  position:absolute; right:3%; bottom:6%;
+  width:min(520px, 78vh); z-index:2;
+  opacity:0; transition:opacity 1.2s ease;
+  touch-action:none;
+}
+.gato-deitado .gato-deitado-svg{ width:100%; height:auto; display:block; }
+.gato-deitado.visivel{ opacity:1; }
+.gato-deitado .zzz{ display:none; }
+.gato-deitado.dormindo .zzz{ display:block; }
+/* respiração lenta: o corpo sobe e desce */
+.corpo-deitado{ transform-box:fill-box; transform-origin:50% 100%; }
+.gato-deitado.dormindo .corpo-deitado{ animation: respirar 4.4s ease-in-out infinite; }
+@keyframes respirar{ 0%,100%{ transform:scaleY(1); } 50%{ transform:scaleY(1.06); } }
+.gato-deitado.shhh .gato-deitado-svg{ transition:transform .4s ease; transform:scale(1.02); }
+.gato-ritual.sumindo{ opacity:0; transition:opacity 1s ease; }
 .gato-ritual{
   position:absolute; z-index:2;
   left:12%; bottom:14%;
@@ -375,7 +390,7 @@ select.seletor{ max-width:min(420px, 60vw); font-size:17px; }
   touch-action:none;
 }
 .gato-ritual .gato-svg{ transition:transform 1.4s ease; transform-origin:50% 60%; }
-.gato-ritual.andando{ left:60%; }
+.gato-ritual.andando{ left:52%; }
 .gato-ritual.andando .gato-svg{ animation: gato-passos .7s ease-in-out infinite; }
 @keyframes gato-passos{
   0%,100%{ transform:translateY(0) rotate(0deg); }
