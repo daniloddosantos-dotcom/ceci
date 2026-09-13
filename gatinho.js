@@ -184,7 +184,9 @@
   // dicas curtinhas do que fazer em cada tela
   var DICAS = {
     'tela-inicio': 'Toca no lápis para desenhar!',
+    'tela-desenhar': 'Toca num jeito de desenhar!',
     'tela-desenho': 'Escolhe uma cor e risca a folha!',
+    'tela-cores': 'Arrasta um pote em cima do outro!',
     'tela-brincar': 'Toca numa brincadeira!',
     'tela-musica': 'Toca na música!',
     'tela-atividade': 'Vai em frente, é só tocar!',
@@ -193,7 +195,7 @@
 
   function dicaDaTela() {
     var tela = document.body.getAttribute('data-tela') || 'tela-inicio';
-    if (tela === 'tela-atividade' || tela === 'tela-som') {
+    if (tela === 'tela-atividade' || tela === 'tela-som' || tela === 'tela-desenho' || tela === 'tela-cores') {
       if (C.dicaAtual === false) return null;     // brincadeira pediu silêncio
       return C.dicaAtual || DICAS[tela];
     }

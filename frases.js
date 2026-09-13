@@ -49,6 +49,7 @@
 
   // ---- dicas do gatinho companheiro ----
   ['Toca no lápis para desenhar!',
+   'Toca num jeito de desenhar!',
    'Escolhe uma cor e risca a folha!',
    'Toca numa brincadeira!',
    'Toca na música!',

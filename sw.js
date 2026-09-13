@@ -9,7 +9,7 @@
 importScripts('frases.js');
 importScripts('musicas.js');
 
-var VERSAO = 'ceci-v21';
+var VERSAO = 'ceci-v22';
 
 var ARQUIVOS = [
   './',
