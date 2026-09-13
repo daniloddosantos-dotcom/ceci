@@ -5,7 +5,7 @@
    Se você mudar algum arquivo, troque o número da versão abaixo.
    ============================================================ */
 
-var VERSAO = 'ceci-v16';
+var VERSAO = 'ceci-v17';
 
 var ARQUIVOS = [
   './',

@@ -915,11 +915,17 @@
   marcarFerramentas();
 
   // --- limpar (segurar 1 segundo) ---
-  segurarPara($('#btn-limpar'), function () {
-    var r = canvas.getBoundingClientRect();
+  // folha nova: fundo bege liso, sem nada
+  function limparFolha() {
+    var w = parseFloat(canvas.style.width) || canvas.getBoundingClientRect().width;
+    var h = parseFloat(canvas.style.height) || canvas.getBoundingClientRect().height;
     ctx.globalCompositeOperation = 'source-over';
-    ctx.fillStyle = FUNDO;                        // folha nova, cor lisa
-    ctx.fillRect(0, 0, r.width, r.height);
+    ctx.fillStyle = FUNDO;
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  segurarPara($('#btn-limpar'), function () {
+    limparFolha();
     nota(NOTAS[5], 0.5, 0.05);
     aviso('Folha nova');
   });
@@ -1049,6 +1055,7 @@
     var tipo;
     do { tipo = TIPOS_LINHA[Math.floor(Math.random() * TIPOS_LINHA.length)]; } while (tipo === ultimaLinha);
     ultimaLinha = tipo;
+    limparFolha();                 // o traço dela só vale enquanto a linha atual está ativa
     gerarLinha(tipo);
   }
 
@@ -1068,6 +1075,7 @@
     modoLinha = false;
     linha.pontos = [];
     desenharGuia();
+    limparFolha();                 // sai do modo com a folha limpa
     marcarFerramentas();
   }
 

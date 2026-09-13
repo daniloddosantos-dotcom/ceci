@@ -800,24 +800,107 @@
     montarEncaixe(t, pecas, { nivel: nivel, aoCompletar: function () { ganharVida(t, 'animal'); } });
   }
 
+  /* Casinha: um único desenho de referência em coordenadas fixas (1000 x 600).
+     O corpo da casa fica fixo no fundo; telhado, porta, janela e chaminé são
+     recortados desse mesmo desenho, então ao encaixar tudo se monta certinho. */
+  var CASA = {
+    corpo:   { x: 380, y: 200, w: 240, h: 220 },
+    telhado: { x: 340, y: 70,  w: 320, h: 140, nome: 'telhado', gira: true,  fala: 'O telhado fica em cima!' },
+    porta:   { x: 470, y: 320, w: 60,  h: 100, nome: 'porta',   gira: true,  fala: 'A porta fica embaixo!' },
+    janela:  { x: 405, y: 240, w: 60,  h: 60,  nome: 'janela',  gira: false, fala: 'A janela fica do lado!' },
+    chamine: { x: 565, y: 110, w: 40,  h: 90,  nome: 'chaminé', gira: true }
+  };
+  var FOLGA = 8;   // margem em volta de cada peça, para o contorno não ser cortado
+
+  // o desenho de cada parte, no seu próprio quadro (0,0 = canto da parte)
+  function desenhoDaCasa(parte) {
+    var p = CASA[parte];
+    var vb = 'viewBox="' + (-FOLGA) + ' ' + (-FOLGA) + ' ' + (p.w + FOLGA * 2) + ' ' + (p.h + FOLGA * 2) + '"';
+    var miolo = '';
+    if (parte === 'corpo')   miolo = '<rect x="0" y="0" width="240" height="220" rx="6" fill="#fdf3df" stroke="' + CT + '" stroke-width="5"/>';
+    if (parte === 'telhado') miolo = '<path d="M160 0 L320 140 H0 Z" fill="#e04a3f" stroke="' + CT + '" stroke-width="5" stroke-linejoin="round"/>';
+    if (parte === 'porta')   miolo = '<rect x="0" y="0" width="60" height="100" rx="8" fill="#b07a4a" stroke="' + CT + '" stroke-width="5"/><circle cx="46" cy="52" r="4" fill="#f2b705"/>';
+    if (parte === 'janela')  miolo = '<rect class="vidro" x="0" y="0" width="60" height="60" rx="6" fill="#9ec5e8" stroke="' + CT + '" stroke-width="5"/><path d="M30 0 V60 M0 30 H60" stroke="' + CT + '" stroke-width="5"/>';
+    if (parte === 'chamine') miolo = '<rect x="0" y="0" width="40" height="90" rx="4" fill="#8a6a4a" stroke="' + CT + '" stroke-width="5"/>';
+    return '<svg ' + vb + '>' + miolo + '</svg>';
+  }
+
   function cenarioCasinha(t, nivel) {
-    // o corpo da casa fica fixo no fundo; ela encaixa telhado, porta e janela
-    var casa = document.createElement('div');
-    casa.className = 'casa-fundo';
-    casa.innerHTML = '<svg viewBox="0 0 200 200"><rect x="30" y="70" width="140" height="120" rx="6" fill="#fdf3df" stroke="' + CT + '" stroke-width="5"/></svg>';
-    t.appendChild(casa);
-    var telhado = '<svg viewBox="0 0 100 100"><path d="M50 12 L96 78 H4 Z" fill="#e04a3f" stroke="' + CT + '" stroke-width="5" stroke-linejoin="round"/></svg>';
-    var porta = '<svg viewBox="0 0 100 100"><rect x="26" y="12" width="48" height="80" rx="10" fill="#b07a4a" stroke="' + CT + '" stroke-width="5"/><circle cx="62" cy="54" r="4" fill="#f2b705"/></svg>';
-    var janela = '<svg viewBox="0 0 100 100"><rect class="vidro" x="14" y="14" width="72" height="72" rx="8" fill="#9ec5e8" stroke="' + CT + '" stroke-width="5"/><path d="M50 14 V86 M14 50 H86" stroke="' + CT + '" stroke-width="5"/></svg>';
-    var chamine = '<svg viewBox="0 0 100 100"><rect x="34" y="16" width="32" height="68" rx="4" fill="#8a6a4a" stroke="' + CT + '" stroke-width="5"/></svg>';
-    var pecas = [
-      { id: 'telhado', nome: 'telhado', svg: telhado, x: 50, y: 14, tam: 'clamp(120px, 24vh, 180px)', gira: true, fala: 'O telhado fica em cima!' },
-      { id: 'porta',   nome: 'porta',   svg: porta,   x: 56, y: 60, gira: true, fala: 'A porta fica embaixo!' },
-      { id: 'janela',  nome: 'janela',  svg: janela,  x: 42, y: 40, gira: false, fala: 'A janela fica do lado!' }
-    ];
-    if (nivel >= 2) pecas.push({ id: 'chamine', nome: 'chaminé', svg: chamine, x: 61, y: 10, tam: 'clamp(56px, 10vh, 76px)', gira: true });
+    // como o quadro de 1000 x 600 cabe dentro do tabuleiro
+    var W = t.clientWidth, H = t.clientHeight;
+    var escala = Math.min(W / 1000, (H * 0.76) / 600);   // deixa a faixa de baixo para as peças
+    var dx = (W - 1000 * escala) / 2, dy = 10;
+
+    function caixa(el, p) {                    // põe um elemento exatamente na parte p
+      var w = (p.w + FOLGA * 2) * escala, h = (p.h + FOLGA * 2) * escala;
+      el.style.width = w + 'px'; el.style.height = h + 'px';
+      el.style.marginLeft = (-w / 2) + 'px'; el.style.marginTop = (-h / 2) + 'px';
+      el.style.left = (dx + (p.x + p.w / 2) * escala) + 'px';
+      el.style.top = (dy + (p.y + p.h / 2) * escala) + 'px';
+    }
+
+    var corpo = document.createElement('div');
+    corpo.className = 'alvo casa-corpo';
+    corpo.innerHTML = desenhoDaCasa('corpo');
+    caixa(corpo, CASA.corpo);
+    t.appendChild(corpo);
+
+    var partes = ['telhado', 'porta', 'janela'];
+    if (nivel >= 2) partes.push('chamine');
+
+    var alvos = [];
+    partes.forEach(function (nome) {
+      var a = novoAlvo(desenhoDaCasa(nome), 0, 0, 'sombra');
+      caixa(a, CASA[nome]);
+      a.dataset.id = nome;
+      t.appendChild(a);
+      alvos.push(a);
+    });
+
+    var faltam = partes.length;
+    var giros = [90, 180, 270];
+    var ordem = embaralhar(partes);
+    ordem.forEach(function (nome, i) {
+      var p = CASA[nome];
+      var peca = novaPeca(desenhoDaCasa(nome), 0, 0);
+      caixa(peca, p);
+      peca.style.left = (W * (i + 1) / (ordem.length + 1)) + 'px';
+      peca.style.top = (H * 0.88) + 'px';
+      peca.dataset.id = nome;
+      var precisaGirar = nivel >= 3 && p.gira;
+      if (precisaGirar) { peca._rot = giros[Math.floor(Math.random() * giros.length)]; aplicar(peca); }
+      t.appendChild(peca);
+
+      var ops = {
+        aoToque: function () { dizerNome(p.nome); },
+        aoSoltar: function (el) {
+          var alvo = alvoMaisPerto(el, alvos);
+          if (!alvo || alvo.dataset.id !== el.dataset.id) { voltarPraCasa(el); return; }
+          if (precisaGirar && el._rot % 360 !== 0) {
+            C.falar('Gira a peça! Toque duas vezes nela.');
+            voltarPraCasa(el);
+            return;
+          }
+          encaixarEm(el, alvo);
+          acertou(2);
+          if (p.fala) C.falar(p.fala);
+          faltam--;
+          if (faltam === 0) ganharVida(t, 'casinha');
+        }
+      };
+      if (precisaGirar) {
+        ops.aoToqueDuplo = function (el) {
+          el.style.transition = 'transform .45s ease';
+          el._rot = (el._rot + 90) % 360;
+          aplicar(el);
+          C.nota(C.NOTAS[1], 0.22, 0.04);
+          C.falar('gira');
+        };
+      }
+      arrastavel(peca, ops);
+    });
+
     C.falar('Monte a casinha. O telhado vai em cima.');
-    montarEncaixe(t, pecas, { nivel: nivel, aoCompletar: function () { ganharVida(t, 'casinha'); } });
   }
 
   // a figura "ganha vida" por 2 segundos e depois vem a tela de fim

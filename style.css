@@ -492,6 +492,7 @@ select.seletor{ max-width:min(420px, 60vw); font-size:17px; }
 }
 .alvo svg{ width:100%; height:100%; display:block; }
 .alvo.sombra{ opacity:1; filter:grayscale(1) brightness(1.2) opacity(.42); }
+.alvo.casa-corpo{ opacity:1; filter:none; }   /* o corpo da casa fica fixo e inteiro */
 .alvo.cheio{ opacity:0; transition:opacity .6s ease; }
 
 /* ------------------ Achar o par ------------------ */
