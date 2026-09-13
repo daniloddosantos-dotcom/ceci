@@ -10,3 +10,8 @@ publicar.bat
 Thumbs.db
 desktop.ini
 *.tmp
+node_modules/
+package.json
+package-lock.json
+gerar-vozes.js
+vozes.html

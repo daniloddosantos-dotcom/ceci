@@ -175,6 +175,7 @@
     limparFala();
     var jaAvisou = false;
     function avisar() { if (jaAvisou) return; jaAvisou = true; if (aoComecar) aoComecar(); }
+    if (tocarAudioDaFrase(texto, avisar, function () {})) return;
     try {
       if (!('speechSynthesis' in window)) { avisar(); return; }
       var u = new SpeechSynthesisUtterance(String(texto));
@@ -195,17 +196,60 @@
     filaDeFala = [];
     falando = false;
     clearTimeout(relogioDaFala);
+    if (audioAtual) { try { audioAtual.onended = null; audioAtual.pause(); audioAtual.currentTime = 0; } catch (e) {} audioAtual = null; }
     try { window.speechSynthesis.cancel(); } catch (e) {}
   }
 
-  function proximaFrase() {
-    if (!filaDeFala.length) { falando = false; return; }
-    if (!('speechSynthesis' in window)) { filaDeFala = []; falando = false; return; }
+  /* ---- ÁUDIOS GRAVADOS ---------------------------------------
+     Cada frase fixa tem um MP3 em /audio/ (voz neural, gerada uma vez
+     no computador). A voz do sistema (speechSynthesis) é só reserva,
+     para frases que ainda não têm áudio - e avisa no console quais são.
+     --------------------------------------------------------- */
+  var AUDIO_DE = {};
+  (function () {
+    var F = window.CeciFrases;
+    if (!F) return;
+    F.lista.forEach(function (t) { AUDIO_DE[t] = 'audio/' + F.arquivo(t); });
+  })();
+  var audioAtual = null;
+  var semAudioAvisadas = {};
 
-    falando = true;
-    var item = filaDeFala.shift();
-    var texto = item.texto;
+  function avisarSemAudio(texto) {
+    if (semAudioAvisadas[texto]) return;
+    semAudioAvisadas[texto] = true;
+    try { console.warn('Cecí: frase SEM áudio gravado (caiu na voz do sistema): "' + texto + '"'); } catch (e) {}
+  }
 
+  // toca o MP3 da frase; avisa quando começa e quando termina.
+  // devolve false se a frase não tem áudio.
+  function tocarAudioDaFrase(texto, aoComecar, aoTerminar) {
+    var caminho = AUDIO_DE[texto];
+    if (!caminho) return false;
+    var a = new Audio(caminho);
+    a.preload = 'auto';
+    a.volume = 0.95;
+    audioAtual = a;
+    var terminou = false;
+    function fim() { if (terminou) return; terminou = true; if (audioAtual === a) audioAtual = null; aoTerminar(); }
+    // falhou de verdade (arquivo nao veio): cai na voz do sistema e avisa
+    function falhou() {
+      if (terminou) return;
+      if (audioAtual !== a) { fim(); return; }     // foi cortada de proposito por um toque novo: silencio
+      terminou = true; audioAtual = null;
+      falarComSistema(texto, aoComecar, aoTerminar);
+    }
+    a.onplaying = function () { if (aoComecar) aoComecar(); };
+    a.onended = fim;
+    a.onerror = falhou;
+    var p = a.play();
+    if (p && p.catch) p.catch(falhou);
+    return true;
+  }
+
+  // reserva: voz do sistema
+  function falarComSistema(texto, aoComecar, aoTerminar) {
+    avisarSemAudio(texto);
+    if (!('speechSynthesis' in window)) { aoTerminar(); return; }
     try {
       var u = new SpeechSynthesisUtterance(texto);
       u.lang = 'pt-BR';
@@ -215,34 +259,44 @@
       if (!vozes.length) carregarVozes();
       if (!vozEscolhida) escolherVoz();
       if (vozEscolhida) u.voice = vozEscolhida;
-
       var jaSeguiu = false;
-      function seguir() {
-        if (jaSeguiu) return;
-        jaSeguiu = true;
-        clearTimeout(relogioDaFala);
-        if (item.aoTerminar) { try { item.aoTerminar(); } catch (e) {} }
-        setTimeout(proximaFrase, 260);        // respirinho entre as frases
-      }
+      function seguir() { if (jaSeguiu) return; jaSeguiu = true; clearTimeout(relogioDaFala); aoTerminar(); }
+      u.onstart = function () { if (aoComecar) aoComecar(); };
       u.onend = seguir;
       u.onerror = seguir;
-
-      // relógio de segurança: tempo estimado pelo tamanho da frase
       var estimativa = 1500 + texto.length * 110;
       relogioDaFala = setTimeout(function esperarMais() {
         try {
-          if (window.speechSynthesis.speaking && !jaSeguiu) {
-            relogioDaFala = setTimeout(esperarMais, 800);   // ainda falando: espera mais
-            return;
-          }
+          if (window.speechSynthesis.speaking && !jaSeguiu) { relogioDaFala = setTimeout(esperarMais, 800); return; }
         } catch (e) {}
         seguir();
       }, estimativa);
-
       window.speechSynthesis.speak(u);
-    } catch (e) {
-      falando = false;
+    } catch (e) { aoTerminar(); }
+  }
+
+  function proximaFrase() {
+    if (!filaDeFala.length) { falando = false; return; }
+    falando = true;
+    var item = filaDeFala.shift();
+    var texto = item.texto;
+    var jaSeguiu = false;
+    function seguir() {
+      if (jaSeguiu) return;
+      jaSeguiu = true;
+      if (item.aoTerminar) { try { item.aoTerminar(); } catch (e) {} }
+      setTimeout(proximaFrase, 260);          // respirinho entre as frases
     }
+    // relógio de segurança também para o MP3 (se o onended não vier)
+    clearTimeout(relogioDaFala);
+    if (tocarAudioDaFrase(texto, null, seguir)) {
+      relogioDaFala = setTimeout(function esperarMais() {
+        if (audioAtual && !audioAtual.paused && !audioAtual.ended) { relogioDaFala = setTimeout(esperarMais, 800); return; }
+        seguir();
+      }, 1500 + texto.length * 110);
+      return;
+    }
+    falarComSistema(texto, null, seguir);
   }
 
   /* ---------------------------------------------------------

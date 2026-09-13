@@ -653,21 +653,21 @@
   };
 
   var OBJETOS = {
-    patinho: { nome: 'patinho', plural: 'patinhos', svg: svg100(
+    patinho: { nome: 'patinho', plural: 'patinhos', artPlural: 'os', fem: false, svg: svg100(
       '<ellipse cx="46" cy="64" rx="30" ry="20" fill="#f2c94c"' + TR + '/>' +
       '<circle cx="70" cy="42" r="16" fill="#f2c94c"' + TR + '/>' +
       '<path d="M84 44 l14 4 l-14 6 Z" fill="#f19a3e"' + TR + '/>' +
       '<circle cx="74" cy="38" r="3" fill="#3a3630"/>' +
       '<path d="M22 60 q-10 -8 -6 -18" fill="none"' + TR + '/>') },
-    bola:    { nome: 'bola', plural: 'bolas', svg: svg100(
+    bola:    { nome: 'bola', plural: 'bolas', artPlural: 'as', fem: true, svg: svg100(
       '<circle cx="50" cy="50" r="38" fill="#e04a3f"' + TR + '/>' +
       '<path d="M22 30 q28 12 56 0 M22 70 q28 -12 56 0" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>') },
-    urso:    { nome: 'urso', plural: 'ursos', svg: svg100(
+    urso:    { nome: 'urso', plural: 'ursos', artPlural: 'os', fem: false, svg: svg100(
       '<circle cx="28" cy="30" r="12" fill="#b07a4a"' + TR + '/><circle cx="72" cy="30" r="12" fill="#b07a4a"' + TR + '/>' +
       '<circle cx="50" cy="54" r="32" fill="#b07a4a"' + TR + '/>' +
       '<ellipse cx="50" cy="66" rx="14" ry="10" fill="#e6c39a"' + TR + '/>' +
       '<circle cx="40" cy="48" r="3.5" fill="#3a3630"/><circle cx="60" cy="48" r="3.5" fill="#3a3630"/><circle cx="50" cy="63" r="4" fill="#3a3630"/>') },
-    copo:    { nome: 'copo', plural: 'copos', svg: svg100(
+    copo:    { nome: 'copo', plural: 'copos', artPlural: 'os', fem: false, svg: svg100(
       '<path d="M26 18 h48 l-6 66 h-36 Z" fill="#9ec5e8"' + TR + '/>' +
       '<path d="M30 40 h40" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>') }
   };
@@ -683,6 +683,7 @@
   var CONVITE_ENCAIXAR = 'Vamos procurar uma coisa redonda na casa?';
   var DICA_ENCAIXAR = 'Pergunte a ela: onde está o círculo? Em cima ou embaixo?';
 
+  var ARTIGO_FORMA = { circulo: 'O', quadrado: 'O', triangulo: 'O', retangulo: 'O', oval: 'O', estrela: 'A', coracao: 'O', lua: 'A', flor: 'A', losango: 'O' };
   function nomeDaForma(tipo) {
     return {
       circulo: 'círculo', quadrado: 'quadrado', triangulo: 'triângulo', retangulo: 'retângulo',
@@ -761,7 +762,7 @@
         svg: forma(f[0], f[1], false), sombra: forma(f[0], '#ece4d4', true),
         x: passo * (i + 1), y: 34,
         gira: f[0] !== 'circulo' && f[0] !== 'oval' && f[0] !== 'flor',
-        fala: (i % 2 === 0) ? 'O ' + nomeDaForma(f[0]) + ' foi em cima!' : null
+        fala: (i % 2 === 0) ? (ARTIGO_FORMA[f[0]] || 'O') + ' ' + nomeDaForma(f[0]) + ' foi em cima!' : null
       };
     });
     C.falar('Leva cada forma para a sombra dela, lá em cima.');
@@ -1060,6 +1061,7 @@
   var CONVITE_ORDEM = 'Vamos contar as colheres da mesa?';
   var DICA_ORDEM = 'Conte junto com ela, devagar, apontando um de cada vez.';
   var NUMEROS = ['um', 'dois', 'três', 'quatro', 'cinco'];
+  var NUMEROS_F = ['uma', 'duas', 'três', 'quatro', 'cinco'];
 
   function atividadeContar() {
     var nivel = progresso('ordem').nivel;
@@ -1096,7 +1098,7 @@
           }
         });
       });
-      C.falar('Coloque ' + obj.plural + ' do menorzinho para o maior.');
+      C.falar('Coloque ' + obj.artPlural + ' ' + obj.plural + ' do menorzinho para o maior.');
     }
 
     // ---- 2) contar tocando ----
@@ -1121,7 +1123,7 @@
             C.falarJa(NUMEROS[contados - 1]);
             if (contados === quantos) {
               daqui(1100, function () {
-                C.falar(NUMEROS[quantos - 1] + ' ' + obj.plural + '!');
+                C.falar((obj.fem ? NUMEROS_F : NUMEROS)[quantos - 1] + ' ' + obj.plural + '!');
                 balancarGatinho();
                 daqui(2200, rodadaDar);
               });
@@ -1492,7 +1494,8 @@
       });
     });
 
-    C.falar(r.fala + ' Toque no bicho para ouvir o nome.');
+    C.falar(r.fala);
+    C.falar('Toque no bicho para ouvir o nome.');
   }
 
   /* =========================================================

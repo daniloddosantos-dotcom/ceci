@@ -5,7 +5,10 @@
    Se você mudar algum arquivo, troque o número da versão abaixo.
    ============================================================ */
 
-var VERSAO = 'ceci-v17';
+// a lista de frases (e dos áudios) vem do mesmo arquivo que o app usa
+importScripts('frases.js');
+
+var VERSAO = 'ceci-v18';
 
 var ARQUIVOS = [
   './',
@@ -17,8 +20,14 @@ var ARQUIVOS = [
   './musica.js',
   './manifest.json',
   './icone.svg',
-  './icone-mascara.svg'
+  './icone-mascara.svg',
+  './frases.js'
 ];
+
+// todos os áudios das frases, para falar offline
+if (self.CeciFrases) {
+  self.CeciFrases.lista.forEach(function (t) { ARQUIVOS.push('./audio/' + self.CeciFrases.arquivo(t)); });
+}
 
 self.addEventListener('install', function (evento) {
   evento.waitUntil(
@@ -26,12 +35,28 @@ self.addEventListener('install', function (evento) {
       // { cache: 'reload' } obriga a baixar tudo do servidor.
       // Sem isso o navegador entrega cópias antigas que ele ainda tem
       // guardadas, e a versão nova nasceria misturada com a velha.
-      return Promise.all(ARQUIVOS.map(function (arquivo) {
+      function baixar(arquivo, obrigatorio) {
         return fetch(new Request(arquivo, { cache: 'reload' })).then(function (resposta) {
           if (!resposta || !resposta.ok) throw new Error('nao baixou: ' + arquivo);
           return cache.put(arquivo, resposta);
+        }).catch(function (erro) {
+          if (obrigatorio) throw erro;            // arquivo do app: sem ele nao da
+          // um audio que falhou nao impede o app: essa frase cai na voz do sistema
         });
-      }));
+      }
+      // os arquivos do app, todos de uma vez
+      var doApp = ARQUIVOS.filter(function (a) { return a.indexOf('./audio/') !== 0; });
+      var audios = ARQUIVOS.filter(function (a) { return a.indexOf('./audio/') === 0; });
+      return Promise.all(doApp.map(function (a) { return baixar(a, true); })).then(function () {
+        // os audios em levas de 8, para nao afogar a conexao do tablet
+        var fila = Promise.resolve();
+        for (var i = 0; i < audios.length; i += 8) {
+          (function (leva) {
+            fila = fila.then(function () { return Promise.all(leva.map(function (a) { return baixar(a, false); })); });
+          })(audios.slice(i, i + 8));
+        }
+        return fila;
+      });
     }).then(function () { return self.skipWaiting(); })
   );
 });
