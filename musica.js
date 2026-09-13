@@ -828,6 +828,7 @@
     C.irPara('tela-som');
     prepararSons();
     daqui(80, function () {
+      C.dicaAtual = { tocar: 'Toca nas teclas coloridas!', eco: 'Agora é a sua vez de tocar!', dancar: 'Dança com o gatinho!' }[nome];
       if (nome === 'tocar') atividadeTocar();
       else if (nome === 'eco') atividadeEco();
       else if (nome === 'dancar') atividadeDancar();

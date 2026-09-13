@@ -10,7 +10,6 @@
 
   var C = window.Ceci;
   var palco = document.getElementById('palco');
-  var gatinho = document.getElementById('gatinho-ajudante');
 
   var atividadeAtual = null;
   var nivelAtual = 1;
@@ -22,7 +21,7 @@
   function limparAtividade() {
     limparRelogios();
     palco.innerHTML = '';
-    gatinho.classList.remove('balancando');
+    C.dicaAtual = null;
   }
   C.limparAtividade = limparAtividade;   // o app.js chama isto ao sair
 
@@ -41,11 +40,14 @@
         No erro: nada acontece (a peça volta sozinha).
      --------------------------------------------------------- */
   function balancarGatinho(el) {
-    var g = el || gatinho;
-    g.classList.remove('balancando');
-    void g.offsetWidth;              // truque para reiniciar a animação
-    g.classList.add('balancando');
-    daqui(1800, function () { g.classList.remove('balancando'); });
+    if (el) {                          // um gatinho específico (o da tela de fim)
+      el.classList.remove('balancando');
+      void el.offsetWidth;             // truque para reiniciar a animação
+      el.classList.add('balancando');
+      daqui(1800, function () { el.classList.remove('balancando'); });
+      return;
+    }
+    if (C.gatinho) C.gatinho.balanca();   // o companheiro do canto
   }
 
   function acertou(indiceNota) {
@@ -1014,6 +1016,14 @@
     nivelAtual = Number(C.config.nivel) || 1;
     C.registrar(nome);
     C.irPara('tela-atividade');
+
+    C.dicaAtual = {
+      encaixar: 'Leva a peça até a sombra dela!',
+      par: 'Vira duas cartas iguais!',
+      ordem: 'Coloca do pequeno para o grande!',
+      pare: false,                    // no Pare e siga ninguém fala durante o jogo
+      classificar: 'Leva o bicho para a casa dele!'
+    }[nome];
 
     daqui(80, function () {
       if (nome === 'encaixar') atividadeEncaixar(nivelAtual);

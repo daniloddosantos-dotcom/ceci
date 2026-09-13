@@ -108,7 +108,7 @@ button{
 
 /* engrenagem discreta do papai */
 .engrenagem{
-  position:absolute; right:var(--seguro-dir); bottom:var(--seguro-baixo);
+  position:absolute; left:var(--seguro-esq); top:var(--seguro-topo);
   width:56px; height:56px; border-radius:50%;
   color:var(--tinta-suave); opacity:.35;
   display:flex; align-items:center; justify-content:center;
@@ -338,7 +338,7 @@ select.seletor{ max-width:min(420px, 60vw); font-size:17px; }
 }
 .tecla:active{ transform:scale(.96); }
 
-/* ------------------ Ritual de tchau ------------------ */
+/* ------------------ Ritual de dormir ------------------ */
 #ritual{
   position:fixed; inset:0; z-index:80;
   background:#20242e;
@@ -346,26 +346,41 @@ select.seletor{ max-width:min(420px, 60vw); font-size:17px; }
   opacity:0; transition:opacity 6s ease;
 }
 #ritual.visivel{ opacity:1; }
-.ritual-conteudo{
-  display:flex; flex-direction:column; align-items:center; gap:18px;
-  color:#f4ead8;
-}
-.gatinho{ width:min(340px, 42vh); height:auto; }
-.patinha{
-  transform-box: fill-box;
-  transform-origin: 18% 100%;
-  animation: acenar 2.8s ease-in-out infinite;
-}
-@keyframes acenar{
-  0%,100%{ transform:rotate(-10deg); }
-  50%    { transform:rotate(14deg); }
-}
 /* céu com lua e estrelinhas, paradas, bem discretas */
 #ritual .ceu{
   position:absolute; left:0; top:0;
   width:100%; height:52%;
   pointer-events:none;
 }
+.quarto{
+  position:relative;
+  width:min(760px, 92vw); height:min(360px, 60vh);
+}
+.cama-fundo, .cama-frente{
+  position:absolute; right:4%; bottom:8%;
+  width:min(360px, 52vh); height:auto;
+  pointer-events:none;
+}
+.cama-fundo{ z-index:1; }
+.cama-frente{ z-index:3; }
+.gato-ritual{
+  position:absolute; z-index:2;
+  left:12%; bottom:14%;
+  width:min(190px, 30vh);
+  transition:left 3.6s linear;
+  touch-action:none;
+}
+.gato-ritual .gato-svg{ transition:transform 1.4s ease; transform-origin:50% 60%; }
+.gato-ritual.andando{ left:60%; }
+.gato-ritual.andando .gato-svg{ animation: gato-passos .7s ease-in-out infinite; }
+@keyframes gato-passos{
+  0%,100%{ transform:translateY(0) rotate(0deg); }
+  50%    { transform:translateY(-5px) rotate(2deg); }
+}
+.gato-ritual.deitado{ left:60%; bottom:11%; }
+.gato-ritual.deitado .gato-svg{ transform:rotate(-90deg) translate(0, -6px) scale(.86); }
+.gato-ritual.deitado .rabo{ display:none; }
+.gato-ritual.shhh .gato-svg{ transition:transform .4s ease; transform:rotate(-90deg) translate(0, -6px) scale(.89); }
 
 /* botão do papai: pequeno, cinza apagado, no canto de baixo à direita */
 #btn-destravar{
@@ -570,15 +585,38 @@ select.seletor{ max-width:min(420px, 60vw); font-size:17px; }
 .cesto.grande-cesto{ background:#f6e8d6; }
 .cesto.pequeno-cesto{ background:#f3e3ec; }
 
-/* ------------------ Gatinho ajudante ------------------ */
-#gatinho-ajudante{
-  position:absolute; left:var(--seguro-esq); bottom:var(--seguro-baixo);
-  width:clamp(70px, 11vh, 110px); height:auto;
-  pointer-events:none; opacity:.9;
+/* ------------------ Gatinho companheiro ------------------ */
+#gatinho{
+  position:fixed; z-index:45;
+  right:var(--seguro-dir); bottom:var(--seguro-baixo);
+  width:clamp(96px, 17vh, 140px);
+  touch-action:none; cursor:pointer;
+  user-select:none;
 }
-#gatinho-ajudante svg{ width:100%; height:auto; }
+#gatinho .gato-svg{ width:100%; height:auto; display:block; transform-origin:50% 100%; }
+/* onde o gatinho não aparece: nas cenas de música (lá ele já está no palco),
+   no painel do papai e enquanto dorme */
+body[data-tela="tela-som"] #gatinho,
+body[data-tela="tela-config"] #gatinho,
+body.dormindo #gatinho{ display:none; }
+
+/* partes que ligam e desligam */
+.gato-svg .olhos-fechados, .gato-svg .boca-aberta, .gato-svg .zzz, .gato-svg .patinha{ display:none; }
+.piscando .gato-svg .olhos-fechados, .bocejando .gato-svg .olhos-fechados,
+.dormindo .gato-svg .olhos-fechados, .enrolando .gato-svg .olhos-fechados{ display:block; }
+.piscando .gato-svg .olhos-abertos, .bocejando .gato-svg .olhos-abertos,
+.dormindo .gato-svg .olhos-abertos, .enrolando .gato-svg .olhos-abertos{ display:none; }
+.miando .gato-svg .boca-aberta, .bocejando .gato-svg .boca-aberta{ display:block; }
+.miando .gato-svg .boca, .bocejando .gato-svg .boca{ display:none; }
+.acenando .gato-svg .patinha{ display:block; animation: acenar 1s ease-in-out 2; }
+.dormindo .gato-svg .zzz{ display:block; }
+
 .cabeca{ transform-box:fill-box; transform-origin:50% 92%; }
-#gatinho-ajudante.balancando .cabeca,
+.rabo{ transform-box:fill-box; transform-origin:100% 100%; }
+.patinha{ transform-box:fill-box; transform-origin:18% 100%; }
+.boca-aberta{ transform-box:fill-box; transform-origin:50% 0; }
+
+.balancando .cabeca,
 .gato-musica.balancando .cabeca,
 .gato-fim.balancando .cabeca{ animation: balancar-cabeca 1.6s ease-in-out 1; }
 @keyframes balancar-cabeca{
@@ -587,6 +625,54 @@ select.seletor{ max-width:min(420px, 60vw); font-size:17px; }
   55%  { transform:rotate(7deg); }
   80%  { transform:rotate(-4deg); }
   100% { transform:rotate(0deg); }
+}
+@keyframes acenar{
+  0%,100%{ transform:rotate(-10deg); }
+  50%    { transform:rotate(14deg); }
+}
+.pulando .gato-svg{ animation: gato-pulo 1s ease-in-out 1; }
+@keyframes gato-pulo{
+  0%,100%{ transform:translateY(0); }
+  40%    { transform:translateY(-30px); }
+  60%    { transform:translateY(-30px); }
+}
+.espreguicando .gato-svg{ animation: gato-espreguica 1.6s ease-in-out 1; }
+@keyframes gato-espreguica{
+  0%,100%{ transform:scale(1,1); }
+  45%    { transform:scale(.94,1.12); }
+  70%    { transform:scale(1.03,.97); }
+}
+.enrolando .gato-svg{ animation: gato-enrola 1.8s ease-in-out 1; }
+@keyframes gato-enrola{
+  0%,100%{ transform:rotate(0deg) scale(1); }
+  45%    { transform:rotate(-14deg) scale(.9); }
+  70%    { transform:rotate(-14deg) scale(.9); }
+}
+.abanando .rabo{ animation: gato-abana 1.6s ease-in-out 1; }
+@keyframes gato-abana{
+  0%,100%{ transform:rotate(0deg); }
+  25%    { transform:rotate(-16deg); }
+  50%    { transform:rotate(12deg); }
+  75%    { transform:rotate(-12deg); }
+}
+.bocejando .gato-svg .boca-aberta{ animation: gato-boceja 1.9s ease-in-out 1; }
+.bocejando .cabeca{ animation: gato-cabeca-tras 1.9s ease-in-out 1; }
+@keyframes gato-boceja{
+  0%,100%{ transform:scale(.4); }
+  35%,65%{ transform:scale(1.25); }
+}
+@keyframes gato-cabeca-tras{
+  0%,100%{ transform:rotate(0deg); }
+  35%,65%{ transform:rotate(-6deg) translateY(-3px); }
+}
+/* zzz flutuando devagar */
+.zzz text{ animation: zzz-flutua 3.2s ease-in-out infinite; transform-box:fill-box; transform-origin:50% 100%; }
+.zzz .z2{ animation-delay:.9s; }
+.zzz .z3{ animation-delay:1.8s; }
+@keyframes zzz-flutua{
+  0%   { opacity:0; transform:translateY(8px); }
+  30%  { opacity:.9; }
+  100% { opacity:0; transform:translateY(-22px); }
 }
 
 /* ------------------ Fim de brincadeira ------------------ */

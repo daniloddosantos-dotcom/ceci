@@ -5,13 +5,14 @@
    Se você mudar algum arquivo, troque o número da versão abaixo.
    ============================================================ */
 
-var VERSAO = 'ceci-v12';
+var VERSAO = 'ceci-v13';
 
 var ARQUIVOS = [
   './',
   './index.html',
   './style.css',
   './app.js',
+  './gatinho.js',
   './brincar.js',
   './musica.js',
   './manifest.json',

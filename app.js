@@ -373,6 +373,8 @@
     limparFala();          // trocar de tela é uma das formas de cortar a fala
     $$('.tela').forEach(function (t) { t.classList.toggle('ativa', t.id === id); });
     telaAtual = id;
+    document.body.setAttribute('data-tela', id);
+    window.Ceci.dicaAtual = null;          // cada brincadeira define a sua
     if (id === 'tela-desenho') { setTimeout(ajustarCanvas, 30); }
   }
 
@@ -943,7 +945,11 @@
       if (gravarJSON(CHAVE_GALERIA, lista)) { ok = true; break; }
       lista.pop();                 // sem espaço: descarta o mais antigo e tenta de novo
     }
-    if (ok) { nota(NOTAS[3], 0.3, 0.05); setTimeout(function () { nota(NOTAS[5], 0.4, 0.05); }, 150); aviso('Guardado!'); }
+    if (ok) {
+      nota(NOTAS[3], 0.3, 0.05); setTimeout(function () { nota(NOTAS[5], 0.4, 0.05); }, 150);
+      aviso('Guardado!');
+      if (window.Ceci.gatinho) window.Ceci.gatinho.acena();
+    }
     else { aviso('Não deu para guardar'); }
   });
 
@@ -1071,6 +1077,7 @@
       g.avisou = true;
       gravarJSON(CHAVE_SESSAO, g);
       nota(NOTAS[1], 0.6, 0.04);
+      if (window.Ceci.gatinho) window.Ceci.gatinho.boceja();
       setTimeout(function () { falar('Cecí, o sol está quase se deitando'); }, 700);
     }
     if (falta <= 0) {
@@ -1084,17 +1091,27 @@
     if (!document.hidden && sessao.ativa) passoDaSessao();
   });
 
-  function ritualDeTchau() {
+  /* O sol se deita, a tela vira noite, o gatinho boceja, anda até a
+     caminha, se deita e ronca. Fica assim até o PIN do papai. */
+  function ritualDeDormir() {
     bloqueado = true;
     fecharSobreposicoes();
     encerrarAtividade();
+    limparFala();
+    document.body.classList.add('dormindo');
+    sol.style.top = '100%';
+    sol.classList.add('deitando');
     var r = $('#ritual');
     r.classList.remove('oculto');
     setTimeout(function () { r.classList.add('visivel'); }, 30);
     nota(NOTAS[2], 0.9, 0.045);
-    setTimeout(function () { falar('Tchau, Cecí! Até amanhã!'); }, 3500);
-    setTimeout(function () { $('#btn-destravar').classList.add('visivel'); }, 8000);
+    if (window.Ceci.gatinho) window.Ceci.gatinho.dormir();
+    setTimeout(function () {
+      falarLista(['O gatinho está com sono.', 'Ele vai dormir.', 'Tchau, Cecí, amanhã ele acorda!']);
+    }, 1800);
+    setTimeout(function () { $('#btn-destravar').classList.add('visivel'); }, 11000);
   }
+  var ritualDeTchau = ritualDeDormir;   // nome antigo, mesma coisa
 
   // o botão do papai só abre o PIN se for segurado 1 segundo
   segurarPara($('#btn-destravar'), function () {
@@ -1105,8 +1122,10 @@
       $('#btn-destravar').classList.remove('visivel');
       bloqueado = false;
       apagarSessaoGuardada();
+      document.body.classList.remove('dormindo');
+      if (window.Ceci.gatinho) window.Ceci.gatinho.acordar();
       sol.style.top = '0%';
-      sol.classList.remove('poente');
+      sol.classList.remove('poente', 'deitando');
       $('#trilha-sol').classList.add('oculto');
       irParaInicio();
     });
