@@ -27,7 +27,10 @@ do tablet deitado (landscape) e ver como a Cecí vai ver.
 | `style.css` | A aparência: cores suaves, botões grandes, animações lentas. |
 | `app.js` | O cérebro: desenho, sons, voz, timer do sol, galeria, travas, configurações. |
 | `brincar.js` | As 5 brincadeiras da Fase 2 (encaixar, par, ordem, pare e siga, separar). |
-| `musica.js` | As 3 atividades de música da Fase 3 (tocar, bater junto, dançar). |
+| `musicas.js` | O repertório: todas as melodias em notação simples, com ícones, letras e gestos. |
+| `musica.js` | As 5 atividades de música (tocar, dançar, cantar, bichos musicais, sons dos bichos) e o tocador. |
+| `frases.js` | Todas as frases faladas; cada uma tem um MP3 em `audio/`. |
+| `audio/musicas/` | Gravações opcionais das músicas (MP3 de domínio público que você baixar). |
 | `animais.html` | Folha de conferência dos bichinhos. Só para você olhar; não faz parte do app. |
 | `manifest.json` | A "identidade" do app: nome Cecí, ícone, tela cheia, deitado. |
 | `sw.js` | O *service worker*: guarda uma cópia dos arquivos para funcionar **offline**. |
@@ -102,29 +105,54 @@ As frases entram numa **fila**: uma espera a outra terminar, nunca corta no meio
 Só duas coisas cortam a fala: tocar num bicho/peça novo e sair da tela.
 Nas configurações você pode escolher a voz na mão e apertar **Ouvir exemplo**.
 
-## 3c. Música (Fase 3)
+## 3c. Música
 
-O terceiro botão da tela inicial abre 3 atividades. **Todo som é feito na hora
-pelo próprio navegador** — não existe nenhum arquivo de música no app.
+O terceiro botão da tela inicial abre 5 atividades. O repertório inteiro está em
+`musicas.js`, em notação simples (`C5:1` = dó, 1 batida). O app sintetiza cada
+música em 4 camadas (melodia, acordes macios, baixo e percussão levinha) — ou toca
+uma **gravação**, se você colocar o MP3 na pasta `audio/musicas/` (veja abaixo).
 
 | Atividade | O que acontece |
 |---|---|
-| **Tocar** | Xilofone de 5 teclas coloridas (escala pentatônica: qualquer combinação soa bem), tambor e chocalho. A tecla afunda devagar quando ela toca. Livre, sem gravação e sem partitura. |
-| **Eco** | O gatinho toca 2 notas no xilofone, devagar, acendendo as teclas. Depois é a vez dela: toca o que quiser e, ao tocar 2 teclas quaisquer, o gatinho balança a cabeça e toca outra dupla. Sem acerto nem tempo. 5 rodadas (no nível 2 e 3 são 3 notas). |
-| **Dançar** | Toca uma música enquanto o gatinho dança devagar. A cada 8 a 12 segundos a música **para**, a voz diz "estátua!" e o gatinho congela por 3 segundos. É o "pare e siga" com o corpo. |
+| **Tocar** | Piano de 8 teclas (dó a dó), xilofone de 5 teclas, tambor, chocalho, triângulo e 3 sinos. O botão **tocar junto** (canto inferior esquerdo) põe uma cantiga bem baixinha de fundo para ela tocar por cima; toca de novo para desligar. |
+| **Dançar** | Primeiro ela escolhe *como* (3 cartões), depois a música (cartões grandes com ícone; tocar num cartão toca 2 s de prévia e a dança começa). **Estátua**: a música para a cada 8–12 s, "estátua!", o gatinho congela 3 s. **Rápido e devagar**: a mesma música alterna andamento lento (0,7×) e rápido (1,35×) a cada 10–15 s; a voz avisa "devagar..." / "rápido!" e o gatinho dança no ritmo. **Gestos**: a cada 8 s o gatinho mostra um gesto grande (bate palma, pula, gira, abaixa, braços para cima) e a voz nomeia. Músicas curtas repetem para a dança durar uns 50 s. |
+| **Cantar** | 8 cantigas. A melodia toca e a letra aparece em versos grandes, uma linha destacada por vez — a voz do app **não canta**: é para você cantar com ela. O gatinho faz o gesto da cantiga (rema na Canoa, marcha no Soldado, roda na Ciranda, passa a pedrinha nos Escravos de Jó...). No fim: "canta de novo com o papai?". |
+| **Bichos musicais** | Carnaval dos Animais: toca um trecho e mostra 2 bichos grandes; ela toca no que combina (cisne, elefante, peixes, galinha). No bicho errado não há som de erro: o gatinho balança a cabeça e o trecho toca de novo. Ao acertar, o bicho dança com a música. 4 rodadas. |
+| **Sons dos bichos** | Toca no bicho, ele faz o som e diz o nome. |
 
-Cada música tem quatro camadas sintetizadas: melodia, acordes macios de fundo,
-uma linha de baixo e uma percussão bem levinha, com trechos mais suaves para respirar.
+### Repertório (todas em domínio público, além das 3 originais)
 
-Na Dançar dá para escolher entre três músicas, tocando no ícone:
-- **da Cecí** — melodia original com refrão que volta e final claro (cerca de 37 segundos);
-- **estrelinha** — "Brilha, brilha, estrelinha" (a melodia francesa que Mozart usou nas variações; domínio público);
-- **primavera** — o trecho de abertura da *Primavera* de Vivaldi (domínio público).
+| chave | música | arquivo de gravação esperado |
+|---|---|---|
+| ceci, pulinho, calminha | originais do app | audio/musicas/ceci.mp3, pulinho.mp3, calminha.mp3 |
+| ciranda | Ciranda, cirandinha | audio/musicas/ciranda.mp3 |
+| canoa | A canoa virou | audio/musicas/canoa.mp3 |
+| peixe-vivo | Peixe vivo | audio/musicas/peixe-vivo.mp3 |
+| marcha-soldado | Marcha, soldado | audio/musicas/marcha-soldado.mp3 |
+| escravos-de-jo | Escravos de Jó | audio/musicas/escravos-de-jo.mp3 |
+| cravo-e-rosa | O cravo e a rosa | audio/musicas/cravo-e-rosa.mp3 |
+| se-essa-rua | Se essa rua fosse minha | audio/musicas/se-essa-rua.mp3 |
+| nao-atire | Não atire o pau no gato (versão gentil) | audio/musicas/nao-atire.mp3 |
+| brahms-ninar | Canção de ninar (Brahms) | audio/musicas/brahms-ninar.mp3 |
+| quebra-nozes-marcha | Marcha do Quebra-Nozes (Tchaikovsky) | audio/musicas/quebra-nozes-marcha.mp3 |
+| vivaldi-primavera | Primavera (Vivaldi) | audio/musicas/vivaldi-primavera.mp3 |
+| mozart-estrelinha | Estrelinha (variações de Mozart) | audio/musicas/mozart-estrelinha.mp3 |
+| cisne | O cisne (Saint-Saëns) | audio/musicas/cisne.mp3 |
+| elefante | O elefante (Saint-Saëns) | audio/musicas/elefante.mp3 |
+| aquario | Aquário (Saint-Saëns) | audio/musicas/aquario.mp3 |
+| galinhas | Galinhas e galos (Saint-Saëns) | audio/musicas/galinhas.mp3 |
 
-Detalhes técnicos, para constar: o som usa a Web Audio API com `latencyHint: "interactive"`,
-o motor de áudio só liga no primeiro toque (regra dos navegadores) e os sons dos instrumentos
-são gerados uma vez e guardados prontos na memória, para sair no mesmo instante do toque.
-Volume moderado e timbres macios (nada de agudo estridente).
+**Gravações**: basta salvar o MP3 com o nome exato acima em `audio/musicas/` e publicar.
+O app confere, ao abrir o menu Música, quais gravações existem (aparece no console
+`Cecí: gravação encontrada para "..."`) e usa a gravação no lugar da síntese — em todos
+os modos, inclusive rápido/devagar (muda a velocidade do áudio) e estátua (pausa/continua).
+O service worker guarda as gravações para funcionar offline. Se a gravação começar com
+silêncio ou tiver outro andamento, ajuste na música em `musicas.js` os campos opcionais
+`inicioGravacao` (segundos) e `bpmGravacao` — eles só afetam a marcação dos versos no Cantar.
+
+As cantigas foram transcritas de notações para flauta doce; as peças clássicas mais longas
+(Quebra-Nozes, Cisne, Aquário) são **aproximações curtas** da abertura de cada uma — se
+quiser o original de verdade, use uma gravação.
 
 ## 4. Para o papai
 

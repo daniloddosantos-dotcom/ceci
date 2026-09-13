@@ -657,6 +657,8 @@
     eco: 'Eco',
     bichos: 'Sons dos bichos',
     dancar: 'Dançar',
+    cantar: 'Cantar',
+    'bichos-musicais': 'Bichos musicais',
     desenhar: 'Desenhar'
   };
   function mostrarRegistro() {

@@ -7,8 +7,9 @@
 
 // a lista de frases (e dos áudios) vem do mesmo arquivo que o app usa
 importScripts('frases.js');
+importScripts('musicas.js');
 
-var VERSAO = 'ceci-v19';
+var VERSAO = 'ceci-v20';
 
 var ARQUIVOS = [
   './',
@@ -21,12 +22,17 @@ var ARQUIVOS = [
   './manifest.json',
   './icone.svg',
   './icone-mascara.svg',
-  './frases.js'
+  './frases.js',
+  './musicas.js'
 ];
 
 // todos os áudios das frases, para falar offline
 if (self.CeciFrases) {
   self.CeciFrases.lista.forEach(function (t) { ARQUIVOS.push('./audio/' + self.CeciFrases.arquivo(t)); });
+}
+// as gravações das músicas (se o papai colocou alguma em audio/musicas/): opcionais
+if (self.CeciMusicas) {
+  self.CeciMusicas.ordem.forEach(function (k) { ARQUIVOS.push('./' + self.CeciMusicas.todas[k].arquivo); });
 }
 
 self.addEventListener('install', function (evento) {
@@ -80,11 +86,16 @@ self.addEventListener('fetch', function (evento) {
     caches.match(req).then(function (guardado) {
       if (guardado) return guardado;
       return fetch(req).then(function (resposta) {
-        var copia = resposta.clone();
-        caches.open(VERSAO).then(function (cache) { cache.put(req, copia); });
+        // só guarda o que veio certo (um 404 guardado viraria um erro para sempre)
+        if (resposta && resposta.ok) {
+          var copia = resposta.clone();
+          caches.open(VERSAO).then(function (cache) { cache.put(req, copia); });
+        }
         return resposta;
       }).catch(function () {
-        return caches.match('./index.html');
+        // sem internet e sem cópia: uma página volta para o app; um arquivo (áudio) falha limpo
+        if (req.mode === 'navigate') return caches.match('./index.html');
+        return new Response('', { status: 404, statusText: 'offline' });
       });
     })
   );

@@ -144,7 +144,20 @@
    'Vamos dançar! Quando a música parar, vira estátua.',
    'Que dança bonita!',
    'Vamos dançar de novo com o papai, sem o tablet?',
-   'Toque num bicho para ouvir o som dele.'].forEach(add);
+   'Toque num bicho para ouvir o som dele.',
+   // dançar (três modos)
+   'Vamos dançar!', 'Vamos dançar! Escolhe como.',
+   'Estátua', 'Rápido e devagar', 'Gestos',
+   'Devagar...', 'Rápido!',
+   'Bate palma!', 'Pula!', 'Gira!', 'Abaixa!', 'Braços para cima!',
+   // cantar
+   'Vamos cantar!', 'Canta de novo com o papai?', 'Canta junto com o papai!',
+   'Ciranda, cirandinha', 'A canoa virou', 'Peixe vivo', 'Marcha, soldado',
+   'Escravos de Jó', 'O cravo e a rosa', 'Se essa rua fosse minha', 'Não atire o pau no gato',
+   // bichos musicais
+   'Escuta a música. Qual bicho combina?', 'Escuta e toca no bicho!',
+   'É o cisne!', 'É o elefante!', 'São os peixes!', 'É a galinha!',
+   'Vamos imitar os bichos com o papai?'].forEach(add);
 
   // nome de arquivo estável e sem acentos: "o-gato-1x2y3.mp3"
   function arquivo(texto) {

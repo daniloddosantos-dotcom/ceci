@@ -1,0 +1,7 @@
+Coloque aqui as gravacoes (MP3, dominio publico) com o nome exato da chave da musica:
+ceci.mp3  pulinho.mp3  calminha.mp3
+ciranda.mp3  canoa.mp3  peixe-vivo.mp3  marcha-soldado.mp3  escravos-de-jo.mp3
+cravo-e-rosa.mp3  se-essa-rua.mp3  nao-atire.mp3
+brahms-ninar.mp3  quebra-nozes-marcha.mp3  vivaldi-primavera.mp3  mozart-estrelinha.mp3
+cisne.mp3  elefante.mp3  aquario.mp3  galinhas.mp3
+Se o arquivo existir, o app toca a gravacao em vez da sintese.
