@@ -19,6 +19,7 @@
   function limparRelogios() { relogios.forEach(clearTimeout); relogios = []; }
 
   function limparAtividade() {
+    abandonarRodada();
     limparRelogios();
     palco.innerHTML = '';
     C.dicaAtual = null;
@@ -68,6 +69,12 @@
     if (tipo === 'quadrado') corpo = '<rect x="8" y="8" width="84" height="84" rx="12"' + f + traco + '/>';
     if (tipo === 'triangulo') corpo = '<path d="M50 9 L92 89 L8 89 Z" stroke-linejoin="round"' + f + traco + '/>';
     if (tipo === 'retangulo') corpo = '<rect x="8" y="30" width="84" height="40" rx="12"' + f + traco + '/>';
+    if (tipo === 'oval') corpo = '<ellipse cx="50" cy="50" rx="44" ry="30"' + f + traco + '/>';
+    if (tipo === 'estrela') corpo = '<path d="M50 6 L61 36 L94 38 L68 58 L77 92 L50 74 L23 92 L32 58 L6 38 L39 36 Z" stroke-linejoin="round"' + f + traco + '/>';
+    if (tipo === 'coracao') corpo = '<path d="M50 90 C10 62 12 26 32 22 C42 20 50 30 50 38 C50 30 58 20 68 22 C88 26 90 62 50 90 Z" stroke-linejoin="round"' + f + traco + '/>';
+    if (tipo === 'lua') corpo = '<path d="M64 8 a42 42 0 1 0 26 74 a34 34 0 0 1 -26 -74 Z" stroke-linejoin="round"' + f + traco + '/>';
+    if (tipo === 'losango') corpo = '<path d="M50 6 L92 50 L50 94 L8 50 Z" stroke-linejoin="round"' + f + traco + '/>';
+    if (tipo === 'flor') corpo = '<circle cx="50" cy="22" r="16"' + f + traco + '/><circle cx="78" cy="42" r="16"' + f + traco + '/><circle cx="68" cy="76" r="16"' + f + traco + '/><circle cx="32" cy="76" r="16"' + f + traco + '/><circle cx="22" cy="42" r="16"' + f + traco + '/><circle cx="50" cy="50" r="14" fill="#f2c94c"' + traco + '/>';
     return '<svg viewBox="0 0 100 100">' + corpo + '</svg>';
   }
 
@@ -248,8 +255,8 @@
     '<circle cx="50" cy="58" r="31" fill="#f0a55c"/>' +
     '<path d="M50 66 q-7 7 -13 2 M50 66 q7 7 13 2" stroke-width="4"/>' +
     '</g>' +
-    '<circle cx="39" cy="53" r="4.5" fill="' + CT + '"/>' +
-    '<circle cx="61" cy="53" r="4.5" fill="' + CT + '"/>' +
+    '<g class="olhos"><circle cx="39" cy="53" r="4.5" fill="' + CT + '"/>' +
+    '<circle cx="61" cy="53" r="4.5" fill="' + CT + '"/></g>' +
     '</svg>';
 
   // som simples do bicho: duas notinhas macias no tom dele.
@@ -442,215 +449,358 @@
   }
 
   /* =========================================================
-     BRINCADEIRA 1 - ENCAIXAR (formas e senso espacial)
+     PROGRESSÃO AUTOMÁTICA
+     3 rodadas completas seguidas -> sobe um nível.
+     Abandonar 2 vezes seguidas no meio -> desce um nível.
+     Não depende da configuração do papai.
+     ========================================================= */
+  var CHAVE_PROG = 'ceci.progresso.v1';
+  function lerProg() { try { return JSON.parse(localStorage.getItem(CHAVE_PROG) || '{}'); } catch (e) { return {}; } }
+  function progresso(nome) { return lerProg()[nome] || { nivel: 1, seguidas: 0, abandonos: 0 }; }
+  function gravarProg(nome, p) {
+    var t = lerProg(); t[nome] = p;
+    try { localStorage.setItem(CHAVE_PROG, JSON.stringify(t)); } catch (e) {}
+  }
+  var rodada = { nome: null, aberta: false };
+  function comecarRodada(nome) { rodada.nome = nome; rodada.aberta = true; }
+  function completarRodada(nome, maxNivel) {
+    rodada.aberta = false;
+    var p = progresso(nome);
+    p.seguidas++; p.abandonos = 0;
+    if (p.seguidas >= 3 && p.nivel < (maxNivel || 3)) { p.nivel++; p.seguidas = 0; }
+    gravarProg(nome, p);
+    return p.nivel;
+  }
+  function abandonarRodada() {
+    if (!rodada.aberta || !rodada.nome) return;
+    rodada.aberta = false;
+    if (C.estaBloqueado()) return;             // o sol se pôs: não foi ela que desistiu
+    var p = progresso(rodada.nome);
+    p.abandonos++; p.seguidas = 0;
+    if (p.abandonos >= 2 && p.nivel > 1) { p.nivel--; p.abandonos = 0; }
+    gravarProg(rodada.nome, p);
+  }
+  C.progressoDe = progresso;                   // o painel do papai mostra
+
+  /* =========================================================
+     MAIS DESENHOS: formas extras, frutas, veículos e objetos
+     ========================================================= */
+  var TR = ' stroke="' + CT + '" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"';
+
+  function svg100(miolo) { return '<svg viewBox="0 0 100 100">' + miolo + '</svg>'; }
+
+  var FRUTAS = {
+    maca:    { nome: 'maçã', plural: 'maçãs', artigo: 'a', svg: svg100(
+      '<circle cx="50" cy="58" r="33" fill="#e04a3f"' + TR + '/>' +
+      '<path d="M50 26 V12" fill="none"' + TR + '/>' +
+      '<path d="M52 20 q16 -12 24 2 q-14 10 -24 -2 Z" fill="#6fae7c"' + TR + '/>') },
+    banana:  { nome: 'banana', plural: 'bananas', artigo: 'a', svg: svg100(
+      '<path d="M18 40 q10 46 58 44 q10 0 12 -8 q-42 6 -56 -40 Z" fill="#f2c94c"' + TR + '/>' +
+      '<path d="M16 34 l4 8" fill="none"' + TR + '/>') },
+    laranja: { nome: 'laranja', plural: 'laranjas', artigo: 'a', svg: svg100(
+      '<circle cx="50" cy="56" r="34" fill="#f19a3e"' + TR + '/>' +
+      '<path d="M50 22 q12 -10 22 -2 q-12 8 -22 2 Z" fill="#6fae7c"' + TR + '/>' +
+      '<circle cx="40" cy="50" r="2.5" fill="#d9822b"/><circle cx="58" cy="62" r="2.5" fill="#d9822b"/><circle cx="46" cy="70" r="2.5" fill="#d9822b"/>') },
+    uva:     { nome: 'uva', plural: 'uvas', artigo: 'a', svg: svg100(
+      '<path d="M50 10 V26" fill="none"' + TR + '/>' +
+      '<circle cx="36" cy="38" r="12" fill="#8e5fb3"' + TR + '/><circle cx="64" cy="38" r="12" fill="#8e5fb3"' + TR + '/>' +
+      '<circle cx="28" cy="58" r="12" fill="#8e5fb3"' + TR + '/><circle cx="50" cy="56" r="12" fill="#8e5fb3"' + TR + '/><circle cx="72" cy="58" r="12" fill="#8e5fb3"' + TR + '/>' +
+      '<circle cx="40" cy="76" r="12" fill="#8e5fb3"' + TR + '/><circle cx="62" cy="76" r="12" fill="#8e5fb3"' + TR + '/>') },
+    morango: { nome: 'morango', plural: 'morangos', artigo: 'o', svg: svg100(
+      '<path d="M50 90 C18 70 16 40 32 34 q18 -4 18 6 q0 -10 18 -6 c16 6 14 36 -18 56 Z" fill="#e04a3f"' + TR + '/>' +
+      '<path d="M30 34 l10 -14 l10 12 l10 -12 l10 14" fill="#6fae7c"' + TR + '/>' +
+      '<circle cx="42" cy="56" r="2.5" fill="#fbe7a0"/><circle cx="58" cy="60" r="2.5" fill="#fbe7a0"/><circle cx="50" cy="72" r="2.5" fill="#fbe7a0"/>') },
+    pera:    { nome: 'pera', plural: 'peras', artigo: 'a', svg: svg100(
+      '<path d="M50 90 c-24 0 -34 -18 -30 -32 c4 -12 14 -14 18 -26 c3 -9 21 -9 24 0 c4 12 14 14 18 26 c4 14 -6 32 -30 32 Z" fill="#b5cf6a"' + TR + '/>' +
+      '<path d="M50 30 V14" fill="none"' + TR + '/>') }
+  };
+
+  var VEICULOS = {
+    carro:     { nome: 'carro', artigo: 'o', svg: svg100(
+      '<path d="M12 64 v-14 q0 -6 6 -6 h10 l10 -16 h26 l10 16 h12 q6 0 6 6 v14 Z" fill="#e04a3f"' + TR + '/>' +
+      '<rect x="42" y="34" width="18" height="12" fill="#cfe7f7"' + TR + '/>' +
+      '<circle cx="30" cy="68" r="10" fill="#3a3630"/><circle cx="72" cy="68" r="10" fill="#3a3630"/>' +
+      '<circle cx="30" cy="68" r="4" fill="#cfc6b6"/><circle cx="72" cy="68" r="4" fill="#cfc6b6"/>') },
+    onibus:    { nome: 'ônibus', artigo: 'o', svg: svg100(
+      '<rect x="8" y="28" width="84" height="44" rx="8" fill="#f2b705"' + TR + '/>' +
+      '<rect x="16" y="36" width="16" height="14" fill="#cfe7f7"' + TR + '/><rect x="42" y="36" width="16" height="14" fill="#cfe7f7"' + TR + '/><rect x="68" y="36" width="16" height="14" fill="#cfe7f7"' + TR + '/>' +
+      '<circle cx="28" cy="74" r="9" fill="#3a3630"/><circle cx="72" cy="74" r="9" fill="#3a3630"/>') },
+    barco:     { nome: 'barco', artigo: 'o', svg: svg100(
+      '<path d="M10 62 h80 l-12 22 h-56 Z" fill="#c98a5a"' + TR + '/>' +
+      '<path d="M50 58 V14" fill="none"' + TR + '/>' +
+      '<path d="M54 18 l30 36 h-30 Z" fill="#ffffff"' + TR + '/>' +
+      '<path d="M8 90 q10 -8 20 0 q10 8 20 0 q10 -8 20 0 q10 8 20 0" fill="none" stroke="#58aed8" stroke-width="5" stroke-linecap="round"/>') },
+    aviao:     { nome: 'avião', artigo: 'o', svg: svg100(
+      '<ellipse cx="52" cy="52" rx="40" ry="13" fill="#cfe7f7"' + TR + '/>' +
+      '<path d="M40 52 l-16 -28 h14 l20 28 Z" fill="#3a72c4"' + TR + '/>' +
+      '<path d="M40 52 l-16 28 h14 l20 -28 Z" fill="#3a72c4"' + TR + '/>' +
+      '<path d="M14 52 l-4 -14 h10 l6 14 Z" fill="#3a72c4"' + TR + '/>' +
+      '<circle cx="76" cy="50" r="4" fill="#3a3630"/>') },
+    trem:      { nome: 'trem', artigo: 'o', svg: svg100(
+      '<rect x="10" y="40" width="50" height="34" rx="6" fill="#4aa657"' + TR + '/>' +
+      '<rect x="60" y="52" width="30" height="22" rx="6" fill="#4aa657"' + TR + '/>' +
+      '<rect x="18" y="24" width="14" height="16" fill="#3a3630"/>' +
+      '<rect x="40" y="48" width="12" height="12" fill="#cfe7f7"' + TR + '/>' +
+      '<circle cx="24" cy="78" r="8" fill="#3a3630"/><circle cx="46" cy="78" r="8" fill="#3a3630"/><circle cx="76" cy="78" r="8" fill="#3a3630"/>') },
+    bicicleta: { nome: 'bicicleta', artigo: 'a', svg: svg100(
+      '<circle cx="26" cy="66" r="18" fill="none"' + TR + '/><circle cx="74" cy="66" r="18" fill="none"' + TR + '/>' +
+      '<path d="M26 66 L44 36 H64 L74 66 M44 36 L52 66 H26 M64 36 l-4 -8 h8" fill="none" stroke="#e04a3f" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<path d="M40 30 h12" fill="none"' + TR + '/>') }
+  };
+
+  var OBJETOS = {
+    patinho: { nome: 'patinho', plural: 'patinhos', svg: svg100(
+      '<ellipse cx="46" cy="64" rx="30" ry="20" fill="#f2c94c"' + TR + '/>' +
+      '<circle cx="70" cy="42" r="16" fill="#f2c94c"' + TR + '/>' +
+      '<path d="M84 44 l14 4 l-14 6 Z" fill="#f19a3e"' + TR + '/>' +
+      '<circle cx="74" cy="38" r="3" fill="#3a3630"/>' +
+      '<path d="M22 60 q-10 -8 -6 -18" fill="none"' + TR + '/>') },
+    bola:    { nome: 'bola', plural: 'bolas', svg: svg100(
+      '<circle cx="50" cy="50" r="38" fill="#e04a3f"' + TR + '/>' +
+      '<path d="M22 30 q28 12 56 0 M22 70 q28 -12 56 0" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>') },
+    urso:    { nome: 'urso', plural: 'ursos', svg: svg100(
+      '<circle cx="28" cy="30" r="12" fill="#b07a4a"' + TR + '/><circle cx="72" cy="30" r="12" fill="#b07a4a"' + TR + '/>' +
+      '<circle cx="50" cy="54" r="32" fill="#b07a4a"' + TR + '/>' +
+      '<ellipse cx="50" cy="66" rx="14" ry="10" fill="#e6c39a"' + TR + '/>' +
+      '<circle cx="40" cy="48" r="3.5" fill="#3a3630"/><circle cx="60" cy="48" r="3.5" fill="#3a3630"/><circle cx="50" cy="63" r="4" fill="#3a3630"/>') },
+    copo:    { nome: 'copo', plural: 'copos', svg: svg100(
+      '<path d="M26 18 h48 l-6 66 h-36 Z" fill="#9ec5e8"' + TR + '/>' +
+      '<path d="M30 40 h40" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>') }
+  };
+
+  function nomeDaCor(cor) {
+    return { '#e04a3f': 'vermelho', '#3a72c4': 'azul', '#f2b705': 'amarelo', '#4aa657': 'verde', '#e987b8': 'rosa', '#8e5fb3': 'roxo' }[cor] || 'cor';
+  }
+
+  /* =========================================================
+     BRINCADEIRA 1 - ENCAIXAR (formas, cores e senso espacial)
+     Cada rodada sorteia um cenário. O nível sobe e desce sozinho.
      ========================================================= */
   var CONVITE_ENCAIXAR = 'Vamos procurar uma coisa redonda na casa?';
   var DICA_ENCAIXAR = 'Pergunte a ela: onde está o círculo? Em cima ou embaixo?';
 
   function nomeDaForma(tipo) {
-    return { circulo: 'círculo', quadrado: 'quadrado', triangulo: 'triângulo', retangulo: 'retângulo' }[tipo] || tipo;
+    return {
+      circulo: 'círculo', quadrado: 'quadrado', triangulo: 'triângulo', retangulo: 'retângulo',
+      oval: 'oval', estrela: 'estrela', coracao: 'coração', lua: 'lua', flor: 'flor', losango: 'losango'
+    }[tipo] || tipo;
   }
 
-  function encaixarNivel1(t) {
-    var tipos = ['circulo', 'quadrado', 'triangulo'];
-    var cores = { circulo: '#e04a3f', quadrado: '#3a72c4', triangulo: '#f2b705' };
+  var CENARIOS_ENCAIXAR = ['formas', 'formas2', 'cores', 'animal', 'casinha'];
+  var ultimoCenario = '';
+
+  // pecas: [{id, nome, svg, sombra, x, y, tam?, gira?}] ; alvos nos mesmos ids
+  function montarEncaixe(t, pecas, opcoes) {
+    var nivel = opcoes.nivel;
     var alvos = [];
-
-    tipos.forEach(function (tipo, i) {
-      var a = novoAlvo(forma(tipo, '#ece4d4', true), 25 + i * 25, 34);
-      a.dataset.tipo = tipo;
-      a.dataset.onde = 'em cima';
-      t.appendChild(a);
-      alvos.push(a);
-    });
-
-    var ordem = embaralhar(tipos);
-    var faltam = tipos.length;
-
-    ordem.forEach(function (tipo, i) {
-      var p = novaPeca(forma(tipo, cores[tipo], false), 25 + i * 25, 82);
-      p.dataset.tipo = tipo;
-      t.appendChild(p);
-      arrastavel(p, {
-        aoToque: function () { dizerNome(nomeDaForma(tipo)); },
-        aoSoltar: function (el) {
-          var alvo = alvoMaisPerto(el, alvos);
-          if (alvo && alvo.dataset.tipo === el.dataset.tipo) {
-            encaixarEm(el, alvo);
-            acertou(2);
-            C.falar('O ' + nomeDaForma(tipo) + ' foi em cima!');
-            faltam--;
-            if (faltam === 0) terminar('Muito bem, Cecí!', CONVITE_ENCAIXAR, DICA_ENCAIXAR);
-          } else {
-            voltarPraCasa(el);       // erro: nada acontece, a peça só volta
-          }
-        }
-      });
-    });
-
-    C.falar('Leve cada forma para o buraquinho igual, lá em cima.');
-  }
-
-  function encaixarNivel2(t) {
-    // quebra-cabeça de um gatinho: cabeça em cima, corpo no meio, patas embaixo
-    var pecas = [
-      { id: 'cabeca', onde: 'em cima', x: 46, y: 26, nome: 'cabeça', svg: CABECA_GATO },
-      { id: 'corpo', onde: 'no meio', x: 46, y: 50, nome: 'corpo',
-        svg: '<svg viewBox="0 0 100 100"><ellipse cx="50" cy="50" rx="40" ry="30" fill="#f0a55c" stroke="#3a3630" stroke-width="5"/></svg>' },
-      { id: 'pata1', onde: 'embaixo', x: 34, y: 70, nome: 'pata',
-        svg: '<svg viewBox="0 0 100 100"><rect x="26" y="34" width="48" height="32" rx="15" fill="#e8963f" stroke="#3a3630" stroke-width="5"/></svg>' },
-      { id: 'pata2', onde: 'embaixo', x: 58, y: 70, nome: 'pata',
-        svg: '<svg viewBox="0 0 100 100"><rect x="26" y="34" width="48" height="32" rx="15" fill="#e8963f" stroke="#3a3630" stroke-width="5"/></svg>' }
-    ];
-
-    var alvos = [];
-    pecas.forEach(function (d) {
-      // a silhueta mostra a sombra da própria peça, para ela saber onde vai
-      var a = novoAlvo(d.svg, d.x, d.y, 'sombra');
-      a.dataset.id = d.id;
-      a.dataset.onde = d.onde;
-      t.appendChild(a);
-      alvos.push(a);
-    });
-
-    var faltam = pecas.length;
-    embaralhar(pecas).forEach(function (d, i) {
-      var p = novaPeca(d.svg, 14 + i * 24, 88);
-      p.dataset.id = d.id;
-      t.appendChild(p);
-      arrastavel(p, {
-        aoToque: function () { dizerNome(d.nome); },
-        aoSoltar: function (el) {
-          var alvo = alvoMaisPerto(el, alvos);
-          if (alvo && alvo.dataset.id === el.dataset.id) {
-            encaixarEm(el, alvo);
-            acertou(3);
-            C.falar('Ficou ' + alvo.dataset.onde + '!');
-            faltam--;
-            if (faltam === 0) terminar('O gatinho ficou pronto!', CONVITE_ENCAIXAR, DICA_ENCAIXAR);
-          } else {
-            voltarPraCasa(el);
-          }
-        }
-      });
-    });
-
-    C.falar('Monte o gatinho. A cabeça vai em cima e as patas embaixo.');
-  }
-
-  function encaixarNivel3(t) {
-    // pinheiro de tangram: 3 triângulos (precisam girar) + 1 tronco
-    var pecas = [
-      { id: 'p1', tipo: 'triangulo', cor: '#7fb98a', x: 50, y: 19, tam: '74px', giraPreciso: true },
-      { id: 'p2', tipo: 'triangulo', cor: '#5ea36d', x: 50, y: 36, tam: '92px', giraPreciso: true },
-      { id: 'p3', tipo: 'triangulo', cor: '#4a8c59', x: 50, y: 55, tam: '112px', giraPreciso: true },
-      { id: 'p4', tipo: 'retangulo', cor: '#b1793f', x: 50, y: 71, tam: '74px', giraPreciso: false }
-    ];
-
-    var alvos = [];
-    pecas.forEach(function (d) {
-      var a = novoAlvo(forma(d.tipo, '#ece4d4', true), d.x, d.y);
-      a.style.setProperty('--p', d.tam);
-      a.dataset.id = d.id;
-      t.appendChild(a);
-      alvos.push(a);
-    });
-
     var faltam = pecas.length;
     var giros = [90, 180, 270];
 
-    embaralhar(pecas).forEach(function (d, i) {
-      var p = novaPeca(forma(d.tipo, d.cor, false), 12 + i * 25, 89);
-      p.style.setProperty('--p', d.tam);
+    pecas.forEach(function (d) {
+      var a = novoAlvo(d.sombra || d.svg, d.x, d.y, d.sombra ? '' : 'sombra');
+      if (d.tam) a.style.setProperty('--p', d.tam);
+      a.dataset.id = d.id;
+      t.appendChild(a);
+      alvos.push(a);
+    });
+
+    var ordem = embaralhar(pecas);
+    var passo = 100 / (ordem.length + 1);
+    ordem.forEach(function (d, i) {
+      var p = novaPeca(d.svg, passo * (i + 1), 84, d.classe || '');
+      if (d.tam) p.style.setProperty('--p', d.tam);
       p.dataset.id = d.id;
-      p._rot = d.giraPreciso ? giros[Math.floor(Math.random() * giros.length)] : 0;
-      aplicar(p);
+      var precisaGirar = nivel >= 3 && d.gira !== false;
+      if (precisaGirar) { p._rot = giros[Math.floor(Math.random() * giros.length)]; aplicar(p); }
       t.appendChild(p);
 
-      arrastavel(p, {
-        aoToque: function () { dizerNome(d.tipo === 'retangulo' ? 'tronco' : 'triângulo'); },
-        aoToqueDuplo: function (el) {
-          el.style.transition = 'transform .45s ease';
-          el._rot = (el._rot + 90) % 360;
-          aplicar(el);
-          C.nota(C.NOTAS[1], 0.22, 0.04);
-          C.falar('gira');
-        },
+      var ops = {
+        aoToque: function () { dizerNome(d.nome); },
         aoSoltar: function (el) {
           var alvo = alvoMaisPerto(el, alvos);
           if (!alvo || alvo.dataset.id !== el.dataset.id) { voltarPraCasa(el); return; }
-          if (d.giraPreciso && el._rot % 360 !== 0) {
+          if (precisaGirar && el._rot % 360 !== 0) {
             C.falar('Gira a peça! Toque duas vezes nela.');
             voltarPraCasa(el);
             return;
           }
           encaixarEm(el, alvo);
-          acertou(4);
+          acertou(2);
+          if (d.fala) C.falar(d.fala);
           faltam--;
-          if (faltam === 0) terminar('Que árvore linda!', CONVITE_ENCAIXAR, DICA_ENCAIXAR);
+          if (faltam === 0) opcoes.aoCompletar();
         }
-      });
+      };
+      if (precisaGirar) {
+        ops.aoToqueDuplo = function (el) {
+          el.style.transition = 'transform .45s ease';
+          el._rot = (el._rot + 90) % 360;
+          aplicar(el);
+          C.nota(C.NOTAS[1], 0.22, 0.04);
+          C.falar('gira');
+        };
+      }
+      arrastavel(p, ops);
     });
-
-    C.falar('Monte o pinheiro. Toque duas vezes na peça para ela girar.');
   }
 
-  function atividadeEncaixar(nivel) {
+  function cenarioFormas(t, nivel, conjunto) {
+    var lista = conjunto === 'formas2'
+      ? [['estrela', '#f2b705'], ['coracao', '#e987b8'], ['lua', '#9ec5e8'], ['flor', '#e04a3f'], ['losango', '#4aa657']]
+      : [['circulo', '#e04a3f'], ['quadrado', '#3a72c4'], ['triangulo', '#f2b705'], ['retangulo', '#4aa657'], ['oval', '#e987b8']];
+    var quantas = nivel === 1 ? 3 : 5;
+    var usadas = lista.slice(0, quantas);
+    var passo = 100 / (quantas + 1);
+    var pecas = usadas.map(function (f, i) {
+      return {
+        id: f[0], nome: nomeDaForma(f[0]),
+        svg: forma(f[0], f[1], false), sombra: forma(f[0], '#ece4d4', true),
+        x: passo * (i + 1), y: 34,
+        gira: f[0] !== 'circulo' && f[0] !== 'oval' && f[0] !== 'flor',
+        fala: (i % 2 === 0) ? 'O ' + nomeDaForma(f[0]) + ' foi em cima!' : null
+      };
+    });
+    C.falar('Leva cada forma para a sombra dela, lá em cima.');
+    montarEncaixe(t, pecas, { nivel: nivel, aoCompletar: function () { ganharVida(t, 'formas'); } });
+  }
+
+  function cenarioCores(t, nivel) {
+    var cores = ['#e04a3f', '#3a72c4', '#f2b705', '#4aa657', '#e987b8'];
+    var quantas = nivel === 1 ? 3 : 5;
+    var passo = 100 / (quantas + 1);
+    var pecas = cores.slice(0, quantas).map(function (cor, i) {
+      return {
+        id: cor, nome: nomeDaCor(cor),
+        svg: forma('circulo', cor, false),
+        sombra: '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="43" fill="' + cor + '" opacity=".38" stroke="' + cor + '" stroke-width="4" stroke-dasharray="9 8"/></svg>',
+        x: passo * (i + 1), y: 34, gira: false,
+        fala: (i === 0) ? 'Cada cor na sua sombra!' : null
+      };
+    });
+    C.falar('Cada cor vai para a sombra da mesma cor.');
+    montarEncaixe(t, pecas, { nivel: nivel, aoCompletar: function () { ganharVida(t, 'formas'); } });
+  }
+
+  function cenarioAnimal(t, nivel) {
+    var corpo = '<svg viewBox="0 0 100 100"><ellipse cx="50" cy="50" rx="40" ry="30" fill="#f0a55c" stroke="' + CT + '" stroke-width="5"/></svg>';
+    var pata = '<svg viewBox="0 0 100 100"><rect x="26" y="34" width="48" height="32" rx="15" fill="#e8963f" stroke="' + CT + '" stroke-width="5"/></svg>';
+    var rabo = '<svg viewBox="0 0 100 100"><path d="M20 80 q-14 -40 30 -50 q26 -6 30 20" fill="none" stroke="' + CT + '" stroke-width="16" stroke-linecap="round"/><path d="M20 80 q-14 -40 30 -50 q26 -6 30 20" fill="none" stroke="#e8963f" stroke-width="9" stroke-linecap="round"/></svg>';
+    var pecas = [
+      { id: 'cabeca', nome: 'cabeça', svg: CABECA_GATO, x: 50, y: 22, gira: true, fala: 'A cabeça ficou em cima!' },
+      { id: 'corpo',  nome: 'corpo',  svg: corpo, x: 50, y: 46, gira: false, fala: 'O corpo ficou no meio!' },
+      { id: 'pata1',  nome: 'pata',   svg: pata,  x: 40, y: 64, gira: false },
+      { id: 'pata2',  nome: 'pata',   svg: pata,  x: 60, y: 64, gira: false, fala: 'As patas ficaram embaixo!' }
+    ];
+    if (nivel >= 2) pecas.push({ id: 'rabo', nome: 'rabo', svg: rabo, x: 26, y: 50, gira: true, fala: 'O rabo ficou do lado!' });
+    C.falar('Monte o gatinho. A cabeça vai em cima e as patas embaixo.');
+    montarEncaixe(t, pecas, { nivel: nivel, aoCompletar: function () { ganharVida(t, 'animal'); } });
+  }
+
+  function cenarioCasinha(t, nivel) {
+    // o corpo da casa fica fixo no fundo; ela encaixa telhado, porta e janela
+    var casa = document.createElement('div');
+    casa.className = 'casa-fundo';
+    casa.innerHTML = '<svg viewBox="0 0 200 200"><rect x="30" y="70" width="140" height="120" rx="6" fill="#fdf3df" stroke="' + CT + '" stroke-width="5"/></svg>';
+    t.appendChild(casa);
+    var telhado = '<svg viewBox="0 0 100 100"><path d="M50 12 L96 78 H4 Z" fill="#e04a3f" stroke="' + CT + '" stroke-width="5" stroke-linejoin="round"/></svg>';
+    var porta = '<svg viewBox="0 0 100 100"><rect x="26" y="12" width="48" height="80" rx="10" fill="#b07a4a" stroke="' + CT + '" stroke-width="5"/><circle cx="62" cy="54" r="4" fill="#f2b705"/></svg>';
+    var janela = '<svg viewBox="0 0 100 100"><rect class="vidro" x="14" y="14" width="72" height="72" rx="8" fill="#9ec5e8" stroke="' + CT + '" stroke-width="5"/><path d="M50 14 V86 M14 50 H86" stroke="' + CT + '" stroke-width="5"/></svg>';
+    var chamine = '<svg viewBox="0 0 100 100"><rect x="34" y="16" width="32" height="68" rx="4" fill="#8a6a4a" stroke="' + CT + '" stroke-width="5"/></svg>';
+    var pecas = [
+      { id: 'telhado', nome: 'telhado', svg: telhado, x: 50, y: 14, tam: 'clamp(120px, 24vh, 180px)', gira: true, fala: 'O telhado fica em cima!' },
+      { id: 'porta',   nome: 'porta',   svg: porta,   x: 56, y: 60, gira: true, fala: 'A porta fica embaixo!' },
+      { id: 'janela',  nome: 'janela',  svg: janela,  x: 42, y: 40, gira: false, fala: 'A janela fica do lado!' }
+    ];
+    if (nivel >= 2) pecas.push({ id: 'chamine', nome: 'chaminé', svg: chamine, x: 61, y: 10, tam: 'clamp(56px, 10vh, 76px)', gira: true });
+    C.falar('Monte a casinha. O telhado vai em cima.');
+    montarEncaixe(t, pecas, { nivel: nivel, aoCompletar: function () { ganharVida(t, 'casinha'); } });
+  }
+
+  // a figura "ganha vida" por 2 segundos e depois vem a tela de fim
+  function ganharVida(t, tipo) {
+    t.classList.add('vivo-' + tipo);
+    if (tipo === 'casinha') C.nota(C.NOTAS[5], 0.6, 0.05);
+    var nivelNovo = completarRodada('encaixar', 3);
+    daqui(2200, function () {
+      terminar(tipo === 'animal' ? 'O gatinho ficou pronto!' : (tipo === 'casinha' ? 'A casinha acendeu!' : 'Muito bem, Cecí!'),
+        CONVITE_ENCAIXAR, DICA_ENCAIXAR);
+    });
+    return nivelNovo;
+  }
+
+  function atividadeEncaixar() {
+    var nivel = progresso('encaixar').nivel;
     var t = tabuleiro('', 'clamp(88px, 18vh, 132px)');
-    if (nivel === 1) encaixarNivel1(t);
-    else if (nivel === 2) encaixarNivel2(t);
-    else encaixarNivel3(t);
+    var cenario;
+    do { cenario = CENARIOS_ENCAIXAR[Math.floor(Math.random() * CENARIOS_ENCAIXAR.length)]; } while (cenario === ultimoCenario);
+    ultimoCenario = cenario;
+    comecarRodada('encaixar');
+    if (cenario === 'formas') cenarioFormas(t, nivel, 'formas');
+    else if (cenario === 'formas2') cenarioFormas(t, nivel, 'formas2');
+    else if (cenario === 'cores') cenarioCores(t, nivel);
+    else if (cenario === 'animal') cenarioAnimal(t, nivel);
+    else cenarioCasinha(t, nivel);
   }
 
   /* =========================================================
      BRINCADEIRA 2 - ACHAR O PAR (memória) + qual vem depois?
+     Temas sorteados; o tamanho do tabuleiro sobe sozinho (2,3,4,6 pares).
      ========================================================= */
   var CONVITE_PAR = 'Vamos achar duas meias iguais no armário?';
-  var DICA_PAR = 'Peça para ela dizer o nome do animal antes de virar a carta.';
+  var DICA_PAR = 'Peça para ela dizer o nome da figura antes de virar a carta.';
 
-  function atividadePar(nivel) {
-    var quantosPares = nivel === 1 ? 2 : (nivel === 2 ? 3 : 4);
-    var bichos = embaralhar(['gato', 'peixe', 'coelho', 'tartaruga', 'cavalo', 'passarinho']).slice(0, quantosPares);
-    var cartas = embaralhar(bichos.concat(bichos));
+  var TEMAS_PAR = {
+    animais:  { cor: '#b7d9a8', itens: function () { return ['gato', 'peixe', 'coelho', 'tartaruga', 'cavalo', 'passarinho'].map(function (k) { return { nome: ANIMAIS[k].nome, svg: svgAnimal(k) }; }); } },
+    formas:   { cor: '#9ec5e8', itens: function () { return [['circulo', '#e04a3f'], ['quadrado', '#3a72c4'], ['triangulo', '#f2b705'], ['estrela', '#f19a3e'], ['coracao', '#e987b8'], ['lua', '#8e5fb3']].map(function (f) { return { nome: nomeDaForma(f[0]), svg: forma(f[0], f[1], false) }; }); } },
+    frutas:   { cor: '#f6c89f', itens: function () { return Object.keys(FRUTAS).map(function (k) { return { nome: FRUTAS[k].nome, svg: FRUTAS[k].svg }; }); } },
+    veiculos: { cor: '#d9c7ea', itens: function () { return Object.keys(VEICULOS).map(function (k) { return { nome: VEICULOS[k].nome, svg: VEICULOS[k].svg }; }); } }
+  };
+  var ultimoTema = '';
+
+  function atividadePar() {
+    var nivel = progresso('par').nivel;                 // 1..4
+    var quantosPares = [2, 3, 4, 6][Math.min(nivel, 4) - 1];
+    var chaves = Object.keys(TEMAS_PAR);
+    var tema;
+    do { tema = chaves[Math.floor(Math.random() * chaves.length)]; } while (tema === ultimoTema);
+    ultimoTema = tema;
+    var itens = embaralhar(TEMAS_PAR[tema].itens()).slice(0, quantosPares);
+    var cartas = embaralhar(itens.concat(itens));
+    comecarRodada('par');
 
     var t = tabuleiro('', 'clamp(76px, 15vh, 120px)');
     var grade = document.createElement('div');
     grade.className = 'grade-cartas';
-    grade.style.setProperty('--c', 'clamp(112px, 21vh, 170px)');
-    grade.style.gridTemplateColumns = 'repeat(' + (cartas.length <= 4 ? cartas.length : (cartas.length === 6 ? 3 : 4)) + ', var(--c))';
+    var colunas = cartas.length <= 4 ? cartas.length : (cartas.length === 6 ? 3 : (cartas.length === 8 ? 4 : 4));
+    grade.style.setProperty('--c', cartas.length >= 12 ? 'clamp(88px, 17vh, 132px)' : 'clamp(112px, 21vh, 170px)');
+    grade.style.gridTemplateColumns = 'repeat(' + colunas + ', var(--c))';
     t.appendChild(grade);
 
-    var travado = true;
-    var primeira = null;
-    var achadas = 0;
+    var travado = true, primeira = null, achadas = 0;
+    var corVerso = TEMAS_PAR[tema].cor;
 
-    cartas.forEach(function (bicho) {
+    cartas.forEach(function (item) {
       var b = document.createElement('button');
       b.className = 'carta virada';
-      b.dataset.bicho = bicho;
+      b.dataset.nome = item.nome;
       b.innerHTML =
         '<div class="lados">' +
-          '<div class="verso"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="30" fill="none" stroke="#cfc6b6" stroke-width="8"/><circle cx="50" cy="50" r="10" fill="#cfc6b6"/></svg></div>' +
-          '<div class="frente">' + svgAnimal(bicho) + '</div>' +
+          '<div class="verso" style="background:' + corVerso + '"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="30" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="8"/><circle cx="50" cy="50" r="10" fill="rgba(255,255,255,.7)"/></svg></div>' +
+          '<div class="frente">' + item.svg + '</div>' +
         '</div>';
       grade.appendChild(b);
 
       b.addEventListener('click', function () {
         if (C.estaBloqueado()) return;
-        // carta já achada ou já virada: só repete o nome do bichinho
-        if (b.classList.contains('achada') || b.classList.contains('virada')) { C.falarJa(ANIMAIS[bicho].nome); return; }
+        if (b.classList.contains('achada') || b.classList.contains('virada')) { C.falarJa(item.nome); return; }
         if (travado) return;
-
         b.classList.add('virada');
-        C.falarJa(ANIMAIS[bicho].nome);
-
+        C.falarJa(item.nome);
         if (!primeira) { primeira = b; return; }
-
-        if (primeira.dataset.bicho === b.dataset.bicho) {
+        if (primeira.dataset.nome === b.dataset.nome) {
           var a = primeira; primeira = null;
           daqui(500, function () {
-            a.classList.add('achada');
-            b.classList.add('achada');
+            a.classList.add('achada'); b.classList.add('achada');
             acertou(2);
             achadas++;
             if (achadas === quantosPares) daqui(900, rodadaDoPadrao);
@@ -658,141 +808,187 @@
         } else {
           travado = true;
           var a2 = primeira; primeira = null;
-          daqui(1400, function () {                 // erro: sem som, as cartas só voltam
-            a2.classList.remove('virada');
-            b.classList.remove('virada');
-            travado = false;
-          });
+          daqui(1400, function () { a2.classList.remove('virada'); b.classList.remove('virada'); travado = false; });
         }
       });
     });
 
-    // 3 segundos vendo tudo, depois as cartas viram
-    C.falar('Olha os bichinhos!');
+    C.falar('Olha as figuras!');
     daqui(3000, function () {
       Array.prototype.forEach.call(grade.children, function (c) { c.classList.remove('virada'); });
-      daqui(800, function () {
-        travado = false;
-        C.falar('Agora ache os dois iguais.');
-      });
+      daqui(800, function () { travado = false; C.falar('Agora ache as duas iguais.'); });
     });
 
-    // ---- rodada extra: qual vem depois? ----
+    // ---- rodada extra: qual vem depois? (forma, cor ou tamanho) ----
     function rodadaDoPadrao() {
       var t2 = tabuleiro('', 'clamp(76px, 14vh, 116px)');
-      var pares = [['circulo', '#e04a3f'], ['quadrado', '#3a72c4'], ['triangulo', '#f2b705']];
-      var dois = embaralhar(pares).slice(0, 2);
-      var A = dois[0], B = dois[1];
-
+      var tipo = ['forma', 'cor', 'tamanho'][Math.floor(Math.random() * 3)];
+      var A, B, desenhoA, desenhoB;
+      if (tipo === 'forma') {
+        var pares = embaralhar([['circulo', '#e04a3f'], ['quadrado', '#3a72c4'], ['triangulo', '#f2b705'], ['estrela', '#f19a3e']]).slice(0, 2);
+        A = pares[0]; B = pares[1];
+        desenhoA = forma(A[0], A[1], false); desenhoB = forma(B[0], B[1], false);
+      } else if (tipo === 'cor') {
+        var cores = embaralhar(['#e04a3f', '#3a72c4', '#f2b705', '#4aa657', '#e987b8']).slice(0, 2);
+        A = ['circulo', cores[0]]; B = ['circulo', cores[1]];
+        desenhoA = forma('circulo', cores[0], false); desenhoB = forma('circulo', cores[1], false);
+      } else {
+        var cor = ['#e04a3f', '#3a72c4', '#4aa657'][Math.floor(Math.random() * 3)];
+        A = ['grande', cor]; B = ['pequeno', cor];
+        desenhoA = svgCirculoTamanho(42, cor); desenhoB = svgCirculoTamanho(20, cor);
+      }
       var fila = document.createElement('div');
       fila.className = 'fila-padrao';
-      [A, B, A].forEach(function (f) {
-        var casa = document.createElement('div');
-        casa.className = 'casa-padrao';
-        casa.innerHTML = forma(f[0], f[1], false);
-        fila.appendChild(casa);
+      [desenhoA, desenhoB, desenhoA].forEach(function (d) {
+        var casa = document.createElement('div'); casa.className = 'casa-padrao'; casa.innerHTML = d; fila.appendChild(casa);
       });
-      var vazia = document.createElement('div');
-      vazia.className = 'casa-padrao vazia';
-      vazia.textContent = '?';
-      fila.appendChild(vazia);
+      var vazia = document.createElement('div'); vazia.className = 'casa-padrao vazia'; vazia.textContent = '?'; fila.appendChild(vazia);
       t2.appendChild(fila);
 
       var opcoes = document.createElement('div');
       opcoes.className = 'fila-opcoes';
-      embaralhar([B, A]).forEach(function (f) {
-        var o = document.createElement('button');
-        o.className = 'opcao-padrao';
-        o.innerHTML = forma(f[0], f[1], false);
-        o.addEventListener('click', function () {
+      embaralhar([['B', desenhoB], ['A', desenhoA]]).forEach(function (o) {
+        var b = document.createElement('button');
+        b.className = 'opcao-padrao';
+        b.innerHTML = o[1];
+        b.addEventListener('click', function () {
           if (C.estaBloqueado()) return;
-          if (f[0] !== B[0]) return;                 // errou: nada acontece
-          vazia.classList.remove('vazia');
-          vazia.textContent = '';
-          vazia.innerHTML = forma(B[0], B[1], false);
+          if (o[0] !== 'B') return;                          // errou: nada acontece
+          vazia.classList.remove('vazia'); vazia.textContent = ''; vazia.innerHTML = desenhoB;
           acertou(4);
+          completarRodada('par', 4);
           terminar('Você achou!', CONVITE_PAR, DICA_PAR);
         });
-        opcoes.appendChild(o);
+        opcoes.appendChild(b);
       });
       t2.appendChild(opcoes);
-
       C.falar('Qual vem depois?');
     }
   }
 
   /* =========================================================
-     BRINCADEIRA 3 - COLOCAR EM ORDEM (lógica e tempo)
+     BRINCADEIRA 3 - CONTAR E ORDENAR
+     1) ordenar objetos por tamanho, 2) contar tocando, 3) dar N para o gatinho
      ========================================================= */
-  var CONVITE_ORDEM = 'Me conta o que você faz antes de dormir?';
-  var DICA_ORDEM = 'Pergunte: o que a gente faz primeiro? E depois?';
+  var CONVITE_ORDEM = 'Vamos contar as colheres da mesa?';
+  var DICA_ORDEM = 'Conte junto com ela, devagar, apontando um de cada vez.';
+  var NUMEROS = ['um', 'dois', 'três', 'quatro', 'cinco'];
 
-  function atividadeOrdem(nivel) {
-    var rodadas = [
-      { fala: 'Coloque em ordem: acordar, escovar os dentes e dormir.',
-        cartas: [
-          { ordem: 1, nome: 'acordar', svg: DESENHOS.acordar },
-          { ordem: 2, nome: 'escovar os dentes', svg: DESENHOS.escovar },
-          { ordem: 3, nome: 'dormir', svg: DESENHOS.dormir }
-        ] },
-      { fala: 'Agora do menorzinho para o maior.',
-        cartas: [
-          { ordem: 1, nome: 'pequeno', svg: svgCirculoTamanho(16, '#e987b8') },
-          { ordem: 2, nome: 'médio', svg: svgCirculoTamanho(28, '#e987b8') },
-          { ordem: 3, nome: 'grande', svg: svgCirculoTamanho(42, '#e987b8') }
-        ] },
-      { fala: 'Um, dois, três. Coloque em ordem.',
-        cartas: [
-          { ordem: 1, nome: 'um', svg: svgBolinhas(1) },
-          { ordem: 2, nome: 'dois', svg: svgBolinhas(2) },
-          { ordem: 3, nome: 'três', svg: svgBolinhas(3) }
-        ] }
-    ].slice(0, nivel);
+  function atividadeContar() {
+    var nivel = progresso('ordem').nivel;
+    comecarRodada('ordem');
 
-    var indice = 0;
-
-    function rodada() {
-      var r = rodadas[indice];
+    // ---- 1) ordenar por tamanho ----
+    function rodadaTamanho() {
+      var chaves = ['bola', 'urso', 'copo'];
+      var obj = OBJETOS[chaves[Math.floor(Math.random() * chaves.length)]];
+      var quantos = nivel === 1 ? 3 : 4;
       var t = tabuleiro('', 'clamp(84px, 17vh, 132px)');
       var alvos = [];
-
-      [1, 2, 3].forEach(function (n, i) {
-        var a = novoAlvo('<svg viewBox="0 0 100 100"><rect x="6" y="6" width="88" height="88" rx="18" fill="#ece4d4" stroke="#c2b7a1" stroke-width="4" stroke-dasharray="9 8"/></svg>', 25 + i * 25, 38);
-        a.dataset.ordem = String(n);
-        t.appendChild(a);
-        alvos.push(a);
-      });
-
-      var faltam = 3;
-      embaralhar(r.cartas).forEach(function (c, i) {
-        var p = novaPeca(c.svg, 25 + i * 25, 84, 'carta-ordem');
+      var passo = 100 / (quantos + 1);
+      var tamanhos = quantos === 3 ? [0.55, 0.78, 1] : [0.5, 0.68, 0.85, 1];
+      for (var i = 1; i <= quantos; i++) {
+        var a = novoAlvo('<svg viewBox="0 0 100 100"><rect x="6" y="6" width="88" height="88" rx="18" fill="#ece4d4" stroke="#c2b7a1" stroke-width="4" stroke-dasharray="9 8"/></svg>', passo * i, 36);
+        a.dataset.ordem = String(i);
+        t.appendChild(a); alvos.push(a);
+      }
+      var faltam = quantos;
+      var lista = tamanhos.map(function (f, i) { return { ordem: i + 1, fator: f }; });
+      embaralhar(lista).forEach(function (c, i) {
+        var p = novaPeca('<div class="objeto" style="transform:scale(' + c.fator + ')">' + obj.svg + '</div>', passo * (i + 1), 82);
         p.dataset.ordem = String(c.ordem);
         t.appendChild(p);
         arrastavel(p, {
-          aoToque: function () { dizerNome(c.nome); },
+          aoToque: function () { dizerNome(c.ordem === 1 ? 'pequeno' : (c.ordem === quantos ? 'grande' : 'médio')); },
           aoSoltar: function (el) {
             var alvo = alvoMaisPerto(el, alvos);
             if (alvo && alvo.dataset.ordem === el.dataset.ordem) {
-              encaixarEm(el, alvo);
-              acertou(3);
-              faltam--;
-              if (faltam === 0) {
-                indice++;
-                if (indice < rodadas.length) daqui(1400, rodada);
-                else terminar('Tudo na ordem certa!', CONVITE_ORDEM, DICA_ORDEM);
-              }
-            } else {
-              voltarPraCasa(el);
-            }
+              encaixarEm(el, alvo); acertou(3); faltam--;
+              if (faltam === 0) { C.falar('Do pequeno ao grande!'); daqui(1800, rodadaContar); }
+            } else voltarPraCasa(el);
           }
         });
       });
-
-      C.falar(r.fala);
+      C.falar('Coloque ' + obj.plural + ' do menorzinho para o maior.');
     }
 
-    rodada();
+    // ---- 2) contar tocando ----
+    function rodadaContar() {
+      var chaves = ['patinho', 'bola', 'urso'];
+      var obj = OBJETOS[chaves[Math.floor(Math.random() * chaves.length)]];
+      var quantos = nivel === 1 ? 2 + Math.floor(Math.random() * 2) : 3 + Math.floor(Math.random() * 3);   // 2-3 ou 3-5
+      var t = tabuleiro('', 'clamp(96px, 19vh, 150px)');
+      var contados = 0;
+      var passo = 100 / (quantos + 1);
+      for (var i = 0; i < quantos; i++) {
+        (function (i) {
+          var p = novaPeca(obj.svg, passo * (i + 1), 50, 'contavel');
+          p.classList.add('fixa');
+          t.appendChild(p);
+          p.addEventListener('pointerdown', function (e) {
+            e.preventDefault();
+            if (C.estaBloqueado() || p.classList.contains('contado')) return;
+            p.classList.add('contado');
+            contados++;
+            C.nota(C.NOTAS[Math.min(contados, 5)], 0.4, 0.05);
+            C.falarJa(NUMEROS[contados - 1]);
+            if (contados === quantos) {
+              daqui(1100, function () {
+                C.falar(NUMEROS[quantos - 1] + ' ' + obj.plural + '!');
+                balancarGatinho();
+                daqui(2200, rodadaDar);
+              });
+            }
+          });
+        })(i);
+      }
+      C.falar('Toca em cada ' + obj.nome + ' e conta comigo.');
+    }
+
+    // ---- 3) dar N frutas para o gatinho ----
+    function rodadaDar() {
+      var quantas = nivel === 1 ? 2 : 3;
+      var total = 4;
+      var t = tabuleiro('', 'clamp(84px, 17vh, 128px)');
+      var gato = document.createElement('div');
+      gato.className = 'gato-cesto';
+      gato.innerHTML = svgAnimal('gato');
+      t.appendChild(gato);
+      var entregues = 0;
+      var passo = 100 / (total + 1);
+      for (var i = 0; i < total; i++) {
+        var p = novaPeca(FRUTAS.maca.svg, passo * (i + 1), 80);
+        t.appendChild(p);
+        arrastavel(p, {
+          aoToque: function () { dizerNome('maçã'); },
+          aoSoltar: function (el) {
+            if (entregues >= quantas) { voltarPraCasa(el); return; }
+            var alvo = alvoMaisPerto(el, [gato]);
+            if (!alvo) { voltarPraCasa(el); return; }
+            var rg = gato.getBoundingClientRect(), rp = el.getBoundingClientRect();
+            el._dx += (rg.left + rg.width * (0.3 + 0.2 * entregues)) - (rp.left + rp.width / 2);
+            el._dy += (rg.top + rg.height * 0.85) - (rp.top + rp.height / 2);
+            el.style.transition = 'transform .45s ease'; aplicar(el); el.classList.add('fixa');
+            entregues++;
+            acertou(2);
+            C.falarJa(NUMEROS[entregues - 1]);
+            if (entregues === quantas) {
+              daqui(1000, function () {
+                C.falar('O gatinho ganhou ' + (quantas === 2 ? 'duas' : 'três') + ' maçãs!');
+                balancarGatinho();
+                completarRodada('ordem', 3);
+                terminar('Você contou direitinho!', CONVITE_ORDEM, DICA_ORDEM);
+              });
+            }
+          }
+        });
+      }
+      C.falar('Dê ' + (quantas === 2 ? 'duas' : 'três') + ' maçãs para o gatinho.');
+    }
+
+    rodadaTamanho();
   }
+  var atividadeOrdem = atividadeContar;   // nome antigo
 
   /* =========================================================
      BRINCADEIRA 4 - PARE E SIGA (esperar a vez)
@@ -1020,15 +1216,15 @@
     C.dicaAtual = {
       encaixar: 'Leva a peça até a sombra dela!',
       par: 'Vira duas cartas iguais!',
-      ordem: 'Coloca do pequeno para o grande!',
+      ordem: 'Toca nos bichinhos e conta!',
       pare: false,                    // no Pare e siga ninguém fala durante o jogo
       classificar: 'Leva o bicho para a casa dele!'
     }[nome];
 
     daqui(80, function () {
-      if (nome === 'encaixar') atividadeEncaixar(nivelAtual);
-      else if (nome === 'par') atividadePar(nivelAtual);
-      else if (nome === 'ordem') atividadeOrdem(nivelAtual);
+      if (nome === 'encaixar') atividadeEncaixar();
+      else if (nome === 'par') atividadePar();
+      else if (nome === 'ordem') atividadeContar();
       else if (nome === 'pare') atividadePare();
       else if (nome === 'classificar') atividadeClassificar();
     });

@@ -552,6 +552,41 @@ select.seletor{ max-width:min(420px, 60vw); font-size:17px; }
 .opcao-padrao svg{ width:100%; height:100%; }
 .opcao-padrao:active{ transform:scale(.97); }
 
+/* ------------------ Encaixar: cenários e "ganhar vida" ------------------ */
+.casa-fundo{
+  position:absolute; left:50%; top:47%;
+  width:clamp(220px, 44vh, 330px); height:clamp(220px, 44vh, 330px);
+  margin-left:calc(clamp(220px, 44vh, 330px) / -2); margin-top:calc(clamp(220px, 44vh, 330px) / -2);
+  pointer-events:none;
+}
+.casa-fundo svg{ width:100%; height:100%; }
+/* a figura ganha vida por 2 segundos */
+.vivo-formas .peca.fixa svg{ animation: pulinho 1s ease-in-out 2; }
+.vivo-animal .peca.fixa .olhos{ animation: piscar-olhos 1s ease-in-out 2; transform-box:fill-box; transform-origin:50% 50%; }
+.vivo-casinha .peca.fixa .vidro{ fill:#ffe27a; transition:fill .8s ease; }
+.vivo-casinha .peca.fixa svg{ animation: brilhar 2s ease-in-out 1; }
+@keyframes pulinho{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-10px); } }
+@keyframes piscar-olhos{ 0%,100%{ transform:scaleY(1); } 40%,60%{ transform:scaleY(.1); } }
+@keyframes brilhar{ 0%,100%{ filter:brightness(1); } 50%{ filter:brightness(1.25); } }
+
+/* ------------------ Contar e ordenar ------------------ */
+.peca .objeto{ width:100%; height:100%; transform-origin:50% 100%; }
+.peca .objeto svg{ width:100%; height:100%; }
+.peca.contavel{ cursor:pointer; }
+.peca.contavel.contado svg{ animation: pulinho .8s ease-in-out 1; filter:brightness(1.08); }
+.peca.contavel.contado::after{
+  content:""; position:absolute; left:50%; bottom:-14px; width:14px; height:14px;
+  margin-left:-7px; border-radius:50%; background:var(--rosa);
+}
+.gato-cesto{
+  position:absolute; left:50%; top:34%;
+  width:clamp(160px, 32vh, 240px); height:clamp(130px, 27vh, 200px);
+  margin-left:calc(clamp(160px, 32vh, 240px) / -2); margin-top:calc(clamp(130px, 27vh, 200px) / -2);
+  background:#fdf3df; border:5px dashed rgba(0,0,0,.14); border-radius:28px;
+  display:flex; align-items:center; justify-content:center;
+}
+.gato-cesto svg{ width:70%; height:70%; }
+
 /* ------------------ Pare e siga ------------------ */
 .bolota{
   position:absolute; left:50%; top:52%;

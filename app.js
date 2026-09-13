@@ -582,7 +582,7 @@
   var NOMES_ATIVIDADES = {
     encaixar: 'Encaixar',
     par: 'Achar o par',
-    ordem: 'Em ordem',
+    ordem: 'Contar e ordenar',
     pare: 'Pare e siga',
     classificar: 'Separar',
     tocar: 'Tocar',
@@ -604,9 +604,11 @@
     chaves.forEach(function (k) {
       var r = config.registro[k];
       var li = document.createElement('li');
+      var auto = (window.Ceci.progressoDe && ['encaixar', 'par', 'ordem'].indexOf(k) >= 0)
+        ? ' <span>(nível automático: ' + window.Ceci.progressoDe(k).nivel + ')</span>'
+        : ' <span>(último nível: ' + (r.nivel || 1) + ')</span>';
       li.innerHTML = (NOMES_ATIVIDADES[k] || k) + ': <b>' + r.vezes + '</b> ' +
-                     (r.vezes === 1 ? 'vez' : 'vezes') +
-                     ' <span>(último nível: ' + (r.nivel || 1) + ')</span>';
+                     (r.vezes === 1 ? 'vez' : 'vezes') + auto;
       ul.appendChild(li);
     });
   }
