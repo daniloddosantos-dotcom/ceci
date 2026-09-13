@@ -127,7 +127,7 @@
 
   // troca a "reação" atual por outra, sempre limpando a anterior
   var REACOES = ['miando', 'espreguicando', 'pulando', 'enrolando', 'piscando', 'abanando',
-                 'acenando', 'balancando', 'bocejando'];
+                 'acenando', 'balancando', 'bocejando', 'tapando', 'aplaudindo'];
   function reagir(nome, duracao, alvo) {
     var g = alvo || el;
     REACOES.forEach(function (r) { g.classList.remove(r); });
@@ -234,6 +234,8 @@
     balanca: function () { reagir('balancando', 1600); },
     boceja:  function () { reagir('bocejando', 1900); },
     pula:    function () { reagir('pulando', 1000); },
+    tapaOlhos: function () { reagir('tapando', 1300); },
+    aplaude: function () { reagir('aplaudindo', 2200); C.nota(C.NOTAS[3], 0.3, 0.05); setTimeout(function () { C.nota(C.NOTAS[5], 0.4, 0.05); }, 160); },
     mia:     function () { reagir('miando', 900); miar(); },
     dormir:  dormir,
     acordar: acordar,

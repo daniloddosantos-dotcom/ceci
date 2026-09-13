@@ -222,7 +222,7 @@
     },
 
     passarinho: {
-      nome: 'passarinho', artigo: 'o', onde: 'terra', tamanho: 'pequeno', tom: 1000,
+      nome: 'passarinho', artigo: 'o', onde: 'terra', tamanho: 'pequeno', tom: 1000, voa: true,
       svg:
         '<g fill="none" stroke="' + CT + '" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">' +
         '<path d="M22 58 L5 44 L7 76 Z" fill="#4a8ac4"/>' +
@@ -233,6 +233,69 @@
         '<path d="M38 60 q15 -11 30 2 q-13 17 -30 -2 Z" fill="#4a8ac4"/>' +
         '</g>' +
         '<circle cx="87" cy="33" r="4.5" fill="' + CT + '"/>'
+    },
+
+    pato: {
+      nome: 'pato', artigo: 'o', onde: 'agua', tamanho: 'pequeno', tom: 480, som: 'quack',
+      svg:
+        '<g fill="none" stroke="' + CT + '" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">' +
+        '<path d="M10 62 q12 -12 26 0" fill="#f2c94c"/>' +
+        '<ellipse cx="50" cy="66" rx="36" ry="22" fill="#f2c94c"/>' +
+        '<circle cx="82" cy="38" r="19" fill="#f2c94c"/>' +
+        '<path d="M98 36 L119 44 L98 52 Z" fill="#f19a3e"/>' +
+        '<path d="M36 64 q14 -10 28 2 q-12 14 -28 -2 Z" fill="#e0b43a"/>' +
+        '</g>' +
+        '<circle cx="88" cy="33" r="4.5" fill="' + CT + '"/>'
+    },
+
+    baleia: {
+      nome: 'baleia', artigo: 'a', onde: 'agua', tamanho: 'grande', tom: 120, som: 'grave',
+      svg:
+        '<g fill="none" stroke="' + CT + '" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">' +
+        '<path d="M24 54 L6 36 L10 66 Z" fill="#5f8fc9"/>' +
+        '<path d="M18 60 q20 -40 62 -32 q36 6 34 30 q-6 24 -40 26 h-40 q-18 -4 -16 -24 Z" fill="#6aa0d8"/>' +
+        '<path d="M30 70 q34 10 70 0" stroke="#dcecf8" stroke-width="4"/>' +
+        '<path d="M74 22 q6 -14 0 -18 M74 22 q-6 -14 0 -18" stroke="#9ec5e8" stroke-width="4"/>' +
+        '</g>' +
+        '<circle cx="100" cy="44" r="4.5" fill="' + CT + '"/>'
+    },
+
+    sapo: {
+      nome: 'sapo', artigo: 'o', onde: 'agua', tamanho: 'pequeno', tom: 260, som: 'grave',
+      svg:
+        '<g fill="none" stroke="' + CT + '" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">' +
+        '<ellipse cx="60" cy="68" rx="40" ry="24" fill="#7fc36c"/>' +
+        '<circle cx="78" cy="40" r="12" fill="#7fc36c"/><circle cx="52" cy="40" r="12" fill="#7fc36c"/>' +
+        '<path d="M22 84 q-10 8 -4 12 h16 M98 84 q10 8 4 12 h-16" fill="#7fc36c"/>' +
+        '<path d="M64 60 q12 6 24 -2" stroke-width="4"/>' +
+        '</g>' +
+        '<circle cx="80" cy="39" r="4.5" fill="' + CT + '"/><circle cx="54" cy="39" r="4.5" fill="' + CT + '"/>'
+    },
+
+    borboleta: {
+      nome: 'borboleta', artigo: 'a', onde: 'terra', tamanho: 'pequeno', tom: 1100, voa: true,
+      svg:
+        '<g fill="none" stroke="' + CT + '" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">' +
+        '<path d="M58 50 q-40 -46 -46 -10 q-2 24 20 22 Z" fill="#e987b8"/>' +
+        '<path d="M58 54 q-40 40 -44 8 q0 -18 18 -14 Z" fill="#f3b3d0"/>' +
+        '<path d="M62 50 q40 -46 46 -10 q2 24 -20 22 Z" fill="#e987b8"/>' +
+        '<path d="M62 54 q40 40 44 8 q0 -18 -18 -14 Z" fill="#f3b3d0"/>' +
+        '<ellipse cx="60" cy="54" rx="6" ry="22" fill="#5a4a6a"/>' +
+        '<path d="M56 32 q-6 -12 -12 -14 M64 32 q6 -12 12 -14" stroke-width="3"/>' +
+        '</g>'
+    },
+
+    abelha: {
+      nome: 'abelha', artigo: 'a', onde: 'terra', tamanho: 'pequeno', tom: 700, voa: true, som: 'zum',
+      svg:
+        '<g fill="none" stroke="' + CT + '" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">' +
+        '<ellipse cx="46" cy="30" rx="16" ry="12" fill="#dcecf8"/><ellipse cx="68" cy="28" rx="16" ry="12" fill="#dcecf8"/>' +
+        '<ellipse cx="56" cy="60" rx="36" ry="24" fill="#f2c94c"/>' +
+        '<path d="M40 38 v44 M58 36 v48 M76 40 v40" stroke-width="8"/>' +
+        '<circle cx="96" cy="56" r="14" fill="#f2c94c"/>' +
+        '<path d="M12 60 h10" stroke-width="4"/>' +
+        '</g>' +
+        '<circle cx="100" cy="52" r="4" fill="' + CT + '"/>'
     }
   };
 
@@ -261,11 +324,45 @@
 
   // som simples do bicho: duas notinhas macias no tom dele.
   // Tocar num bicho novo é uma das únicas coisas que corta a fala anterior.
-  function somDoAnimal(chave) {
+  function somDoAnimal(chave, semNome) {
     var a = ANIMAIS[chave];
-    C.falarJa(a.artigo + ' ' + a.nome);
-    daqui(900, function () { C.nota(a.tom, 0.28, 0.05); });
-    daqui(1150, function () { C.nota(a.tom * 1.25, 0.34, 0.045); });
+    if (!semNome) C.falarJa(a.artigo + ' ' + a.nome);
+    var espera = semNome ? 0 : 900;
+    daqui(espera, function () { barulhoDoBicho(a); });
+  }
+
+  // o barulho de cada bicho, tudo sintetizado e macio
+  function barulhoDoBicho(a) {
+    var c = C.audio(); if (!c) return;
+    var t = c.currentTime;
+    function voz(freqIni, freqFim, dur, tipo, vol, corte) {
+      var o = c.createOscillator(); o.type = tipo || 'sine';
+      o.frequency.setValueAtTime(freqIni, t);
+      o.frequency.linearRampToValueAtTime(freqFim, t + dur);
+      var lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = corte || 1400;
+      var g = c.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol || 0.06, t + 0.05);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(lp); lp.connect(g); g.connect(c.destination);
+      o.start(t); o.stop(t + dur + 0.05);
+    }
+    if (a.som === 'grave' || a.nome === 'vaca' || a.nome === 'elefante') {
+      voz(a.tom * 1.4, a.tom * 0.9, 0.7, 'triangle', 0.06, 600);        // "muuu"
+    } else if (a.nome === 'passarinho' || a.som === 'zum') {
+      voz(a.tom, a.tom * 1.5, 0.16, 'sine', 0.05, 3000);                 // piadinho
+      daqui(220, function () { voz(a.tom * 1.2, a.tom * 0.9, 0.16, 'sine', 0.05, 3000); });
+    } else if (a.nome === 'peixe' || a.nome === 'baleia' || a.nome === 'tartaruga') {
+      voz(a.tom, a.tom * 1.1, 0.12, 'sine', 0.04);                       // bolhinhas
+      daqui(180, function () { voz(a.tom * 1.3, a.tom * 1.4, 0.12, 'sine', 0.04); });
+      daqui(360, function () { voz(a.tom * 1.6, a.tom * 1.7, 0.12, 'sine', 0.035); });
+    } else if (a.som === 'quack') {
+      voz(a.tom, a.tom * 0.8, 0.22, 'square', 0.03, 900);
+      daqui(280, function () { voz(a.tom, a.tom * 0.8, 0.22, 'square', 0.03, 900); });
+    } else {
+      C.nota(a.tom, 0.28, 0.05);                                            // duas notinhas
+      daqui(250, function () { C.nota(a.tom * 1.25, 0.34, 0.045); });
+    }
   }
 
   // fala o nome de uma peça quando ela toca (sem arrastar)
@@ -336,6 +433,12 @@
       if (C.estaBloqueado() || el.classList.contains('fixa')) return;
       if (id !== null) return;
       id = e.pointerId; x0 = e.clientX; y0 = e.clientY;
+      // se a peça ainda está voltando para casa, pega do lugar onde ela está agora
+      if (el._rot % 360 === 0) {
+        var m = getComputedStyle(el).transform;
+        var v = m && m !== 'none' ? m.match(/matrix(([^)]+))/) : null;
+        if (v) { var nums = v[1].split(',').map(Number); el._dx = nums[4]; el._dy = nums[5]; }
+      }
       ix = el._dx; iy = el._dy;
       el.style.transition = 'none';
       el.classList.add('pegando');
@@ -1049,21 +1152,45 @@
     t.appendChild(bolota);
 
     var verde = false;
+    var jaTeveVermelho = false;
     var jogando = false;
     var comecou = false;
     var fim = 0;
 
+    var tocouNoVermelho = false;              // só desta fase vermelha
+    var esperouAlgumaVez = false;             // passou por um vermelho inteiro sem tocar?
+
+    function reanimar(classe, ms) {
+      bolota.classList.remove('pula', 'encolhe');
+      void bolota.offsetWidth;
+      bolota.classList.add(classe);
+      daqui(ms, function () { bolota.classList.remove(classe); });
+    }
+
     bolota.addEventListener('pointerdown', function (e) {
       e.preventDefault();
-      if (C.estaBloqueado()) return;
-      if (!verde) return;                       // vermelho: nada acontece
-      C.nota(C.NOTAS[Math.floor(Math.random() * C.NOTAS.length)], 0.4, 0.06);
-      bolota.classList.add('tocada');
-      daqui(500, function () { bolota.classList.remove('tocada'); });
+      if (C.estaBloqueado() || !jogando) return;
+      if (verde) {
+        // verde + toque: a bola pula, som alegre, o gatinho dá um pulinho
+        reanimar('pula', 700);
+        var i = Math.floor(Math.random() * 4);
+        C.nota(C.NOTAS[i], 0.28, 0.06);
+        daqui(120, function () { C.nota(C.NOTAS[i + 2], 0.36, 0.05); });
+        if (C.gatinho) C.gatinho.pula();
+      } else {
+        // vermelho + toque: a bola encolhe um pouquinho, som grave curto,
+        // o gatinho tapa os olhos. Sem palavra de erro, sem contar nada.
+        tocouNoVermelho = true;
+        reanimar('encolhe', 600);
+        C.nota(140, 0.25, 0.045);
+        if (C.gatinho) C.gatinho.tapaOlhos();
+      }
     });
 
     // a cor e o som saem juntos, na mesma linha, sem esperar nada
     function acenderSinal(paraVerde) {
+      if (paraVerde && verde === false && comecou && !tocouNoVermelho && jaTeveVermelho) esperouAlgumaVez = true;
+      if (!paraVerde) { tocouNoVermelho = false; jaTeveVermelho = true; }
       verde = paraVerde;
       bolota.classList.toggle('verde', paraVerde);
       bolota.classList.toggle('vermelha', !paraVerde);
@@ -1105,9 +1232,15 @@
 
     function fecharJogo() {
       jogando = false;
+      // se o jogo acabou no vermelho e ela não tocou, também conta como espera
+      if (!verde && jaTeveVermelho && !tocouNoVermelho) esperouAlgumaVez = true;
       bolota.classList.remove('verde', 'vermelha', 'respirando');
-      balancarGatinho();
-      terminar('Você esperou muito bem!', CONVITE_PARE, DICA_PARE);
+      if (C.gatinho) C.gatinho.aplaude();      // o gatinho aplaude a tentativa
+      if (esperouAlgumaVez) {
+        terminar('Você esperou o vermelho!', CONVITE_PARE, DICA_PARE);
+      } else {
+        terminar('Que legal brincar de pare e siga!', CONVITE_PARE, DICA_PARE);
+      }
     }
 
     // a explicação é falada ANTES de começar; durante o jogo nada mais é falado
@@ -1125,82 +1258,157 @@
 
   /* =========================================================
      BRINCADEIRA 5 - SEPARAR (classificar animais)
+     Cada rodada tem um cenário: água/terra, voa/não voa, grande/pequeno.
+     6 bichos no nível 1, 8 depois (progressão automática).
      ========================================================= */
   var CONVITE_CLASSIFICAR = 'Vamos achar um bichinho no livro e ver onde ele mora?';
   var DICA_CLASSIFICAR = 'Pergunte: esse bicho mora na água ou na terra?';
 
+  // os fundos dos cestos (SVG, cores chapadas, animação bem lenta)
+  var CENARIOS = {
+    agua: '<svg viewBox="0 0 300 160" preserveAspectRatio="none">' +
+          '<rect width="300" height="160" fill="#cfe6f7"/>' +
+          '<rect y="90" width="300" height="70" fill="#a9d1ef"/>' +
+          '<path class="onda" d="M-20 92 q25 -14 50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0" fill="none" stroke="#7fb5e0" stroke-width="5" stroke-linecap="round"/>' +
+          '<path d="M40 130 q12 -8 24 0 l-8 6 l8 6 q-12 8 -24 0 Z" fill="#8fc2e6"/>' +
+          '<path d="M220 118 q12 -8 24 0 l-8 6 l8 6 q-12 8 -24 0 Z" fill="#8fc2e6"/>' +
+          '<circle class="bolha b1" cx="120" cy="140" r="5" fill="none" stroke="#ffffff" stroke-width="2"/>' +
+          '<circle class="bolha b2" cx="180" cy="150" r="4" fill="none" stroke="#ffffff" stroke-width="2"/>' +
+          '<circle class="bolha b3" cx="260" cy="145" r="6" fill="none" stroke="#ffffff" stroke-width="2"/>' +
+          '</svg>',
+    terra: '<svg viewBox="0 0 300 160" preserveAspectRatio="none">' +
+           '<rect width="300" height="160" fill="#e6f2ff"/>' +
+           '<circle cx="250" cy="34" r="20" fill="#ffcf5c"/>' +
+           '<rect y="100" width="300" height="60" fill="#a8d38f"/>' +
+           '<path d="M0 100 q15 -10 30 0 q15 -10 30 0 q15 -10 30 0 q15 -10 30 0 q15 -10 30 0 q15 -10 30 0 q15 -10 30 0 q15 -10 30 0 q15 -10 30 0 q15 -10 30 0" fill="#a8d38f"/>' +
+           '<rect x="52" y="60" width="14" height="46" fill="#8a6a4a"/>' +
+           '<circle cx="59" cy="52" r="30" fill="#6fae7c"/>' +
+           '</svg>',
+    ceu: '<svg viewBox="0 0 300 160" preserveAspectRatio="none">' +
+         '<rect width="300" height="160" fill="#d6ebfb"/>' +
+         '<g class="nuvem n1" fill="#ffffff"><ellipse cx="70" cy="50" rx="34" ry="16"/><ellipse cx="52" cy="42" rx="18" ry="14"/><ellipse cx="88" cy="40" rx="20" ry="15"/></g>' +
+         '<g class="nuvem n2" fill="#ffffff"><ellipse cx="220" cy="90" rx="38" ry="17"/><ellipse cx="200" cy="80" rx="20" ry="15"/><ellipse cx="240" cy="78" rx="22" ry="16"/></g>' +
+         '</svg>',
+    chao: '<svg viewBox="0 0 300 160" preserveAspectRatio="none">' +
+          '<rect width="300" height="160" fill="#f1e7d2"/>' +
+          '<rect y="70" width="300" height="90" fill="#a8d38f"/>' +
+          '<path d="M30 70 l6 -14 l6 14 M110 70 l6 -14 l6 14 M200 70 l6 -14 l6 14 M260 70 l6 -14 l6 14" fill="none" stroke="#6fae7c" stroke-width="4" stroke-linecap="round"/>' +
+          '</svg>',
+    neutro: '<svg viewBox="0 0 300 160" preserveAspectRatio="none"><rect width="300" height="160" fill="#f6e8d6"/></svg>',
+    neutro2: '<svg viewBox="0 0 300 160" preserveAspectRatio="none"><rect width="300" height="160" fill="#f3e3ec"/></svg>'
+  };
+
+  var CASA_REFERENCIA =
+    '<svg viewBox="0 0 100 100">' +
+    '<path d="M50 8 L92 46 H8 Z" fill="#e04a3f" stroke="' + CT + '" stroke-width="4" stroke-linejoin="round"/>' +
+    '<rect x="18" y="46" width="64" height="46" fill="#fdf3df" stroke="' + CT + '" stroke-width="4"/>' +
+    '<rect x="42" y="62" width="16" height="30" fill="#b07a4a" stroke="' + CT + '" stroke-width="4"/>' +
+    '</svg>';
+
+  var RODADAS_SEPARAR = [
+    { campo: 'onde', fala: 'Cada bicho no seu lugar: água ou terra.',
+      cestos: [['agua', 'Água', 'agua'], ['terra', 'Terra', 'terra']],
+      grupoA: ['peixe', 'tartaruga', 'pato', 'baleia', 'sapo'], grupoB: ['gato', 'coelho', 'vaca', 'cavalo', 'rato'],
+      criterio: 'Os da água na água, os da terra na terra!' },
+    { campo: 'voa', fala: 'Quem voa vai para o céu. Quem não voa fica no chão.',
+      cestos: [[true, 'Voa', 'ceu'], [false, 'Não voa', 'chao']],
+      grupoA: ['passarinho', 'borboleta', 'abelha'], grupoB: ['gato', 'vaca', 'elefante', 'tartaruga', 'rato', 'coelho'],
+      criterio: 'Os que voam no céu, os outros no chão!' },
+    { campo: 'tamanho', fala: 'Separe: bicho grande e bicho pequeno. Olhe a casinha.',
+      cestos: [['grande', 'Grande', 'neutro'], ['pequeno', 'Pequeno', 'neutro2']],
+      grupoA: ['elefante', 'vaca', 'cavalo', 'baleia'], grupoB: ['rato', 'passarinho', 'abelha', 'borboleta', 'sapo'],
+      criterio: 'Todos os grandes juntos e todos os pequenos juntos!', comCasa: true }
+  ];
+  var ultimaRodadaSeparar = -1;
+
+  function valorDoBicho(bicho, campo) {
+    var a = ANIMAIS[bicho];
+    if (campo === 'voa') return !!a.voa;
+    return a[campo];
+  }
+
   function atividadeClassificar() {
-    var rodadas = [
-      { fala: 'Cada bicho no seu lugar: água ou terra.',
-        campo: 'onde', cestos: [['agua', 'Água'], ['terra', 'Terra']],
-        bichos: ['peixe', 'tartaruga', 'gato', 'coelho'] },
-      { fala: 'Agora separe: bicho grande e bicho pequeno.',
-        campo: 'tamanho', cestos: [['grande', 'Grande'], ['pequeno', 'Pequeno']],
-        bichos: ['elefante', 'vaca', 'rato', 'passarinho'] }
-    ];
-    var indice = 0;
+    var nivel = progresso('classificar').nivel;      // 1 ou 2
+    var quantos = nivel >= 2 ? 8 : 6;
+    var i;
+    do { i = Math.floor(Math.random() * RODADAS_SEPARAR.length); } while (i === ultimaRodadaSeparar);
+    ultimaRodadaSeparar = i;
+    var r = RODADAS_SEPARAR[i];
+    comecarRodada('classificar');
 
-    function rodada() {
-      var r = rodadas[indice];
-      var t = tabuleiro('', 'clamp(100px, 20vh, 158px)');
-      var cestos = [];
+    var t = tabuleiro('', quantos === 8 ? 'clamp(80px, 16vh, 118px)' : 'clamp(90px, 18vh, 132px)');
+    var cestos = [];
 
-      r.cestos.forEach(function (c, i) {
-        var el = document.createElement('div');
-        el.className = 'cesto ' + (c[0] === 'agua' ? 'agua' : (c[0] === 'terra' ? 'terra' : (c[0] === 'grande' ? 'grande-cesto' : 'pequeno-cesto')));
-        el.style.left = (i === 0 ? 3 : 52) + '%';
-        el.style.top = '6%';
-        el.style.width = '45%';
-        el.style.height = '48%';
-        el.textContent = c[1];
-        el.dataset.valor = c[0];
-        el.dataset.quantos = '0';
-        t.appendChild(el);
-        cestos.push(el);
-      });
+    r.cestos.forEach(function (c, k) {
+      var el = document.createElement('div');
+      el.className = 'cesto com-cenario';
+      el.style.left = (k === 0 ? 3 : 52) + '%';
+      el.style.top = '4%';
+      el.style.width = '45%';
+      el.style.height = '46%';
+      el.innerHTML = '<div class="cenario">' + CENARIOS[c[2]] + '</div><span class="rotulo-cesto">' + c[1] + '</span>';
+      el.dataset.valor = String(c[0]);
+      el.dataset.quantos = '0';
+      t.appendChild(el);
+      cestos.push(el);
+    });
 
-      var faltam = r.bichos.length;
-      embaralhar(r.bichos).forEach(function (bicho, i) {
-        var p = novaPeca(svgAnimal(bicho), 15 + i * 23.5, 79);
-        p.dataset.bicho = bicho;
-        t.appendChild(p);
-        arrastavel(p, {
-          aoToque: function () { somDoAnimal(bicho); },
-          aoSoltar: function (el) {
-            var cesto = alvoMaisPerto(el, cestos);
-            if (cesto && cesto.dataset.valor === ANIMAIS[bicho][r.campo]) {
-              // encaixa dentro do cesto, em uma vaguinha livre
-              var n = Number(cesto.dataset.quantos);
-              cesto.dataset.quantos = String(n + 1);
-              var rc = cesto.getBoundingClientRect();
-              var rp = el.getBoundingClientRect();
-              var alvoX = rc.left + rc.width * (n === 0 ? 0.3 : 0.7);
-              var alvoY = rc.top + rc.height * 0.6;
-              el._dx += alvoX - (rp.left + rp.width / 2);
-              el._dy += alvoY - (rp.top + rp.height / 2);
-              el.style.transition = 'transform .45s ease';
-              aplicar(el);
-              el.classList.add('fixa');
-              acertou(2);
-              var art = ANIMAIS[bicho].artigo === 'a' ? 'A' : 'O';
-              C.falar(art + ' ' + ANIMAIS[bicho].nome + ' é ' + (r.campo === 'onde' ? 'da ' : '') + cesto.textContent.toLowerCase() + '!');
-              faltam--;
-              if (faltam === 0) {
-                indice++;
-                if (indice < rodadas.length) daqui(1800, rodada);
-                else terminar('Tudo separadinho!', CONVITE_CLASSIFICAR, DICA_CLASSIFICAR);
-              }
-            } else {
-              voltarPraCasa(el);
-            }
-          }
-        });
-      });
-
-      C.falar(r.fala + ' Toque no bicho para ouvir o nome.');
+    if (r.comCasa) {
+      var casa = document.createElement('div');
+      casa.className = 'casa-referencia';
+      casa.innerHTML = CASA_REFERENCIA;
+      t.appendChild(casa);
     }
 
-    rodada();
+    // metade de cada grupo
+    var metade = quantos / 2;
+    var bichos = embaralhar(embaralhar(r.grupoA).slice(0, metade).concat(embaralhar(r.grupoB).slice(0, metade)));
+    var faltam = bichos.length;
+
+    bichos.forEach(function (bicho, k) {
+      var x, y;
+      if (quantos === 8) { x = 11 + (k % 4) * 23; y = k < 4 ? 64 : 88; }
+      else { x = 18 + (k % 3) * 28; y = k < 3 ? 64 : 88; }
+      var p = novaPeca(svgAnimal(bicho), x, y);
+      if (r.campo === 'tamanho' && ANIMAIS[bicho].tamanho === 'pequeno') p.classList.add('bicho-pequeno');
+      p.dataset.bicho = bicho;
+      t.appendChild(p);
+
+      arrastavel(p, {
+        aoToque: function () { somDoAnimal(bicho); },
+        aoSoltar: function (el) {
+          var cesto = alvoMaisPerto(el, cestos);
+          if (!cesto || cesto.dataset.valor !== String(valorDoBicho(bicho, r.campo))) { voltarPraCasa(el); return; }
+          var n = Number(cesto.dataset.quantos);
+          cesto.dataset.quantos = String(n + 1);
+          var rc = cesto.getBoundingClientRect(), rp = el.getBoundingClientRect();
+          var colunas = quantos === 8 ? 4 : 3;
+          var alvoX = rc.left + rc.width * ((n % colunas) + 0.5) / colunas;
+          var alvoY = rc.top + rc.height * (n < colunas ? 0.62 : 0.82);
+          el._dx += alvoX - (rp.left + rp.width / 2);
+          el._dy += alvoY - (rp.top + rp.height / 2);
+          el.style.transition = 'transform .45s ease';
+          aplicar(el);
+          el.classList.add('fixa');
+          acertou(2);
+          // o bicho reage: nada, voa, pula ou faz o som dele
+          var a = ANIMAIS[bicho];
+          var reacao = (a.onde === 'agua' && !a.voa) ? 'reage-nada' : (a.voa || a.nome === 'passarinho' ? 'reage-voa' : (a.nome === 'sapo' || a.nome === 'coelho' ? 'reage-pula' : 'reage-som'));
+          daqui(480, function () { el.classList.add(reacao); somDoAnimal(bicho, true); });
+          faltam--;
+          if (faltam === 0) {
+            daqui(1500, function () {
+              C.falar(r.criterio);
+              balancarGatinho();
+              completarRodada('classificar', 2);
+              terminar('Tudo separadinho!', CONVITE_CLASSIFICAR, DICA_CLASSIFICAR);
+            });
+          }
+        }
+      });
+    });
+
+    C.falar(r.fala + ' Toque no bicho para ouvir o nome.');
   }
 
   /* =========================================================
