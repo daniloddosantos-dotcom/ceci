@@ -307,6 +307,7 @@
   // deixa os desenhos à mão para a página de teste animais.html
   C.ANIMAIS = ANIMAIS;
   C.svgAnimal = svgAnimal;
+  C.somDoAnimal = function (chave) { somDoAnimal(chave); };
   if (!palco) return;      // sem palco = é a folha de teste, não o app
 
   // cabeça de gatinho de frente, só para o quebra-cabeça do nível 2

@@ -588,6 +588,7 @@
     tocar: 'Tocar',
     bater: 'Bater junto',
     eco: 'Eco',
+    bichos: 'Sons dos bichos',
     dancar: 'Dançar',
     desenhar: 'Desenhar'
   };
@@ -678,6 +679,7 @@
 
     if (copia) { ctx.drawImage(copia, 0, 0, larguraCSS, alturaCSS); }
     retangulo = canvas.getBoundingClientRect();
+    if (typeof ajustarGuia === 'function') ajustarGuia();
   }
 
   window.addEventListener('resize', function () {
@@ -756,6 +758,7 @@
     try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
     ultimoPonto = posicao(e);
     pingo(ultimoPonto, larguraDoTraco(e));
+    if (modoLinha) alimentarLinha(ultimoPonto);
     e.preventDefault();
   });
 
@@ -771,6 +774,7 @@
       var p = posicao(ev);
       traco(ultimoPonto, p, larguraDoTraco(ev));
       ultimoPonto = p;
+      if (modoLinha) alimentarLinha(p);
     }
     e.preventDefault();
   });
@@ -795,6 +799,7 @@
     b.addEventListener('click', function () {
       corAtual = b.getAttribute('data-cor');
       borrachaLigada = false;   // a cor vale tambem para o carimbo
+      if (modoLinha) desenharGuia();
       marcarFerramentas();
       nota(NOTAS[Number(b.getAttribute('data-nota')) % NOTAS.length], 0.34, 0.06);
     });
@@ -806,6 +811,7 @@
       tamanhoAtual = b.getAttribute('data-tamanho');
       borrachaLigada = false;
       carimboLigado = false;
+      desligarLinha();
       marcarFerramentas();
       nota(NOTAS[2], 0.26, 0.045);
     });
@@ -815,6 +821,7 @@
   $('#btn-borracha').addEventListener('click', function () {
     borrachaLigada = true;
     carimboLigado = false;
+    desligarLinha();
     marcarFerramentas();
     nota(NOTAS[0], 0.3, 0.04);
   });
@@ -834,6 +841,7 @@
       figuraAtual = b.getAttribute('data-figura');
       carimboLigado = true;
       borrachaLigada = false;
+      desligarLinha();
       $('#escolher-carimbo').classList.add('oculto');
       marcarFerramentas();
       nota(NOTAS[4], 0.34, 0.05);
@@ -902,6 +910,7 @@
     });
     $('#btn-borracha').classList.toggle('escolhida', borrachaLigada);
     $('#btn-carimbo').classList.toggle('escolhida', carimboLigado);
+    $('#btn-linha').classList.toggle('escolhida', modoLinha);
   }
   marcarFerramentas();
 
@@ -917,6 +926,155 @@
 
   // --- casa ---
   $('#btn-casa').addEventListener('click', irParaInicio);
+
+
+  /* --- Seguir a linha: uma linha pontilhada grossa para ela traçar por cima.
+     O trecho que ela cobre fica colorido. Sair da linha não faz nada.
+     Tolerância: 1,5 cm (uns 64 px). --- */
+  var guia = document.createElement('canvas');
+  guia.id = 'guia';
+  area.appendChild(guia);
+  var gctx = guia.getContext('2d');
+  var modoLinha = false;
+  var linha = { tipo: '', pontos: [], visitados: [], completa: false };
+  var TOLERANCIA_LINHA = 64;
+  var TIPOS_LINHA = ['reta', 'curva', 'zigue', 'circulo', 'letraC'];
+  var NOME_LINHA = { reta: 'uma linha reta', curva: 'uma curva', zigue: 'um zigue-zague', circulo: 'um círculo', letraC: 'a letra C' };
+  var ultimaLinha = '';
+
+  function ajustarGuia() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    guia.width = canvas.width; guia.height = canvas.height;
+    guia.style.width = canvas.style.width; guia.style.height = canvas.style.height;
+    guia.style.left = canvas.offsetLeft + 'px';
+    guia.style.top = canvas.offsetTop + 'px';
+    gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (modoLinha) { gerarLinha(linha.tipo); }
+  }
+
+  // gera os pontos da linha (em px do canvas), bem espaçados
+  function gerarLinha(tipo) {
+    var w = parseFloat(canvas.style.width), h = parseFloat(canvas.style.height);
+    var brutos = [];
+    var i, n;
+    if (tipo === 'reta') {
+      for (i = 0; i <= 40; i++) brutos.push([w * 0.18 + (w * 0.64) * i / 40, h * 0.5]);
+    } else if (tipo === 'curva') {
+      for (i = 0; i <= 40; i++) { var a = Math.PI + Math.PI * i / 40; brutos.push([w * 0.5 + Math.cos(a) * w * 0.32, h * 0.62 + Math.sin(a) * h * 0.42]); }
+    } else if (tipo === 'zigue') {
+      var picos = [[0.15, 0.7], [0.32, 0.3], [0.5, 0.7], [0.68, 0.3], [0.85, 0.7]];
+      for (i = 0; i < picos.length - 1; i++) for (n = 0; n <= 12; n++) brutos.push([w * (picos[i][0] + (picos[i + 1][0] - picos[i][0]) * n / 12), h * (picos[i][1] + (picos[i + 1][1] - picos[i][1]) * n / 12)]);
+    } else if (tipo === 'circulo') {
+      var r = Math.min(w, h) * 0.32;
+      for (i = 0; i <= 60; i++) { var b = -Math.PI / 2 + Math.PI * 2 * i / 60; brutos.push([w * 0.5 + Math.cos(b) * r, h * 0.5 + Math.sin(b) * r]); }
+    } else {
+      var rc = Math.min(w, h) * 0.32;
+      for (i = 0; i <= 50; i++) { var c = -Math.PI * 0.3 - Math.PI * 1.4 * i / 50; brutos.push([w * 0.5 + Math.cos(c) * rc, h * 0.5 + Math.sin(c) * rc]); }
+    }
+    linha.tipo = tipo;
+    linha.pontos = brutos;
+    linha.visitados = brutos.map(function () { return false; });
+    linha.completa = false;
+    desenharGuia();
+  }
+
+  function desenharGuia() {
+    var w = parseFloat(canvas.style.width), h = parseFloat(canvas.style.height);
+    gctx.clearRect(0, 0, w, h);
+    if (!modoLinha || !linha.pontos.length) return;
+    var pts = linha.pontos, i;
+    // 1) a linha pontilhada cinza, bem grossa
+    gctx.lineCap = 'round'; gctx.lineJoin = 'round';
+    gctx.setLineDash([2, 26]);
+    gctx.lineWidth = 22;
+    gctx.strokeStyle = 'rgba(120,110,95,.35)';
+    gctx.beginPath();
+    gctx.moveTo(pts[0][0], pts[0][1]);
+    for (i = 1; i < pts.length; i++) gctx.lineTo(pts[i][0], pts[i][1]);
+    gctx.stroke();
+    // 2) o que ela já traçou fica colorido
+    gctx.setLineDash([]);
+    gctx.lineWidth = 24;
+    gctx.strokeStyle = corAtual;
+    gctx.globalAlpha = 0.55;
+    for (i = 1; i < pts.length; i++) {
+      if (linha.visitados[i - 1] && linha.visitados[i]) {
+        gctx.beginPath(); gctx.moveTo(pts[i - 1][0], pts[i - 1][1]); gctx.lineTo(pts[i][0], pts[i][1]); gctx.stroke();
+      }
+    }
+    gctx.globalAlpha = 1;
+    // 3) ponto de partida grande com uma seta
+    if (!linha.completa) {
+      var p0 = pts[0], p1 = pts[3] || pts[1];
+      gctx.fillStyle = '#4aa657';
+      gctx.beginPath(); gctx.arc(p0[0], p0[1], 24, 0, Math.PI * 2); gctx.fill();
+      gctx.strokeStyle = '#ffffff'; gctx.lineWidth = 4;
+      gctx.beginPath(); gctx.arc(p0[0], p0[1], 24, 0, Math.PI * 2); gctx.stroke();
+      var ang = Math.atan2(p1[1] - p0[1], p1[0] - p0[0]);
+      var sx = p0[0] + Math.cos(ang) * 44, sy = p0[1] + Math.sin(ang) * 44;
+      gctx.strokeStyle = '#4aa657'; gctx.lineWidth = 7;
+      gctx.beginPath(); gctx.moveTo(p0[0] + Math.cos(ang) * 26, p0[1] + Math.sin(ang) * 26); gctx.lineTo(sx, sy); gctx.stroke();
+      gctx.fillStyle = '#4aa657';
+      gctx.beginPath();
+      gctx.moveTo(sx + Math.cos(ang) * 14, sy + Math.sin(ang) * 14);
+      gctx.lineTo(sx + Math.cos(ang + 2.4) * 12, sy + Math.sin(ang + 2.4) * 12);
+      gctx.lineTo(sx + Math.cos(ang - 2.4) * 12, sy + Math.sin(ang - 2.4) * 12);
+      gctx.closePath(); gctx.fill();
+    }
+  }
+
+  // cada ponto por onde o dedo passa marca os pontos da linha que estão perto
+  function alimentarLinha(p) {
+    if (!modoLinha || linha.completa) return;
+    var pts = linha.pontos, mudou = false, i;
+    for (i = 0; i < pts.length; i++) {
+      if (linha.visitados[i]) continue;
+      var dx = pts[i][0] - p.x, dy = pts[i][1] - p.y;
+      if (dx * dx + dy * dy <= TOLERANCIA_LINHA * TOLERANCIA_LINHA) { linha.visitados[i] = true; mudou = true; }
+    }
+    if (!mudou) return;
+    desenharGuia();
+    var feitos = linha.visitados.filter(Boolean).length;
+    if (feitos >= pts.length * 0.9) {
+      linha.completa = true;
+      desenharGuia();
+      nota(NOTAS[3], 0.4, 0.05); setTimeout(function () { nota(NOTAS[5], 0.5, 0.05); }, 160);
+      if (window.Ceci.gatinho) window.Ceci.gatinho.balanca();
+      falarJa('Você fez ' + NOME_LINHA[linha.tipo] + '!');
+      setTimeout(function () { if (modoLinha) novaLinha(); }, 2600);
+    }
+  }
+
+  function novaLinha() {
+    var tipo;
+    do { tipo = TIPOS_LINHA[Math.floor(Math.random() * TIPOS_LINHA.length)]; } while (tipo === ultimaLinha);
+    ultimaLinha = tipo;
+    gerarLinha(tipo);
+  }
+
+  function ligarLinha() {
+    modoLinha = true;
+    carimboLigado = false;
+    borrachaLigada = false;
+    ajustarGuia();
+    novaLinha();
+    marcarFerramentas();
+    nota(NOTAS[2], 0.3, 0.05);
+    falar('Começa na bolinha verde e segue a linha.');
+  }
+
+  function desligarLinha() {
+    if (!modoLinha) return;
+    modoLinha = false;
+    linha.pontos = [];
+    desenharGuia();
+    marcarFerramentas();
+  }
+
+  $('#btn-linha').addEventListener('click', function () {
+    if (modoLinha) { novaLinha(); nota(NOTAS[2], 0.3, 0.05); return; }   // outra linha
+    ligarLinha();
+  });
 
   /* ---------------------------------------------------------
      10) Galeria da Cecí (guardada no próprio tablet)

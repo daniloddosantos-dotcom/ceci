@@ -223,3 +223,38 @@ de abrir pelo navegador e recupera a tela cheia se ela for perdida.
 Como em tela cheia as beiradas laterais são a área do **gesto de voltar** do Android,
 todos os botões ficam afastados das bordas (uma margem de segurança que também
 respeita o recorte da tela do aparelho).
+
+## 10. Reformulação depois da primeira semana de uso
+
+**Gatinho companheiro.** Fica no canto de baixo à direita de todas as telas (por isso a
+engrenagem do papai foi para o canto de cima à esquerda). Tocar nele sorteia uma reação
+(mia, se espreguiça, pula, se enrola, pisca, abana o rabo); a cada 3 toques ele fala uma
+dica do que fazer naquela tela. Ele acena quando ela guarda um desenho, balança a cabeça
+quando ela acerta, boceja quando faltam 2 minutos.
+
+**Ritual de dormir.** No fim da sessão o sol se deita, a tela vira noite, o gatinho boceja,
+anda até a caminha, se deita e ronca (zzz). Tocar nele dormindo só faz "shhh".
+Fica assim até o PIN do papai.
+
+**Progressão automática (Encaixar, Achar o par, Contar).** 3 rodadas completas seguidas
+sobem um nível; abandonar 2 vezes seguidas no meio desce um nível. Não depende do
+"Nível das brincadeiras" do painel (esse ainda vale para o Eco, que ficou escondido).
+O nível automático aparece no Registro do painel.
+
+- **Encaixar**: cenários sorteados (formas, formas 2, cores, quebra-cabeça do gatinho,
+  casinha); mais peças no nível 2, rotação no nível 3; a figura ganha vida ao terminar.
+- **Achar o par**: temas sorteados (animais, formas, frutas, veículos), verso colorido,
+  2 → 3 → 4 → 6 pares; "qual vem depois?" com padrão de forma, cor ou tamanho.
+- **Contar** (no lugar de "Em ordem"): ordenar por tamanho, contar tocando, dar N maçãs
+  para o gatinho.
+- **Pare e siga**: verde + toque = a bola pula; vermelho + toque = a bola encolhe e o
+  gatinho tapa os olhos (sem palavra de erro). No fim, "você esperou o vermelho!" quando
+  ela esperou pelo menos uma vez.
+- **Separar**: cenários (água/terra, voa/não voa, grande/pequeno com a casinha de
+  referência), 6 bichos e depois 8, o bicho reage ao cair no lugar certo.
+- **Dançar**: 5 músicas (duas originais novas: "calminha" e "pulinho"); tocar no ícone dá
+  uma prévia de 2 s e depois a dança começa. **Sons dos bichos** entrou no lugar do Eco.
+- **Desenhar**: botão "Seguir a linha" (abaixo da galeria): linha pontilhada grossa
+  (reta, curva, zigue-zague, círculo, letra C), bolinha verde de partida com seta,
+  tolerância de 1,5 cm; o trecho traçado fica colorido e, ao completar, o gatinho
+  balança e a voz diz o que ela fez.

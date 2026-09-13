@@ -443,6 +443,46 @@
              '<circle cx="40" cy="48" r="4" fill="' + CT + '"/><circle cx="60" cy="48" r="4" fill="' + CT + '"/></svg>'
     },
 
+    calma: {
+      nome: 'calminha', bpm: 76, repetir: 1,
+      // acalanto original: frase que desce devagar, repete, e termina no dó
+      melodia:
+        'E5:2 D5:1 C5:1  D5:2 C5:2  A4:1 C5:1 D5:1 C5:1  G4:4 ' +
+        'E5:2 D5:1 C5:1  D5:2 C5:2  A4:1 C5:1 D5:1 E5:1  C5:4 ' +
+        'G4:1 A4:1 C5:2  A4:1 G4:1 E4:2  G4:1 A4:1 C5:1 D5:1  C5:4 ' +
+        'E5:2 D5:1 C5:1  D5:2 C5:2  A4:1 C5:1 D5:1 E5:1  C5:6',
+      acordes:
+        'C:4 Am:4 F:4 G:4 ' +
+        'C:4 Am:4 F:4 C:4 ' +
+        'Am:4 F:4 G:4 C:4 ' +
+        'C:4 Am:4 F:4 C:6',
+      dinamica: [[16, 0.85], [32, 0.7], [48, 0.6], [70, 0.75]],
+      icone: '<svg viewBox="0 0 100 100"><path d="M60 14 a34 34 0 1 0 22 60 a28 28 0 0 1 -22 -60 Z" fill="#c9c3e8" stroke="' + CT + '" stroke-width="5" stroke-linejoin="round"/>' +
+             '<path d="M22 30 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3 Z" fill="#f2c94c"/></svg>'
+    },
+
+    alegre: {
+      nome: 'pulinho', bpm: 126, repetir: 1,
+      // dancinha original: saltitante, com pergunta e resposta, e final no dó
+      melodia:
+        'C5:.5 C5:.5 E5:1 G5:1 E5:1  C5:.5 C5:.5 E5:1 G5:2 ' +
+        'A5:.5 A5:.5 G5:1 E5:1 D5:1  C5:1 D5:1 E5:2 ' +
+        'C5:.5 C5:.5 E5:1 G5:1 E5:1  C5:.5 C5:.5 E5:1 G5:2 ' +
+        'A5:.5 A5:.5 G5:1 E5:1 D5:1  D5:1 D5:1 C5:2 ' +
+        'G5:.5 G5:.5 A5:1 G5:1 E5:1  F5:.5 F5:.5 G5:1 F5:1 D5:1 ' +
+        'C5:.5 C5:.5 E5:1 G5:1 E5:1  D5:1 D5:1 C5:2 ' +
+        'E5:1 G5:1 C6:2  C5:4',
+      acordes:
+        'C:4 C:4 F:4 C:4 ' +
+        'C:4 C:4 F:2 G:2 C:4 ' +
+        'G:4 F:4 C:4 G:2 C:2 ' +
+        'C:4 C:4',
+      dinamica: [[16, 1], [32, 0.85], [48, 1], [64, 0.8], [72, 1]],
+      icone: '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="34" fill="#f2b705" stroke="' + CT + '" stroke-width="5"/>' +
+             '<circle cx="38" cy="42" r="4" fill="' + CT + '"/><circle cx="62" cy="42" r="4" fill="' + CT + '"/>' +
+             '<path d="M34 58 q16 16 32 0" fill="none" stroke="' + CT + '" stroke-width="5" stroke-linecap="round"/></svg>'
+    },
+
     brilha: {
       nome: 'estrelinha', bpm: 100, repetir: 1,
       melodia:
@@ -737,8 +777,7 @@
         if (C.estaBloqueado()) return;
         escolhida = chave;
         marcarEscolha();
-        C.falarJa('Música ' + m.nome);
-        daqui(900, comecarDanca);
+        previaDe(chave, function () { daqui(500, comecarDanca); });
       });
       escolhas.appendChild(b);
     });
@@ -747,6 +786,20 @@
       Array.prototype.forEach.call(escolhas.children, function (b, i) {
         b.classList.toggle('escolhida', Object.keys(MUSICAS)[i] === escolhida);
       });
+    }
+
+    // toca só os 2 primeiros segundos da música (o gatinho fica parado)
+    function previaDe(chave, depois) {
+      pararDanca();
+      var m = MUSICAS[chave];
+      var montado = montarEventos(m);
+      danca.eventos = montado.eventos.filter(function (e) { return e.t < 2.0; });
+      danca.total = 2.0;
+      danca.i = 0;
+      danca.vozes = [];
+      danca.base = ctx().currentTime + 0.15;
+      danca.tocando = true;
+      danca.relogio = cada(30, function () { passoDaMelodia(function () { pararDanca(); if (depois) depois(); }); });
     }
 
     function pararDanca() {
@@ -806,6 +859,34 @@
   }
 
   /* ---------------------------------------------------------
+     6b) SONS DOS BICHOS - toca no bicho, ele faz o som, diz o nome e se mexe
+     --------------------------------------------------------- */
+  function atividadeBichos() {
+    var cena = document.createElement('div');
+    cena.className = 'cena-bichos';
+    palco.appendChild(cena);
+    var lista = ['gato', 'vaca', 'cavalo', 'passarinho', 'peixe', 'pato', 'sapo', 'abelha'];
+    lista.forEach(function (chave) {
+      var a = C.ANIMAIS[chave];
+      if (!a) return;
+      var b = document.createElement('button');
+      b.className = 'bicho-som';
+      b.innerHTML = C.svgAnimal(chave);
+      var mexe = (a.onde === 'agua' && !a.voa) ? 'reage-nada' : (a.voa || chave === 'passarinho' ? 'reage-voa' : (chave === 'sapo' ? 'reage-pula' : 'reage-som'));
+      b.addEventListener('pointerdown', function (e) {
+        e.preventDefault();
+        if (C.estaBloqueado()) return;
+        b.classList.remove('reage-nada', 'reage-voa', 'reage-pula', 'reage-som');
+        void b.offsetWidth;
+        b.classList.add(mexe);
+        if (C.somDoAnimal) C.somDoAnimal(chave);
+      });
+      cena.appendChild(b);
+    });
+    C.falar('Toque num bicho para ouvir o som dele.');
+  }
+
+  /* ---------------------------------------------------------
      7) Abrir e fechar
      --------------------------------------------------------- */
   function pararTudo() {
@@ -828,10 +909,11 @@
     C.irPara('tela-som');
     prepararSons();
     daqui(80, function () {
-      C.dicaAtual = { tocar: 'Toca nas teclas coloridas!', eco: 'Agora é a sua vez de tocar!', dancar: 'Dança com o gatinho!' }[nome];
+      C.dicaAtual = { tocar: 'Toca nas teclas coloridas!', eco: 'Agora é a sua vez de tocar!', dancar: 'Dança com o gatinho!', bichos: 'Toca no bicho para ouvir!' }[nome];
       if (nome === 'tocar') atividadeTocar();
       else if (nome === 'eco') atividadeEco();
       else if (nome === 'dancar') atividadeDancar();
+      else if (nome === 'bichos') atividadeBichos();
     });
   }
 
