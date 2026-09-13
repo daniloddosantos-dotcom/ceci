@@ -61,6 +61,86 @@
   </button>
 </section>
 
+<!-- ================= MENU DO DESENHAR ================= -->
+<section id="tela-desenhar" class="tela">
+  <div class="menu menu-desenhar">
+    <button class="cartao pequeno" data-desenho="livre">
+      <svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+        <rect x="14" y="14" width="72" height="72" rx="10" fill="#fffdf7" stroke="#3a3630" stroke-width="4"/>
+        <path d="M28 66 L34 48 L60 22 L72 34 L46 60 Z" fill="#f6d06a" stroke="#3a3630" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M22 78 C36 72 50 76 66 80" stroke="#e08a9b" stroke-width="5" stroke-linecap="round" fill="none"/>
+      </svg>
+      <span class="rotulo">Folha livre</span>
+    </button>
+
+    <button class="cartao pequeno" data-desenho="linha">
+      <svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M14 70 q22 -50 44 0 t28 -30" fill="none" stroke="#b3a894" stroke-width="8" stroke-linecap="round" stroke-dasharray="1 14"/>
+        <circle cx="14" cy="70" r="10" fill="#4aa657" stroke="#3a3630" stroke-width="3"/>
+      </svg>
+      <span class="rotulo">Seguir a linha</span>
+    </button>
+
+    <button class="cartao pequeno" data-desenho="espelho">
+      <svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M50 14 V86" stroke="#b3a894" stroke-width="4" stroke-dasharray="6 8" stroke-linecap="round"/>
+        <path d="M46 30 q-26 -18 -30 8 q-2 16 14 14 q-14 6 -8 18 q8 10 24 -6 Z" fill="#e987b8" stroke="#3a3630" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M54 30 q26 -18 30 8 q2 16 -14 14 q14 6 8 18 q-8 10 -24 -6 Z" fill="#e987b8" stroke="#3a3630" stroke-width="4" stroke-linejoin="round"/>
+        <ellipse cx="50" cy="52" rx="4" ry="18" fill="#3a3630"/>
+      </svg>
+      <span class="rotulo">Espelho</span>
+    </button>
+
+    <button class="cartao pequeno" data-desenho="completar">
+      <svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M50 14 a36 36 0 0 0 0 72" fill="#f7d9a0" stroke="#3a3630" stroke-width="4"/>
+        <path d="M50 14 a36 36 0 0 1 0 72" fill="none" stroke="#cfc6b6" stroke-width="4" stroke-dasharray="6 8"/>
+        <circle cx="36" cy="44" r="4" fill="#3a3630"/>
+        <path d="M32 62 q8 8 18 6" fill="none" stroke="#3a3630" stroke-width="4" stroke-linecap="round"/>
+      </svg>
+      <span class="rotulo">Completar</span>
+    </button>
+
+    <button class="cartao pequeno" data-desenho="pintar">
+      <svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M24 42 L52 14 L84 46 L56 74 Z" fill="#9ec5e8" stroke="#3a3630" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M24 42 q-14 14 -8 30 q6 14 20 8" fill="#3a72c4" stroke="#3a3630" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M52 14 L40 6" stroke="#3a3630" stroke-width="5" stroke-linecap="round"/>
+        <ellipse cx="80" cy="76" rx="9" ry="12" fill="#3a72c4" stroke="#3a3630" stroke-width="4"/>
+      </svg>
+      <span class="rotulo">Pintar dentro</span>
+    </button>
+
+    <button class="cartao pequeno" data-desenho="cores">
+      <svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M8 40 h26 l-3 40 h-20 Z" fill="#e04a3f" stroke="#3a3630" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M37 40 h26 l-3 40 h-20 Z" fill="#3a72c4" stroke="#3a3630" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M66 40 h26 l-3 40 h-20 Z" fill="#f2b705" stroke="#3a3630" stroke-width="4" stroke-linejoin="round"/>
+        <circle cx="50" cy="22" r="11" fill="#4aa657" stroke="#3a3630" stroke-width="4"/>
+      </svg>
+      <span class="rotulo">Misturar cores</span>
+    </button>
+  </div>
+
+  <button class="voltar-canto" id="btn-desenhar-casa" aria-label="Voltar para o inicio">
+    <svg viewBox="0 0 100 100" aria-hidden="true">
+      <path d="M18 50 L50 22 L82 50" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M28 46 V78 H72 V46" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+</section>
+
+<!-- ================= MISTURAR CORES ================= -->
+<section id="tela-cores" class="tela">
+  <div id="palco-cores"></div>
+  <button class="voltar-canto" id="btn-cores-voltar" aria-label="Voltar para o desenhar">
+    <svg viewBox="0 0 100 100" aria-hidden="true">
+      <path d="M18 50 L50 22 L82 50" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M28 46 V78 H72 V46" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+</section>
+
 <!-- ================= TELA DE DESENHO ================= -->
 <section id="tela-desenho" class="tela">
   <aside class="barra">
@@ -122,10 +202,18 @@
       </svg>
     </button>
 
-    <button id="btn-linha" class="flutuante abaixo2" aria-label="Seguir a linha">
+    <button id="btn-linha" class="flutuante abaixo2" aria-label="Outra figura">
       <svg viewBox="0 0 100 100" aria-hidden="true">
-        <path d="M14 70 q22 -50 44 0 t28 -30" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-dasharray="1 14"/>
-        <circle cx="14" cy="70" r="9" fill="#4aa657"/>
+        <path d="M76 42 a30 30 0 1 0 6 22" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round"/>
+        <path d="M84 20 V44 H60" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <button id="btn-musica-fundo" class="flutuante abaixo3" aria-label="Desenhar com musica">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M42 72 V30 L74 22 V64" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        <ellipse cx="34" cy="72" rx="12" ry="9" fill="#9ec5e8" stroke="currentColor" stroke-width="5"/>
+        <ellipse cx="66" cy="64" rx="12" ry="9" fill="#9ec5e8" stroke="currentColor" stroke-width="5"/>
       </svg>
     </button>
 
@@ -371,6 +459,9 @@
 <div id="escolher-carimbo" class="sobreposicao oculto">
   <div class="balao">
     <div class="figuras">
+      <button class="figura pincel" data-figura="pincel" aria-label="Voltar para o lapis">
+        <svg viewBox="0 0 100 100"><path d="M24 76 L30 56 L62 24 L76 38 L44 70 Z" fill="#f6d06a" stroke="#3a3630" stroke-width="5" stroke-linejoin="round"/><path d="M62 24 L76 38" stroke="#3a3630" stroke-width="5" stroke-linecap="round"/><path d="M24 76 L36 72" stroke="#3a3630" stroke-width="5" stroke-linecap="round"/><path d="M18 84 C34 80 46 82 60 86" stroke="#e08a9b" stroke-width="6" stroke-linecap="round" fill="none"/></svg>
+      </button>
       <button class="figura" data-figura="circulo" aria-label="Circulo">
         <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="38" fill="#e04a3f" stroke="#3a3630" stroke-width="5"/></svg>
       </button>
@@ -476,5 +567,6 @@
 <script src="gatinho.js"></script>
 <script src="brincar.js"></script>
 <script src="musica.js"></script>
+<script src="desenhar.js"></script>
 </body>
 </html>

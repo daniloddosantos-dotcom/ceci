@@ -69,7 +69,17 @@
    'Você fez uma curva!',
    'Você fez um zigue-zague!',
    'Você fez um círculo!',
-   'Você fez a letra C!'].forEach(add);
+   'Você fez a letra C!',
+   // modos do ateliê
+   'Risca de um lado e olha o outro!',
+   'O desenho está pela metade. Termina ele!',
+   'Toca dentro da figura para pintar!',
+   'Que rosto lindo!', 'Que gato lindo!', 'Que casa linda!', 'Que flor linda!', 'Que carro lindo!',
+   // misturar cores
+   'Arrasta um pote em cima do outro e olha a cor nova!',
+   'Arrasta um pote em cima do outro!',
+   'Azul com amarelo dá verde!', 'Vermelho com amarelo dá laranja!', 'Vermelho com azul dá roxo!',
+   'laranja'].forEach(add);
 
   // ---- encaixar ----
   ['Leva cada forma para a sombra dela, lá em cima.',

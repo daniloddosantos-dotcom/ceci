@@ -652,6 +652,8 @@
       '<path d="M40 30 h12" fill="none"' + TR + '/>') }
   };
 
+  C.VEICULOS = VEICULOS;      // os carimbos do ateliê usam estes desenhos
+
   var OBJETOS = {
     patinho: { nome: 'patinho', plural: 'patinhos', artPlural: 'os', fem: false, svg: svg100(
       '<ellipse cx="46" cy="64" rx="30" ry="20" fill="#f2c94c"' + TR + '/>' +

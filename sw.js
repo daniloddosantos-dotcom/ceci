@@ -9,7 +9,7 @@
 importScripts('frases.js');
 importScripts('musicas.js');
 
-var VERSAO = 'ceci-v20';
+var VERSAO = 'ceci-v21';
 
 var ARQUIVOS = [
   './',
@@ -23,7 +23,8 @@ var ARQUIVOS = [
   './icone.svg',
   './icone-mascara.svg',
   './frases.js',
-  './musicas.js'
+  './musicas.js',
+  './desenhar.js'
 ];
 
 // todos os áudios das frases, para falar offline

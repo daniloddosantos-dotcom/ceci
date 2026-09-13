@@ -142,6 +142,50 @@ button{
 .segurando{ opacity:1 !important; }              /* a engrenagem aparece enquanto segura */
 .ferramenta.segurando, .apagar.segurando{ background:#fff3f6; }  /* fundo rosado de "segurando" */
 
+/* ------------------ Menu do Desenhar ------------------ */
+#tela-desenhar{
+  align-items:center; justify-content:center;
+  background: radial-gradient(120% 90% at 50% 0%, #fffdf8 0%, var(--creme) 45%, var(--creme-fundo) 100%);
+}
+.menu-desenhar{ flex-wrap:wrap; width:min(900px, 86vw); gap:clamp(10px, 2vw, 24px); padding:0 24px; }
+.menu-desenhar .cartao.pequeno{ width:clamp(150px, 24vw, 250px); height:clamp(110px, 34vh, 200px); }
+.menu-desenhar .cartao.pequeno .ico{ width:clamp(50px, 12vh, 90px); height:clamp(50px, 12vh, 90px); }
+
+/* ------------------ Misturar cores ------------------ */
+#tela-cores{ background:var(--creme); }
+#palco-cores{
+  position:absolute; inset:0;
+  padding: calc(14px + var(--seguro-topo)) calc(90px + var(--seguro-dir)) calc(14px + var(--seguro-baixo)) calc(96px + var(--seguro-esq));
+}
+.pote{
+  position:absolute; width:clamp(120px, 26vh, 190px); height:clamp(132px, 28.6vh, 209px);
+  margin-left:calc(clamp(120px, 26vh, 190px) / -2); margin-top:calc(clamp(132px, 28.6vh, 209px) / -2);
+  touch-action:none; cursor:grab;
+}
+.pote svg{ width:100%; height:100%; display:block; pointer-events:none; }
+.pote.pegando{ z-index:5; filter:drop-shadow(0 10px 12px rgba(0,0,0,.18)); }
+.pote.voltando{ transition:left .6s ease, top .6s ease; }
+.pote.alvo svg{ transform:scale(1.08); transition:transform .3s ease; }
+.pote.mexendo svg{ animation: mexer-pote .9s ease-in-out 1; }
+@keyframes mexer-pote{ 0%,100%{ transform:rotate(0deg); } 25%{ transform:rotate(-8deg); } 75%{ transform:rotate(8deg); } }
+.resultado-cor{
+  position:absolute; left:50%; top:30%; transform:translate(-50%, -50%);
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+  opacity:0; transition:opacity .8s ease; pointer-events:none;
+}
+.resultado-cor.visivel{ opacity:1; }
+.bola-cor{
+  width:clamp(140px, 32vh, 240px); height:clamp(140px, 32vh, 240px); border-radius:50%;
+  border:6px solid rgba(0,0,0,.12); background:#ddd;
+  transition:background .9s ease;
+}
+.nome-cor{ font-size:clamp(22px, 4vh, 36px); font-weight:700; color:var(--tinta); min-height:1.3em; }
+.paleta-nova{
+  position:absolute; right:0; top:42%; transform:translateY(-50%);
+  display:flex; flex-direction:column; gap:12px;
+}
+.cor-nova{ width:var(--b); height:var(--b); border-radius:50%; border:3px solid rgba(0,0,0,.1); touch-action:none; }
+
 /* ------------------ Tela de desenho ------------------ */
 #tela-desenho{ flex-direction:row; background:var(--creme-fundo); }
 
@@ -206,14 +250,26 @@ button{
 /* a galeria fica logo abaixo da casinha; a linha, abaixo da galeria */
 .flutuante.abaixo{ top:calc(8px + var(--seguro-topo) + var(--b) + 10px); }
 .flutuante.abaixo2{ top:calc(8px + var(--seguro-topo) + 2 * (var(--b) + 10px)); }
+.flutuante.abaixo3{ top:calc(8px + var(--seguro-topo) + 3 * (var(--b) + 10px)); }
+/* o botão "outra" só aparece nos modos que têm outra figura / outra linha */
+#btn-linha{ display:none; }
+body[data-modo-atelie="linha"] #btn-linha,
+body[data-modo-atelie="pintar"] #btn-linha,
+body[data-modo-atelie="completar"] #btn-linha{ display:flex; }
+/* com cores a mais (misturadas), a barra ganha uma sétima fileira */
+body.barra-7{ --b: min(96px, calc((100vh - 76px) / 7)); }
 .flutuante.escolhida{ border-color:var(--tinta); border-width:5px; }
 /* a folha-guia do "seguir a linha" fica por cima do desenho, sem pegar toques */
 #guia{ position:absolute; pointer-events:none; }
 
-/* painel das figuras do carimbo */
+/* painel das figuras do carimbo (três fileiras: formas, bichos, veículos) */
 .figuras{ display:flex; gap:clamp(12px, 2.5vw, 28px); }
+.figuras + .figuras{ margin-top:clamp(8px, 1.6vh, 16px); }
+.figura.pincel{ background:var(--creme-fundo); margin-right:clamp(8px, 1.6vw, 20px); }
+#escolher-carimbo .balao{ align-items:flex-start; }
+#escolher-carimbo .figuras + .figuras{ margin-left:calc(clamp(84px, 17vh, 130px) + clamp(12px, 2.5vw, 28px) + clamp(8px, 1.6vw, 20px)); }
 .figura{
-  width:clamp(96px, 15vh, 150px); height:clamp(96px, 15vh, 150px);
+  width:clamp(84px, 17vh, 130px); height:clamp(84px, 17vh, 130px);
   background:var(--papel); border:3px solid var(--borda);
   border-radius:24px; padding:10px; touch-action:none;
 }

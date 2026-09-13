@@ -27,6 +27,7 @@ do tablet deitado (landscape) e ver como a Cecí vai ver.
 | `style.css` | A aparência: cores suaves, botões grandes, animações lentas. |
 | `app.js` | O cérebro: desenho, sons, voz, timer do sol, galeria, travas, configurações. |
 | `brincar.js` | As 5 brincadeiras da Fase 2 (encaixar, par, ordem, pare e siga, separar). |
+| `desenhar.js` | O menu Desenhar: figuras para pintar/completar, carimbos de bichos e veículos, misturar cores. |
 | `musicas.js` | O repertório: todas as melodias em notação simples, com ícones, letras e gestos. |
 | `musica.js` | As 5 atividades de música (tocar, dançar, cantar, bichos musicais, sons dos bichos) e o tocador. |
 | `frases.js` | Todas as frases faladas; cada uma tem um MP3 em `audio/`. |
@@ -153,6 +154,30 @@ silêncio ou tiver outro andamento, ajuste na música em `musicas.js` os campos 
 As cantigas foram transcritas de notações para flauta doce; as peças clássicas mais longas
 (Quebra-Nozes, Cisne, Aquário) são **aproximações curtas** da abertura de cada uma — se
 quiser o original de verdade, use uma gravação.
+
+## 3d. Desenhar (menu com 6 modos)
+
+O botão Desenhar abre um menu. Todos os modos usam o mesmo ateliê (cores, pincel
+fino/grosso, borracha, carimbo, limpar, guardar, galeria) — o que muda é a folha.
+
+| Modo | O que acontece |
+|---|---|
+| **Folha livre** | O ateliê de sempre. |
+| **Seguir a linha** | A linha pontilhada para traçar (1,5 cm de tolerância, na ordem, a partir da bolinha verde). O botão de setinha dá outra linha. |
+| **Espelho** | Tudo o que ela risca aparece espelhado do outro lado da folha (uma linha central suave marca o meio). Vale para pincel, borracha e carimbo — vira borboleta, rosto, flor. |
+| **Completar** | Aparece meio desenho (metade de um rosto, gato sem patas, casa sem telhado, flor sem pétalas, carro sem rodas) e ela completa livremente. Ao guardar, o gatinho diz "que gato lindo!" (ou casa, rosto, flor, carro). Setinha = outro desenho. |
+| **Pintar dentro** | Uma figura grande com áreas fechadas (flor, carro, peixe, borboleta, casa). **Toque parado** dentro de uma área = balde: pinta a área inteira com a cor escolhida, até a linha escura. **Arrastar** = pincel normal por cima. Setinha = outra figura. |
+| **Misturar cores** | Três potes (vermelho, azul, amarelo). Ela arrasta um pote sobre o outro; a cor nova aparece num círculo grande e a voz diz "azul com amarelo dá verde!". Laranja e roxo entram na paleta do ateliê (a barra ganha uma sétima fileira) e ficam guardadas no tablet. Tocar num pote diz o nome da cor. |
+
+Outras novidades do ateliê:
+- **Carimbos**: três fileiras — formas (círculo, estrela, coração, gatinho), bichos (peixe,
+  borboleta, passarinho, sapo) e veículos (carro, ônibus, avião, trem). O tamanho do
+  carimbo segue o pincel escolhido (fino = pequeno, grosso = grande). O primeiro botão
+  do painel (lápis) volta para o desenho normal.
+- **Desenhar com música**: o botão de nota musical (abaixo da setinha) toca uma cantiga
+  ou um clássico bem baixinho enquanto ela desenha, uma música atrás da outra; tocar de
+  novo desliga. Sair do ateliê também desliga.
+- A casinha do ateliê volta para o menu Desenhar; a do menu volta para o início.
 
 ## 4. Para o papai
 
