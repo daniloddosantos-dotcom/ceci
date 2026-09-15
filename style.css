@@ -164,7 +164,7 @@ button{
 }
 .pote svg{ width:100%; height:100%; display:block; pointer-events:none; }
 .pote.pegando{ z-index:5; filter:drop-shadow(0 10px 12px rgba(0,0,0,.18)); }
-.pote.voltando{ transition:left .6s ease, top .6s ease; }
+.pote.voltando{ transition:left .8s ease, top .8s ease; }
 .pote.alvo svg{ transform:scale(1.08); transition:transform .3s ease; }
 .pote.mexendo svg{ animation: mexer-pote .9s ease-in-out 1; }
 @keyframes mexer-pote{ 0%,100%{ transform:rotate(0deg); } 25%{ transform:rotate(-8deg); } 75%{ transform:rotate(8deg); } }
@@ -627,6 +627,8 @@ select.seletor{ max-width:min(420px, 60vw); font-size:17px; }
 }
 .opcao-padrao svg{ width:100%; height:100%; }
 .opcao-padrao:active{ transform:scale(.97); }
+.opcao-padrao.voltando{ animation: vai-e-volta .8s ease 1; }
+@keyframes vai-e-volta{ 0%,100%{ transform:translateY(0); } 40%{ transform:translateY(-14px); } }
 
 /* ------------------ Encaixar: cenários e "ganhar vida" ------------------ */
 .casa-fundo{

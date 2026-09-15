@@ -427,19 +427,24 @@
     return el;
   }
 
+  /* REGRAS IGUAIS PARA TODAS AS BRINCADEIRAS DE ARRASTAR:
+     - soltar no lugar certo: a peça trava ali (fixa), som suave e o gatinho balança;
+     - soltar em qualquer outro lugar: a peça volta devagar (0,8 s) para onde estava,
+       sem som, sem mensagem, sem contar nada;
+     - uma peça solta NUNCA fica parada no meio do caminho: se por algum motivo o
+       dedo "sumiu" sem avisar (toque perdido), um vigia manda a peça de volta. */
   function arrastavel(el, opcoes) {
-    var id = null, x0 = 0, y0 = 0, ix = 0, iy = 0, ultimoToque = 0, relogioDoToque = 0;
+    var id = null, x0 = 0, y0 = 0, ix = 0, iy = 0, mexeu = 0;
+    el._solta = function () { if (!el.classList.contains('fixa')) voltarPraCasa(el); };
 
     el.addEventListener('pointerdown', function (e) {
       if (C.estaBloqueado() || el.classList.contains('fixa')) return;
       if (id !== null) return;
-      id = e.pointerId; x0 = e.clientX; y0 = e.clientY;
+      id = e.pointerId; x0 = e.clientX; y0 = e.clientY; mexeu = 0;
       // se a peça ainda está voltando para casa, pega do lugar onde ela está agora
-      if (el._rot % 360 === 0) {
-        var m = getComputedStyle(el).transform;
-        var v = m && m !== 'none' ? m.match(/matrix(([^)]+))/) : null;
-        if (v) { var nums = v[1].split(',').map(Number); el._dx = nums[4]; el._dy = nums[5]; }
-      }
+      var m = getComputedStyle(el).transform;
+      var v = m && m !== 'none' ? m.match(/matrix\(([^)]+)\)/) : null;
+      if (v) { var nums = v[1].split(',').map(Number); el._dx = nums[4]; el._dy = nums[5]; }
       ix = el._dx; iy = el._dy;
       el.style.transition = 'none';
       el.classList.add('pegando');
@@ -451,38 +456,45 @@
       if (id !== e.pointerId) return;
       el._dx = ix + (e.clientX - x0);
       el._dy = iy + (e.clientY - y0);
+      mexeu = Math.max(mexeu, Math.abs(e.clientX - x0) + Math.abs(e.clientY - y0));
       aplicar(el);
     });
 
     function terminou(e) {
-      if (id !== e.pointerId) return;
+      if (id === null || (e && e.pointerId != null && id !== e.pointerId)) return;
       id = null;
       el.classList.remove('pegando');
-      var mexeu = Math.abs(e.clientX - x0) + Math.abs(e.clientY - y0);
       if (mexeu < 12) {                       // foi um toque, não um arrasto
-        var agora = Date.now();
-        if (agora - ultimoToque < 450 && opcoes.aoToqueDuplo) {
-          clearTimeout(relogioDoToque);
-          ultimoToque = 0;
-          opcoes.aoToqueDuplo(el);
-          return;
-        }
-        ultimoToque = agora;
-        if (opcoes.aoToque) {
-          // se a peça também gira, espera para ver se vem o segundo toque
-          if (opcoes.aoToqueDuplo) {
-            relogioDoToque = daqui(470, function () { opcoes.aoToque(el); });
-          } else {
-            opcoes.aoToque(el);
-          }
-        }
+        if (el._dx !== 0 || el._dy !== 0) voltarPraCasa(el);
+        if (opcoes.aoToque) opcoes.aoToque(el);
         return;
       }
       if (opcoes.aoSoltar) opcoes.aoSoltar(el);
+      // seja qual for o resultado, a peça ou travou ou está voltando para casa
+      if (!el.classList.contains('fixa') && (el._dx !== 0 || el._dy !== 0) && el.style.transition === 'none') voltarPraCasa(el);
     }
     el.addEventListener('pointerup', terminou);
     el.addEventListener('pointercancel', terminou);
+    el.addEventListener('lostpointercapture', function (e) { if (id !== null && id === e.pointerId) terminou(e); });
+    // rede de segurança: o dedo levantou em outro lugar da tela
+    el._terminou = function (e) { if (id !== null && id === e.pointerId) terminou(e); };
   }
+  ["pointerup", "pointercancel"].forEach(function (tipo) {
+    document.addEventListener(tipo, function (e) {
+      if (!palco) return;
+      Array.prototype.forEach.call(palco.querySelectorAll(".peca.pegando"), function (el) { if (el._terminou) el._terminou(e); });
+    }, true);
+  });
+
+  // vigia: a cada segundo, qualquer peça solta fora de casa e não travada volta sozinha
+  setInterval(function () {
+    if (!palco || !palco.children.length) return;
+    Array.prototype.forEach.call(palco.querySelectorAll('.peca'), function (el) {
+      if (el.classList.contains('fixa') || el.classList.contains('pegando')) return;
+      if (typeof el._solta !== 'function') return;
+      if ((el._dx !== 0 || el._dy !== 0) && el.style.transition === 'none') el._solta();
+    });
+  }, 1000);
 
   // volta devagar para o lugar de origem (é isto que acontece no erro)
   function voltarPraCasa(el) {
@@ -504,6 +516,7 @@
   }
 
   // qual alvo está mais perto? (tolerância generosa: soltar perto já encaixa)
+  // TOLERÂNCIA ÚNICA: o centro da peça a até 80 % do tamanho do alvo + 60 px do centro dele
   function alvoMaisPerto(el, alvos) {
     var rp = el.getBoundingClientRect();
     var cx = rp.left + rp.width / 2, cy = rp.top + rp.height / 2;
@@ -696,17 +709,17 @@
   var CENARIOS_ENCAIXAR = ['formas', 'formas2', 'cores', 'animal', 'casinha'];
   var ultimoCenario = '';
 
-  // pecas: [{id, nome, svg, sombra, x, y, tam?, gira?}] ; alvos nos mesmos ids
+  // pecas: [{id, grupo?, nome, svg, sombra, x, y, tam?}] ; alvos nos mesmos ids.
+  // Peças iguais (as patas) têm o mesmo "grupo": qualquer uma serve em qualquer sombra do grupo.
+  // Não existe rotação: a peça encaixa em qualquer ângulo.
   function montarEncaixe(t, pecas, opcoes) {
-    var nivel = opcoes.nivel;
     var alvos = [];
     var faltam = pecas.length;
-    var giros = [90, 180, 270];
 
     pecas.forEach(function (d) {
       var a = novoAlvo(d.sombra || d.svg, d.x, d.y, d.sombra ? '' : 'sombra');
       if (d.tam) a.style.setProperty('--p', d.tam);
-      a.dataset.id = d.id;
+      a.dataset.id = d.grupo || d.id;
       t.appendChild(a);
       alvos.push(a);
     });
@@ -716,38 +729,21 @@
     ordem.forEach(function (d, i) {
       var p = novaPeca(d.svg, passo * (i + 1), 84, d.classe || '');
       if (d.tam) p.style.setProperty('--p', d.tam);
-      p.dataset.id = d.id;
-      var precisaGirar = nivel >= 3 && d.gira !== false;
-      if (precisaGirar) { p._rot = giros[Math.floor(Math.random() * giros.length)]; aplicar(p); }
+      p.dataset.id = d.grupo || d.id;
       t.appendChild(p);
 
-      var ops = {
+      arrastavel(p, {
         aoToque: function () { dizerNome(d.nome); },
         aoSoltar: function (el) {
           var alvo = alvoMaisPerto(el, alvos);
           if (!alvo || alvo.dataset.id !== el.dataset.id) { voltarPraCasa(el); return; }
-          if (precisaGirar && el._rot % 360 !== 0) {
-            C.falar('Gira a peça! Toque duas vezes nela.');
-            voltarPraCasa(el);
-            return;
-          }
           encaixarEm(el, alvo);
           acertou(2);
           if (d.fala) C.falar(d.fala);
           faltam--;
           if (faltam === 0) opcoes.aoCompletar();
         }
-      };
-      if (precisaGirar) {
-        ops.aoToqueDuplo = function (el) {
-          el.style.transition = 'transform .45s ease';
-          el._rot = (el._rot + 90) % 360;
-          aplicar(el);
-          C.nota(C.NOTAS[1], 0.22, 0.04);
-          C.falar('gira');
-        };
-      }
-      arrastavel(p, ops);
+      });
     });
   }
 
@@ -755,7 +751,7 @@
     var lista = conjunto === 'formas2'
       ? [['estrela', '#f2b705'], ['coracao', '#e987b8'], ['lua', '#9ec5e8'], ['flor', '#e04a3f'], ['losango', '#4aa657']]
       : [['circulo', '#e04a3f'], ['quadrado', '#3a72c4'], ['triangulo', '#f2b705'], ['retangulo', '#4aa657'], ['oval', '#e987b8']];
-    var quantas = nivel === 1 ? 3 : 5;
+    var quantas = nivel === 1 ? 3 : (nivel === 2 ? 4 : 5);   // o nível sobe = mais peças
     var usadas = lista.slice(0, quantas);
     var passo = 100 / (quantas + 1);
     var pecas = usadas.map(function (f, i) {
@@ -763,7 +759,6 @@
         id: f[0], nome: nomeDaForma(f[0]),
         svg: forma(f[0], f[1], false), sombra: forma(f[0], '#ece4d4', true),
         x: passo * (i + 1), y: 34,
-        gira: f[0] !== 'circulo' && f[0] !== 'oval' && f[0] !== 'flor',
         fala: (i % 2 === 0) ? (ARTIGO_FORMA[f[0]] || 'O') + ' ' + nomeDaForma(f[0]) + ' foi em cima!' : null
       };
     });
@@ -773,14 +768,14 @@
 
   function cenarioCores(t, nivel) {
     var cores = ['#e04a3f', '#3a72c4', '#f2b705', '#4aa657', '#e987b8'];
-    var quantas = nivel === 1 ? 3 : 5;
+    var quantas = nivel === 1 ? 3 : (nivel === 2 ? 4 : 5);
     var passo = 100 / (quantas + 1);
     var pecas = cores.slice(0, quantas).map(function (cor, i) {
       return {
         id: cor, nome: nomeDaCor(cor),
         svg: forma('circulo', cor, false),
         sombra: '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="43" fill="' + cor + '" opacity=".38" stroke="' + cor + '" stroke-width="4" stroke-dasharray="9 8"/></svg>',
-        x: passo * (i + 1), y: 34, gira: false,
+        x: passo * (i + 1), y: 34,
         fala: (i === 0) ? 'Cada cor na sua sombra!' : null
       };
     });
@@ -793,12 +788,20 @@
     var pata = '<svg viewBox="0 0 100 100"><rect x="26" y="34" width="48" height="32" rx="15" fill="#e8963f" stroke="' + CT + '" stroke-width="5"/></svg>';
     var rabo = '<svg viewBox="0 0 100 100"><path d="M20 80 q-14 -40 30 -50 q26 -6 30 20" fill="none" stroke="' + CT + '" stroke-width="16" stroke-linecap="round"/><path d="M20 80 q-14 -40 30 -50 q26 -6 30 20" fill="none" stroke="#e8963f" stroke-width="9" stroke-linecap="round"/></svg>';
     var pecas = [
-      { id: 'cabeca', nome: 'cabeça', svg: CABECA_GATO, x: 50, y: 22, gira: true, fala: 'A cabeça ficou em cima!' },
-      { id: 'corpo',  nome: 'corpo',  svg: corpo, x: 50, y: 46, gira: false, fala: 'O corpo ficou no meio!' },
-      { id: 'pata1',  nome: 'pata',   svg: pata,  x: 40, y: 64, gira: false },
-      { id: 'pata2',  nome: 'pata',   svg: pata,  x: 60, y: 64, gira: false, fala: 'As patas ficaram embaixo!' }
+      { id: 'cabeca', nome: 'cabeça', svg: CABECA_GATO, x: 50, y: 22, fala: 'A cabeça ficou em cima!' },
+      { id: 'corpo',  nome: 'corpo',  svg: corpo, x: 50, y: 46, fala: 'O corpo ficou no meio!' }
     ];
-    if (nivel >= 2) pecas.push({ id: 'rabo', nome: 'rabo', svg: rabo, x: 26, y: 50, gira: true, fala: 'O rabo ficou do lado!' });
+    // as patas são iguais: qualquer pata serve em qualquer sombra de pata
+    if (nivel >= 3) {
+      pecas.push({ id: 'pata1', grupo: 'pata', nome: 'pata', svg: pata, x: 36, y: 64 });
+      pecas.push({ id: 'pata2', grupo: 'pata', nome: 'pata', svg: pata, x: 45.5, y: 64 });
+      pecas.push({ id: 'pata3', grupo: 'pata', nome: 'pata', svg: pata, x: 54.5, y: 64 });
+      pecas.push({ id: 'pata4', grupo: 'pata', nome: 'pata', svg: pata, x: 64, y: 64, fala: 'As patas ficaram embaixo!' });
+    } else {
+      pecas.push({ id: 'pata1', grupo: 'pata', nome: 'pata', svg: pata, x: 40, y: 64 });
+      pecas.push({ id: 'pata2', grupo: 'pata', nome: 'pata', svg: pata, x: 60, y: 64, fala: 'As patas ficaram embaixo!' });
+    }
+    if (nivel >= 2) pecas.push({ id: 'rabo', nome: 'rabo', svg: rabo, x: 26, y: 50, fala: 'O rabo ficou do lado!' });
     C.falar('Monte o gatinho. A cabeça vai em cima e as patas embaixo.');
     montarEncaixe(t, pecas, { nivel: nivel, aoCompletar: function () { ganharVida(t, 'animal'); } });
   }
@@ -808,10 +811,11 @@
      recortados desse mesmo desenho, então ao encaixar tudo se monta certinho. */
   var CASA = {
     corpo:   { x: 380, y: 200, w: 240, h: 220 },
-    telhado: { x: 340, y: 70,  w: 320, h: 140, nome: 'telhado', gira: true,  fala: 'O telhado fica em cima!' },
-    porta:   { x: 470, y: 320, w: 60,  h: 100, nome: 'porta',   gira: true,  fala: 'A porta fica embaixo!' },
-    janela:  { x: 405, y: 240, w: 60,  h: 60,  nome: 'janela',  gira: false, fala: 'A janela fica do lado!' },
-    chamine: { x: 565, y: 110, w: 40,  h: 90,  nome: 'chaminé', gira: true }
+    telhado: { x: 340, y: 70,  w: 320, h: 140, nome: 'telhado', fala: 'O telhado fica em cima!' },
+    porta:   { x: 470, y: 320, w: 60,  h: 100, nome: 'porta',   fala: 'A porta fica embaixo!' },
+    janela:  { x: 405, y: 240, w: 60,  h: 60,  nome: 'janela',  fala: 'A janela fica do lado!' },
+    janela2: { x: 535, y: 240, w: 60,  h: 60,  nome: 'janela',  grupo: 'janela' },
+    chamine: { x: 565, y: 110, w: 40,  h: 90,  nome: 'chaminé' }
   };
   var FOLGA = 8;   // margem em volta de cada peça, para o contorno não ser cortado
 
@@ -823,7 +827,7 @@
     if (parte === 'corpo')   miolo = '<rect x="0" y="0" width="240" height="220" rx="6" fill="#fdf3df" stroke="' + CT + '" stroke-width="5"/>';
     if (parte === 'telhado') miolo = '<path d="M160 0 L320 140 H0 Z" fill="#e04a3f" stroke="' + CT + '" stroke-width="5" stroke-linejoin="round"/>';
     if (parte === 'porta')   miolo = '<rect x="0" y="0" width="60" height="100" rx="8" fill="#b07a4a" stroke="' + CT + '" stroke-width="5"/><circle cx="46" cy="52" r="4" fill="#f2b705"/>';
-    if (parte === 'janela')  miolo = '<rect class="vidro" x="0" y="0" width="60" height="60" rx="6" fill="#9ec5e8" stroke="' + CT + '" stroke-width="5"/><path d="M30 0 V60 M0 30 H60" stroke="' + CT + '" stroke-width="5"/>';
+    if (parte === 'janela' || parte === 'janela2') miolo = '<rect class="vidro" x="0" y="0" width="60" height="60" rx="6" fill="#9ec5e8" stroke="' + CT + '" stroke-width="5"/><path d="M30 0 V60 M0 30 H60" stroke="' + CT + '" stroke-width="5"/>';
     if (parte === 'chamine') miolo = '<rect x="0" y="0" width="40" height="90" rx="4" fill="#8a6a4a" stroke="' + CT + '" stroke-width="5"/>';
     return '<svg ' + vb + '>' + miolo + '</svg>';
   }
@@ -850,18 +854,18 @@
 
     var partes = ['telhado', 'porta', 'janela'];
     if (nivel >= 2) partes.push('chamine');
+    if (nivel >= 3) partes.push('janela2');           // nível 3 = mais peças (segunda janela)
 
     var alvos = [];
     partes.forEach(function (nome) {
       var a = novoAlvo(desenhoDaCasa(nome), 0, 0, 'sombra');
       caixa(a, CASA[nome]);
-      a.dataset.id = nome;
+      a.dataset.id = CASA[nome].grupo || nome;
       t.appendChild(a);
       alvos.push(a);
     });
 
     var faltam = partes.length;
-    var giros = [90, 180, 270];
     var ordem = embaralhar(partes);
     ordem.forEach(function (nome, i) {
       var p = CASA[nome];
@@ -869,38 +873,21 @@
       caixa(peca, p);
       peca.style.left = (W * (i + 1) / (ordem.length + 1)) + 'px';
       peca.style.top = (H * 0.88) + 'px';
-      peca.dataset.id = nome;
-      var precisaGirar = nivel >= 3 && p.gira;
-      if (precisaGirar) { peca._rot = giros[Math.floor(Math.random() * giros.length)]; aplicar(peca); }
+      peca.dataset.id = p.grupo || nome;
       t.appendChild(peca);
 
-      var ops = {
+      arrastavel(peca, {
         aoToque: function () { dizerNome(p.nome); },
         aoSoltar: function (el) {
           var alvo = alvoMaisPerto(el, alvos);
           if (!alvo || alvo.dataset.id !== el.dataset.id) { voltarPraCasa(el); return; }
-          if (precisaGirar && el._rot % 360 !== 0) {
-            C.falar('Gira a peça! Toque duas vezes nela.');
-            voltarPraCasa(el);
-            return;
-          }
           encaixarEm(el, alvo);
           acertou(2);
           if (p.fala) C.falar(p.fala);
           faltam--;
           if (faltam === 0) ganharVida(t, 'casinha');
         }
-      };
-      if (precisaGirar) {
-        ops.aoToqueDuplo = function (el) {
-          el.style.transition = 'transform .45s ease';
-          el._rot = (el._rot + 90) % 360;
-          aplicar(el);
-          C.nota(C.NOTAS[1], 0.22, 0.04);
-          C.falar('gira');
-        };
-      }
-      arrastavel(peca, ops);
+      });
     });
 
     C.falar('Monte a casinha. O telhado vai em cima.');
@@ -1043,7 +1030,10 @@
         b.innerHTML = o[1];
         b.addEventListener('click', function () {
           if (C.estaBloqueado()) return;
-          if (o[0] !== 'B') return;                          // errou: nada acontece
+          if (o[0] !== 'B') {                                // errou: a opção "vai e volta" devagar, sem som
+            b.classList.remove('voltando'); void b.offsetWidth; b.classList.add('voltando');
+            return;
+          }
           vazia.classList.remove('vazia'); vazia.textContent = ''; vazia.innerHTML = desenhoB;
           acertou(4);
           completarRodada('par', 4);
@@ -1269,8 +1259,7 @@
         // vermelho + toque: a bola encolhe um pouquinho, som grave curto,
         // o gatinho tapa os olhos. Sem palavra de erro, sem contar nada.
         tocouNoVermelho = true;
-        reanimar('encolhe', 600);
-        C.nota(140, 0.25, 0.045);
+        reanimar('encolhe', 600);            // sem som: só a bola encolhe e o gatinho tapa os olhos
         if (C.gatinho) C.gatinho.tapaOlhos();
       }
     });
@@ -1409,6 +1398,17 @@
   ];
   var ultimaRodadaSeparar = -1;
 
+  // em qual cesto o bicho foi solto? (o centro dele dentro do cesto, com 40 px de folga)
+  function cestoOnde(el, cestos) {
+    var rp = el.getBoundingClientRect();
+    var cx = rp.left + rp.width / 2, cy = rp.top + rp.height / 2;
+    for (var i = 0; i < cestos.length; i++) {
+      var r = cestos[i].getBoundingClientRect();
+      if (cx >= r.left - 40 && cx <= r.right + 40 && cy >= r.top - 40 && cy <= r.bottom + 40) return cestos[i];
+    }
+    return null;
+  }
+
   function valorDoBicho(bicho, campo) {
     var a = ANIMAIS[bicho];
     if (campo === 'voa') return !!a.voa;
@@ -1465,7 +1465,7 @@
       arrastavel(p, {
         aoToque: function () { somDoAnimal(bicho); },
         aoSoltar: function (el) {
-          var cesto = alvoMaisPerto(el, cestos);
+          var cesto = cestoOnde(el, cestos);
           if (!cesto || cesto.dataset.valor !== String(valorDoBicho(bicho, r.campo))) { voltarPraCasa(el); return; }
           var n = Number(cesto.dataset.quantos);
           cesto.dataset.quantos = String(n + 1);

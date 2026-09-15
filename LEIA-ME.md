@@ -92,6 +92,20 @@ Detalhes:
   nada é falado. Meio segundo antes de trocar, a bolinha **respira** (cresce um pouquinho),
   para ela antecipar a mudança.
 
+### Regras iguais em todos os jogos
+
+- Resposta errada nunca é aceita nem fica na tela: a peça/bicho/carta volta devagar
+  (0,8 s) para onde estava, sem som, sem mensagem, sem contagem. Um vigia manda de
+  volta qualquer peça solta fora de casa (se o toque se perder no meio do arrasto).
+- Resposta certa: som suave + o gatinho balança a cabeça; a peça trava no lugar.
+- A rodada só termina quando todas as peças estão no lugar certo.
+- Tolerância de encaixe única: o centro da peça a até 80 % do tamanho do alvo + 60 px.
+  No Separar o bicho precisa ser solto dentro do cesto (40 px de folga).
+- Peças iguais (as patas do gatinho, as duas janelas) servem em qualquer sombra igual.
+- Não existe rotação de peça: encaixa em qualquer ângulo. O nível 3 é "mais peças".
+- Sair no meio conta como abandono (2 seguidos = desce um nível), exceto quando o sol se pôs.
+- Nenhum jogo tem pontuação, estrelas, tempo ou penalidade.
+
 ### A tela do fim
 O gatinho aparece grande no meio, com um balão de fala em letras grandes
 convidando ela para uma coisa fora da tela ("Vamos procurar uma coisa redonda na casa?").
@@ -314,15 +328,20 @@ O nível automático aparece no Registro do painel.
 
 ## 11. Voz natural gravada (offline)
 
-As frases fixas do app agora tocam **MP3 gravados com a voz neural do Edge**
-(pt-BR-ThalitaMultilingualNeural, -10 % de velocidade, tom levemente alto), gerados
-uma única vez no computador e embarcados em `/audio/` (179 arquivos, cerca de 2 MB),
+As frases fixas do app tocam **MP3 gravados com a voz neural do Edge**
+(**pt-BR-FranciscaNeural**, -10 % de velocidade, tom levemente alto), gerados
+uma única vez no computador e embarcados em `/audio/` (221 arquivos, cerca de 3 MB),
 que entram no cache do service worker — funcionam sem internet.
+A Thalita (multilíngue) foi abandonada porque "adivinhava" espanhol em frases curtas;
+a Francisca só fala português. Cada frase é enviada em SSML com `xml:lang="pt-BR"`
+e `<voice name="pt-BR-FranciscaNeural">` (o serviço recusa a tag `<lang>`, por isso
+ela não é usada). Os MP3 vêm com ~1 s de silêncio no fim: o app decodifica cada um
+(Web Audio), apara as pontas e toca do buffer, para a fala não arrastar.
 
 - `frases.js` (publicado) é a lista central de TODAS as frases. Quer mudar ou
   acrescentar uma frase? Edite ali, rode o gerador e publique.
 - `gerar-vozes.js` (só no PC) gera os MP3 que faltam: `node gerar-vozes.js`
-  (ou `node gerar-vozes.js francisca` para a voz Francisca; `--forcar` regenera tudo).
+  (ou `node gerar-vozes.js thalita` para a voz Thalita; `--forcar` regenera tudo).
   Precisa de internet só nessa hora. Na primeira vez rode antes `npm install msedge-tts`.
 - `vozes.html` (só no PC) lista as frases com um botão para ouvir cada uma.
 - A voz do sistema (speechSynthesis) ficou como **reserva**: se alguma frase não tiver

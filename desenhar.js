@@ -361,7 +361,7 @@
       function voltar() {
         el.classList.add('voltando');
         colocar(el, potePos(indice));
-        depois(700, function () { el.classList.remove('voltando'); });
+        depois(900, function () { el.classList.remove('voltando'); });
       }
       el.addEventListener('pointerup', soltou);
       el.addEventListener('pointercancel', soltou);

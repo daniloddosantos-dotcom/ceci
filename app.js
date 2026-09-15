@@ -196,7 +196,7 @@
     filaDeFala = [];
     falando = false;
     clearTimeout(relogioDaFala);
-    if (audioAtual) { try { audioAtual.onended = null; audioAtual.pause(); audioAtual.currentTime = 0; } catch (e) {} audioAtual = null; }
+    if (audioAtual) { try { audioAtual.parar(); } catch (e) {} audioAtual = null; }
     try { window.speechSynthesis.cancel(); } catch (e) {}
   }
 
@@ -211,8 +211,9 @@
     if (!F) return;
     F.lista.forEach(function (t) { AUDIO_DE[t] = 'audio/' + F.arquivo(t); });
   })();
-  var audioAtual = null;
+  var audioAtual = null;          // { parar(), tocando }
   var semAudioAvisadas = {};
+  var buffersDeFala = {};         // caminho -> { buffer, inicio, fim } já decodificado e aparado
 
   function avisarSemAudio(texto) {
     if (semAudioAvisadas[texto]) return;
@@ -220,29 +221,66 @@
     try { console.warn('Cecí: frase SEM áudio gravado (caiu na voz do sistema): "' + texto + '"'); } catch (e) {}
   }
 
+  /* Os MP3 vêm com cerca de 1 segundo de silêncio no fim (é assim que o
+     serviço de voz entrega). Para a fala não "arrastar", cada arquivo é
+     decodificado uma vez (Web Audio), o silêncio das pontas é aparado e o
+     som toca direto do buffer, com o fim exato. */
+  function carregarFala(caminho) {
+    if (buffersDeFala[caminho]) return buffersDeFala[caminho];
+    var c = audio();
+    if (!c) return Promise.reject(new Error('sem áudio'));
+    var p = fetch(caminho).then(function (r) {
+      if (!r.ok) throw new Error('não veio: ' + caminho);
+      return r.arrayBuffer();
+    }).then(function (dados) {
+      return new Promise(function (resolve, reject) {
+        var pr = c.decodeAudioData(dados, resolve, reject);
+        if (pr && pr.then) pr.then(resolve, reject);
+      });
+    }).then(function (buffer) {
+      var d = buffer.getChannelData(0), lim = 0.012, i0 = 0, i1 = d.length - 1;
+      while (i0 < d.length && Math.abs(d[i0]) < lim) i0++;
+      while (i1 > i0 && Math.abs(d[i1]) < lim) i1--;
+      var inicio = Math.max(0, i0 / buffer.sampleRate - 0.05);
+      var fim = Math.min(buffer.duration, i1 / buffer.sampleRate + 0.14);
+      return { buffer: buffer, inicio: inicio, fim: fim };
+    });
+    buffersDeFala[caminho] = p;
+    p.catch(function () { delete buffersDeFala[caminho]; });
+    return p;
+  }
+
   // toca o MP3 da frase; avisa quando começa e quando termina.
   // devolve false se a frase não tem áudio.
   function tocarAudioDaFrase(texto, aoComecar, aoTerminar) {
     var caminho = AUDIO_DE[texto];
     if (!caminho) return false;
-    var a = new Audio(caminho);
-    a.preload = 'auto';
-    a.volume = 0.95;
-    audioAtual = a;
-    var terminou = false;
-    function fim() { if (terminou) return; terminou = true; if (audioAtual === a) audioAtual = null; aoTerminar(); }
-    // falhou de verdade (arquivo nao veio): cai na voz do sistema e avisa
-    function falhou() {
-      if (terminou) return;
-      if (audioAtual !== a) { fim(); return; }     // foi cortada de proposito por um toque novo: silencio
-      terminou = true; audioAtual = null;
+    var c = audio();
+    if (!c) return false;
+    var terminou = false, cancelado = false;
+    var toque = {
+      tocando: false,
+      // cortada de propósito (toque novo / troca de tela): silêncio, e ninguém é avisado
+      parar: function () { cancelado = true; terminou = true; toque.tocando = false; try { if (toque.fonte) { toque.fonte.onended = null; toque.fonte.stop(); } } catch (e) {} }
+    };
+    audioAtual = toque;
+    function fim() { if (terminou) return; terminou = true; toque.tocando = false; if (audioAtual === toque) audioAtual = null; aoTerminar(); }
+    carregarFala(caminho).then(function (f) {
+      if (cancelado) return;                     // foi cortada por um toque novo: silêncio
+      var fonte = c.createBufferSource();
+      fonte.buffer = f.buffer;
+      var g = c.createGain(); g.gain.value = 0.95;
+      fonte.connect(g); g.connect(c.destination);
+      fonte.onended = fim;
+      toque.fonte = fonte; toque.tocando = true;
+      fonte.start(0, f.inicio, f.fim - f.inicio);
+      if (aoComecar) aoComecar();
+    }).catch(function () {
+      if (terminou || cancelado) return;
+      // falhou de verdade (arquivo não veio): cai na voz do sistema e avisa
+      terminou = true; if (audioAtual === toque) audioAtual = null;
       falarComSistema(texto, aoComecar, aoTerminar);
-    }
-    a.onplaying = function () { if (aoComecar) aoComecar(); };
-    a.onended = fim;
-    a.onerror = falhou;
-    var p = a.play();
-    if (p && p.catch) p.catch(falhou);
+    });
     return true;
   }
 
@@ -291,7 +329,7 @@
     clearTimeout(relogioDaFala);
     if (tocarAudioDaFrase(texto, null, seguir)) {
       relogioDaFala = setTimeout(function esperarMais() {
-        if (audioAtual && !audioAtual.paused && !audioAtual.ended) { relogioDaFala = setTimeout(esperarMais, 800); return; }
+        if (audioAtual && audioAtual.tocando) { relogioDaFala = setTimeout(esperarMais, 800); return; }
         seguir();
       }, 1500 + texto.length * 110);
       return;

@@ -37,7 +37,7 @@
   VEICULOS.forEach(add);
   NUMEROS.forEach(add);
   ['cabeça', 'corpo', 'pata', 'rabo', 'telhado', 'porta', 'janela', 'chaminé',
-   'pequeno', 'médio', 'grande', 'tronco', 'gira', 'verde', 'vermelho', 'estátua!'].forEach(add);
+   'pequeno', 'médio', 'grande', 'tronco', 'verde', 'vermelho', 'estátua!'].forEach(add);
 
   // ---- tela inicial, sessão e ritual de dormir ----
   ['Oi, Cecí! Vamos brincar?',
@@ -88,7 +88,6 @@
    'Cada cor na sua sombra!',
    'Monte o gatinho. A cabeça vai em cima e as patas embaixo.',
    'Monte a casinha. O telhado vai em cima.',
-   'Gira a peça! Toque duas vezes nela.',
    'A cabeça ficou em cima!',
    'O corpo ficou no meio!',
    'As patas ficaram embaixo!',
@@ -179,7 +178,7 @@
     return (base || 'frase') + '-' + h.toString(36) + '.mp3';
   }
 
-  var api = { lista: lista, arquivo: arquivo, VOZ_PADRAO: 'pt-BR-ThalitaMultilingualNeural' };
+  var api = { lista: lista, arquivo: arquivo, VOZ_PADRAO: 'pt-BR-FranciscaNeural' };
   raiz.CeciFrases = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof self !== 'undefined' ? self : this);
