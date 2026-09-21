@@ -31,6 +31,7 @@ do tablet deitado (landscape) e ver como a Cecí vai ver.
 | `musicas.js` | O repertório: todas as melodias em notação simples, com ícones, letras e gestos. |
 | `musica.js` | As 5 atividades de música (tocar, dançar, cantar, bichos musicais, sons dos bichos) e o tocador. |
 | `frases.js` | Todas as frases faladas; cada uma tem um MP3 em `audio/`. |
+| `versao.js` | A versão do código que está rodando (o `publicar.js` escreve). O Modo do papai mostra essa versão e avisa se uma mais nova já foi baixada. |
 | `audio/musicas/` | Gravações opcionais das músicas (MP3 de domínio público que você baixar). |
 | `animais.html` | Folha de conferência dos bichinhos. Só para você olhar; não faz parte do app. |
 | `manifest.json` | A "identidade" do app: nome Cecí, ícone, tela cheia, deitado. |

@@ -403,8 +403,9 @@
   /* ---------------------------------------------------------
      3) Peças que se arrastam (Pointer Events, dedo ou caneta)
      --------------------------------------------------------- */
+  // a peça só se desloca; nunca gira (não existe ângulo em lugar nenhum)
   function aplicar(el) {
-    el.style.transform = 'translate(' + el._dx + 'px,' + el._dy + 'px) rotate(' + el._rot + 'deg)';
+    el.style.transform = 'translate(' + el._dx + 'px,' + el._dy + 'px)';
   }
 
   function novaPeca(html, x, y, classe) {
@@ -413,7 +414,7 @@
     el.innerHTML = html;
     el.style.left = x + '%';
     el.style.top = y + '%';
-    el._dx = 0; el._dy = 0; el._rot = 0;
+    el._dx = 0; el._dy = 0;
     aplicar(el);
     return el;
   }

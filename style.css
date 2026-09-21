@@ -167,7 +167,7 @@ button{
 .pote.voltando{ transition:left .8s ease, top .8s ease; }
 .pote.alvo svg{ transform:scale(1.08); transition:transform .3s ease; }
 .pote.mexendo svg{ animation: mexer-pote .9s ease-in-out 1; }
-@keyframes mexer-pote{ 0%,100%{ transform:rotate(0deg); } 25%{ transform:rotate(-8deg); } 75%{ transform:rotate(8deg); } }
+@keyframes mexer-pote{ 0%,100%{ transform:translateY(0); } 25%{ transform:translateY(-8px); } 75%{ transform:translateY(-8px) scale(1.04); } }
 .resultado-cor{
   position:absolute; left:50%; top:30%; transform:translate(-50%, -50%);
   display:flex; flex-direction:column; align-items:center; gap:8px;
@@ -730,9 +730,9 @@ select.seletor{ max-width:min(420px, 60vw); font-size:17px; }
 .peca.reage-voa svg{ animation: bicho-voa 1.4s ease-in-out 2; }
 .peca.reage-pula svg{ animation: pulinho .7s ease-in-out 2; }
 .peca.reage-som svg{ animation: bicho-som 1s ease-in-out 1; }
-@keyframes bicho-nada{ 0%,100%{ transform:translateX(0) rotate(0deg); } 25%{ transform:translateX(10px) rotate(4deg); } 75%{ transform:translateX(-8px) rotate(-4deg); } }
-@keyframes bicho-voa{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-22px) rotate(-6deg); } }
-@keyframes bicho-som{ 0%,100%{ transform:scale(1); } 40%{ transform:scale(1.1) rotate(-3deg); } }
+@keyframes bicho-nada{ 0%,100%{ transform:translateX(0); } 25%{ transform:translateX(10px); } 75%{ transform:translateX(-8px); } }
+@keyframes bicho-voa{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-22px); } }
+@keyframes bicho-som{ 0%,100%{ transform:scale(1); } 40%{ transform:scale(1.1); } }
 .peca.bicho-pequeno.reage-nada svg, .peca.bicho-pequeno.reage-voa svg, .peca.bicho-pequeno.reage-pula svg, .peca.bicho-pequeno.reage-som svg{ transform:scale(.5); animation:none; }
 
 /* ------------------ Sons dos bichos ------------------ */
@@ -1165,8 +1165,8 @@ body.dormindo #gatinho{ display:none; }
 .bicho-grande.nada svg{ animation: bicho-nada 2s ease-in-out infinite; }
 .bicho-grande.cisca svg{ animation: cisca .7s ease-in-out infinite; }
 @keyframes desliza{ 0%,100%{ transform:translateX(-18px) translateY(0); } 50%{ transform:translateX(18px) translateY(-6px); } }
-@keyframes pisa{ 0%,100%{ transform:translateY(0) rotate(0deg); } 25%{ transform:translateY(-8px) rotate(-3deg); } 75%{ transform:translateY(-8px) rotate(3deg); } }
-@keyframes cisca{ 0%,100%{ transform:rotate(0deg) translateY(0); } 50%{ transform:rotate(8deg) translateY(6px); } }
+@keyframes pisa{ 0%,100%{ transform:translateY(0); } 25%{ transform:translateY(-8px) translateX(-4px); } 75%{ transform:translateY(-8px) translateX(4px); } }
+@keyframes cisca{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(6px) translateX(4px); } }
 .gato-canto{ position:absolute; right:2%; bottom:0; width:min(22vh, 170px); }
 .gato-canto .gato-musica{ width:100%; }
 

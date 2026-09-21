@@ -9,7 +9,7 @@
 importScripts('frases.js');
 importScripts('musicas.js');
 
-var VERSAO = 'ceci-v23';
+var VERSAO = 'ceci-v24';
 
 var ARQUIVOS = [
   './',
@@ -23,6 +23,7 @@ var ARQUIVOS = [
   './icone.svg',
   './icone-mascara.svg',
   './frases.js',
+  './versao.js',
   './musicas.js',
   './desenhar.js'
 ];

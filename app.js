@@ -45,6 +45,7 @@
   }
 
   var bloqueado = false;   // true durante o ritual de tchau
+  var atualizacaoPendente = false;   // o service worker novo assumiu; recarrega na próxima ida ao início
   var telaAtual = 'tela-inicio';
 
   /* ---------------------------------------------------------
@@ -462,6 +463,8 @@
      5) Troca de telas
      --------------------------------------------------------- */
   function irPara(id) {
+    // uma versão nova já foi baixada: entra em cena na volta para o início (nunca no meio de uma brincadeira)
+    if (id === 'tela-inicio' && atualizacaoPendente && !bloqueado) { location.reload(); return; }
     limparFala();          // trocar de tela é uma das formas de cortar a fala
     $$('.tela').forEach(function (t) { t.classList.toggle('ativa', t.id === id); });
     telaAtual = id;
@@ -593,16 +596,21 @@
   /* ---------------------------------------------------------
      8) Configurações do papai
      --------------------------------------------------------- */
-  // mostra a versão instalada (o nome do cache do service worker, ex.: ceci-v19)
+  // mostra a versão que está RODANDO agora (versao.js) e, se uma mais nova já
+  // foi baixada pelo service worker mas ainda não entrou, avisa.
   function mostrarVersao() {
     var el = $('#info-versao');
     if (!el) return;
-    if (!('caches' in window)) { el.textContent = 'versão local'; return; }
+    var rodando = window.CECI_VERSAO ? 'versão ' + window.CECI_VERSAO : 'versão local';
+    el.textContent = rodando;
+    if (!('caches' in window)) return;
     caches.keys().then(function (nomes) {
       var v = nomes.filter(function (n) { return /^ceci-v[0-9]+$/.test(n); })
         .sort(function (x, y) { return Number(y.slice(6)) - Number(x.slice(6)); })[0];
-      el.textContent = v ? v.replace('ceci-', 'versão ') : 'versão local';
-    }).catch(function () { el.textContent = 'versão —'; });
+      if (v && window.CECI_VERSAO && v.replace('ceci-', '') !== window.CECI_VERSAO) {
+        el.textContent = rodando + ' (' + v.replace('ceci-', '') + ' já baixada: volte para o início)';
+      }
+    }).catch(function () {});
   }
 
   function abrirConfig() {
@@ -1719,7 +1727,10 @@
     navigator.serviceWorker.addEventListener('controllerchange', function () {
       if (jaAtualizou || !jaTinhaVersao) return;
       jaAtualizou = true;
-      if (!sessao.ativa && !bloqueado) location.reload();
+      // na tela inicial pode recarregar na hora (a sessão continua guardada);
+      // numa brincadeira, espera ela voltar para o início
+      if (telaAtual === 'tela-inicio' && !bloqueado) location.reload();
+      else atualizacaoPendente = true;
     });
   }
 
